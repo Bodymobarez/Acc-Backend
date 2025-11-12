@@ -2,22 +2,21 @@ import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-// Get the directory name in ES modules - handle serverless environments where import.meta.url might be undefined
+// Get the directory name - compatible with both ESM and CommonJS
 const getDirectoryPath = () => {
-  if (typeof import.meta.url !== 'undefined') {
-    const __filename = fileURLToPath(import.meta.url);
-    return path.dirname(__filename);
+  // Check if running in CommonJS mode (bundled by esbuild/NFT)
+  if (typeof __dirname !== 'undefined') {
+    return __dirname;
   }
-  // Fallback for serverless/bundled environments
+  // Fallback for other environments
   return process.cwd();
 };
 
-const __dirname = getDirectoryPath();
+const dirPath = getDirectoryPath();
 
 // Load environment variables FIRST before any other imports
-dotenv.config({ path: path.join(__dirname, '../.env') });
+dotenv.config({ path: path.join(dirPath, '../.env') });
 
 import { prisma } from './lib/prisma';
 import { startCurrencyUpdateCron, stopCurrencyUpdateCron } from './jobs/currencyUpdateCron';
@@ -174,7 +173,7 @@ app.use('/api/notifications', notificationRoutes);
 
 // Serve static files from dist folder (for production)
 if (process.env.NODE_ENV === 'production') {
-  const distPath = path.join(__dirname, '../dist');
+  const distPath = path.join(dirPath, '../dist');
   console.log('📁 Serving static files from:', distPath);
   
   // Serve static assets
