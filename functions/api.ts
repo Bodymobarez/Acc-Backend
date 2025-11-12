@@ -1,13 +1,19 @@
 import serverless from 'serverless-http';
 import type { Handler } from '@netlify/functions';
 
-let cachedHandler: any = null;
+let cachedHandler: Handler | null = null;
 
-const getHandler = async () => {
+const getHandler = async (): Promise<Handler> => {
   if (cachedHandler) return cachedHandler;
   
-  const { default: app } = await import('../server/index.js');
-  cachedHandler = serverless(app);
+  const { app } = await import('../server/index.js');
+  
+  // Configure serverless-http with explicit options
+  cachedHandler = serverless(app, {
+    provider: 'aws',
+    basePath: '/api',
+  }) as Handler;
+  
   return cachedHandler;
 };
 
