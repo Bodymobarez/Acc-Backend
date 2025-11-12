@@ -1,0 +1,446 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model countries {
+  id        String   @id
+  code      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cities    cities[]
+}
+
+model cities {
+  id         String     @id
+  name       String
+  countryId  String
+  country    countries  @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  hotels     hotels[]
+
+  @@unique([name, countryId])
+}
+
+model hotels {
+  id        String   @id
+  name      String
+  cityId    String
+  city      cities   @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  address   String?
+  phone     String?
+  email     String?
+  rating    Int      @default(3)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, cityId])
+}
+
+model airlines {
+  id        String   @id
+  name      String   @unique
+  code      String?
+  country   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model accounts {
+  id                                                        String            @id
+  code                                                      String            @unique
+  name                                                      String
+  nameAr                                                    String?
+  type                                                      String
+  category                                                  String?
+  parentId                                                  String?
+  balance                                                   Float             @default(0)
+  debitBalance                                              Float             @default(0)
+  creditBalance                                             Float             @default(0)
+  isActive                                                  Boolean           @default(true)
+  allowManualEntry                                          Boolean           @default(true)
+  description                                               String?
+  createdAt                                                 DateTime          @default(now())
+  updatedAt                                                 DateTime
+  accounts                                                  accounts?         @relation("accountsToaccounts", fields: [parentId], references: [id], onDelete: Restrict)
+  other_accounts                                            accounts[]        @relation("accountsToaccounts")
+  journal_entries_journal_entries_creditAccountIdToaccounts journal_entries[] @relation("journal_entries_creditAccountIdToaccounts")
+  journal_entries_journal_entries_debitAccountIdToaccounts  journal_entries[] @relation("journal_entries_debitAccountIdToaccounts")
+}
+
+model bookings {
+  id                                              String             @id
+  bookingNumber                                   String             @unique
+  customerId                                      String
+  supplierId                                      String?
+  serviceType                                     String             @default("FLIGHT")
+  bookingAgentId                                  String?
+  customerServiceId                               String?
+  costAmount                                      Float
+  costCurrency                                    String             @default("AED")
+  costInAED                                       Float
+  saleAmount                                      Float
+  saleCurrency                                    String             @default("AED")
+  saleInAED                                       Float
+  isUAEBooking                                    Boolean            @default(true)
+  vatApplicable                                   Boolean            @default(true)
+  netBeforeVAT                                    Float?
+  vatAmount                                       Float?
+  totalWithVAT                                    Float?
+  grossProfit                                     Float?
+  netProfit                                       Float?
+  agentCommissionRate                             Float?
+  agentCommissionAmount                           Float?
+  agentCommissionType                             String?
+  agentCommissionValue                            Float?
+  csCommissionRate                                Float?
+  csCommissionAmount                              Float?
+  salesCommissionType                             String?
+  salesCommissionValue                            Float?
+  salesCommissionAmount                           Float?
+  totalCommission                                 Float?
+  status                                          String             @default("DRAFT")
+  bookingStatus                                   String             @default("CONFIRMED")
+  serviceDetails                                  String             @default("{}")
+  bookingDate                                     DateTime           @default(now())
+  travelDate                                      DateTime?
+  returnDate                                      DateTime?
+  notes                                           String?
+  internalNotes                                   String?
+  createdById                                     String
+  createdAt                                       DateTime           @default(now())
+  updatedAt                                       DateTime
+  employees_bookings_bookingAgentIdToemployees    employees?         @relation("bookings_bookingAgentIdToemployees", fields: [bookingAgentId], references: [id])
+  users                                           users              @relation(fields: [createdById], references: [id])
+  customers                                       customers          @relation(fields: [customerId], references: [id])
+  employees_bookings_customerServiceIdToemployees employees?         @relation("bookings_customerServiceIdToemployees", fields: [customerServiceId], references: [id])
+  suppliers                                       suppliers?         @relation(fields: [supplierId], references: [id])
+  booking_suppliers                               booking_suppliers[]
+  files                                           files?
+  invoices                                        invoices?
+}
+
+model company_settings {
+  id                String   @id
+  companyName       String
+  companyNameArabic String?
+  tradeLicense      String?
+  taxRegistrationNo String?
+  addressLine1      String
+  addressLine2      String?
+  city              String
+  state             String?
+  country           String   @default("United Arab Emirates")
+  postalCode        String?
+  phone             String
+  email             String
+  website           String?
+  logoPath          String?
+  defaultCurrency   String   @default("AED")
+  vatRate           Float    @default(5.0)
+  vatEnabled        Boolean  @default(true)
+  invoicePrefix     String   @default("INV")
+  invoiceTerms      String?
+  invoiceFooter     String?
+  filePrefix        String   @default("FILE")
+  updatedAt         DateTime
+}
+
+model currencies {
+  id                String   @id
+  code              String   @unique
+  name              String
+  symbol            String
+  exchangeRateToAED Float    @default(1)
+  isActive          Boolean  @default(true)
+  lastUpdated       DateTime @default(now())
+}
+
+model customer_assignments {
+  id                  String    @id
+  customerId          String
+  userId              String
+  assignedRole        String    @default("SALES")
+  commissionRate      Float?
+  flightCommission    Float?
+  hotelCommission     Float?
+  visaCommission      Float?
+  transferCommission  Float?
+  cruiseCommission    Float?
+  rentalCarCommission Float?
+  trainCommission     Float?
+  activityCommission  Float?
+  isActive            Boolean   @default(true)
+  assignedDate        DateTime  @default(now())
+  notes               String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime
+  customers           customers @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  users               users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, userId, assignedRole])
+}
+
+model customers {
+  id                   String                 @id
+  customerCode         String                 @unique
+  type                 String                 @default("INDIVIDUAL")
+  companyName          String?
+  firstName            String
+  lastName             String
+  email                String
+  phone                String
+  alternatePhone       String?
+  addressLine1         String
+  addressLine2         String?
+  city                 String
+  state                String?
+  country              String
+  postalCode           String?
+  taxNumber            String?
+  taxRegistered        Boolean                @default(false)
+  notes                String?
+  isActive             Boolean                @default(true)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime
+  bookings             bookings[]
+  customer_assignments customer_assignments[]
+  files                files[]
+  invoices             invoices[]
+  receipts             receipts[]
+}
+
+model employees {
+  id                                             String     @id
+  userId                                         String     @unique
+  employeeCode                                   String     @unique
+  department                                     String     @default("BOOKING")
+  defaultCommissionRate                          Float      @default(0)
+  customCommissionRates                          String     @default("{}")
+  isActive                                       Boolean    @default(true)
+  createdAt                                      DateTime   @default(now())
+  updatedAt                                      DateTime
+  bookings_bookings_bookingAgentIdToemployees    bookings[] @relation("bookings_bookingAgentIdToemployees")
+  bookings_bookings_customerServiceIdToemployees bookings[] @relation("bookings_customerServiceIdToemployees")
+  users                                          users      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model files {
+  id            String    @id
+  fileNumber    String    @unique
+  bookingId     String    @unique
+  customerId    String
+  fileData      String    @default("{}")
+  status        String    @default("ACTIVE")
+  generatedDate DateTime  @default(now())
+  pdfPath       String?
+  createdById   String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime
+  bookings      bookings  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  users         users     @relation(fields: [createdById], references: [id])
+  customers     customers @relation(fields: [customerId], references: [id])
+}
+
+model invoices {
+  id              String    @id
+  invoiceNumber   String    @unique
+  bookingId       String    @unique
+  customerId      String
+  subtotal        Float
+  vatAmount       Float
+  totalAmount     Float
+  currency        String    @default("AED")
+  invoiceDate     DateTime  @default(now())
+  dueDate         DateTime?
+  paidDate        DateTime?
+  status          String    @default("UNPAID")
+  notes           String?
+  termsConditions String?
+  pdfPath         String?
+  createdById     String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime
+  bookings        bookings  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  users           users     @relation(fields: [createdById], references: [id])
+  customers       customers @relation(fields: [customerId], references: [id])
+}
+
+model journal_entries {
+  id                                                 String    @id
+  entryNumber                                        String    @unique
+  date                                               DateTime  @default(now())
+  description                                        String
+  reference                                          String?
+  debitAccountId                                     String
+  creditAccountId                                    String
+  amount                                             Float
+  bookingId                                          String?
+  invoiceId                                          String?
+  transactionType                                    String?
+  status                                             String    @default("DRAFT")
+  postedDate                                         DateTime?
+  reversedDate                                       DateTime?
+  notes                                              String?
+  createdBy                                          String?
+  createdAt                                          DateTime  @default(now())
+  updatedAt                                          DateTime
+  accounts_journal_entries_creditAccountIdToaccounts accounts  @relation("journal_entries_creditAccountIdToaccounts", fields: [creditAccountId], references: [id])
+  accounts_journal_entries_debitAccountIdToaccounts  accounts  @relation("journal_entries_debitAccountIdToaccounts", fields: [debitAccountId], references: [id])
+}
+
+model receipts {
+  id             String    @id
+  receiptNumber  String    @unique
+  customerId     String
+  invoiceId      String?
+  amount         Float
+  paymentMethod  String    @default("CASH")
+  bankAccountId  String?
+  checkNumber    String?
+  reference      String?
+  receiptDate    DateTime  @default(now())
+  notes          String?
+  status         String    @default("COMPLETED")
+  createdById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime
+  matchedAmount  Float     @default(0)
+  matchingStatus String    @default("NOT_MATCHED")
+  customers      customers @relation(fields: [customerId], references: [id])
+}
+
+model suppliers {
+  id                String             @id
+  supplierCode      String             @unique
+  companyName       String
+  contactPerson     String
+  email             String
+  phone             String
+  alternatePhone    String?
+  addressLine1      String
+  addressLine2      String?
+  city              String
+  state             String?
+  country           String
+  postalCode        String?
+  taxNumber         String?
+  taxRegistered     Boolean            @default(false)
+  paymentTerms      String?
+  currency          String             @default("AED")
+  serviceTypes      String             @default("")
+  notes             String?
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime
+  bookings          bookings[]
+  booking_suppliers booking_suppliers[]
+}
+
+model booking_suppliers {
+  id            String    @id
+  bookingId     String
+  supplierId    String
+  serviceType   String    @default("FLIGHT")
+  costAmount    Float
+  costCurrency  String    @default("AED")
+  costInAED     Float
+  saleAmount    Float     @default(0)
+  saleCurrency  String    @default("AED")
+  saleInAED     Float     @default(0)
+  description   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime
+  bookings      bookings  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  suppliers     suppliers @relation(fields: [supplierId], references: [id])
+
+  @@unique([bookingId, supplierId, serviceType])
+}
+
+model system_settings {
+  id          String   @id
+  key         String   @unique
+  value       String   @default("{}")
+  description String?
+  updatedAt   DateTime
+}
+
+model users {
+  id                                      String                 @id
+  email                                   String                 @unique
+  password                                String
+  firstName                               String
+  lastName                                String
+  role                                    String                 @default("USER")
+  isActive                                Boolean                @default(true)
+  permissions                             String                 @default("{}") @db.Text
+  pagePermissions                         String                 @default("{}") @db.Text
+  viewSettings                            String                 @default("{}") @db.Text
+  createdAt                               DateTime               @default(now())
+  updatedAt                               DateTime
+  avatar                                  String?
+  commissionRate                          Float                  @default(0)
+  department                              String?
+  joinedDate                              DateTime               @default(now())
+  lastLogin                               DateTime?
+  phone                                   String?
+  salesTarget                             Float                  @default(0)
+  username                                String                 @unique
+  bookings                                bookings[]
+  customer_assignments                    customer_assignments[]
+  employees                               employees?
+  files                                   files[]
+  invoices                                invoices[]
+  notifications_notifications_userIdTousers notifications[]      @relation("notifications_userIdTousers")
+  activity_logs_activity_logs_userIdTousers activity_logs[]       @relation("activity_logs_userIdTousers")
+  activity_logs_activity_logs_targetUserIdTousers activity_logs[] @relation("activity_logs_targetUserIdTousers")
+}
+
+model notifications {
+  id          String   @id
+  userId      String
+  type        String   // LOGIN, BOOKING_CREATED, BOOKING_UPDATED, INVOICE_CREATED, etc.
+  title       String
+  message     String   @db.Text
+  actionType  String?  // CREATE, UPDATE, DELETE, LOGIN, LOGOUT
+  actionBy    String?  // User who performed the action
+  entityType  String?  // BOOKING, INVOICE, CUSTOMER, etc.
+  entityId    String?  // ID of the entity
+  metadata    String   @default("{}") @db.Text
+  isRead      Boolean  @default(false)
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+  users       users    @relation("notifications_userIdTousers", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+model activity_logs {
+  id                                           String   @id
+  userId                                       String
+  action                                       String   // LOGIN, CREATE, UPDATE, DELETE, VIEW, EXPORT, etc.
+  entityType                                   String   // BOOKING, INVOICE, CUSTOMER, USER, etc.
+  entityId                                     String?
+  description                                  String   @db.Text
+  ipAddress                                    String?
+  userAgent                                    String?  @db.Text
+  changes                                      String?  @db.Text // JSON of what changed
+  targetUserId                                 String?  // For user-related actions
+  metadata                                     String   @default("{}") @db.Text
+  createdAt                                    DateTime @default(now())
+  users_activity_logs_userIdTousers            users    @relation("activity_logs_userIdTousers", fields: [userId], references: [id], onDelete: Cascade)
+  users_activity_logs_targetUserIdTousers      users?   @relation("activity_logs_targetUserIdTousers", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
