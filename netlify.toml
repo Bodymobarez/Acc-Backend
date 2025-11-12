@@ -14,16 +14,12 @@
 [functions."*"]
   timeout = 26
 
-# API routes
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
-
+# API routes - redirect everything to the function
 [[redirects]]
   from = "/*"
   to = "/.netlify/functions/api/:splat"
   status = 200
+  force = true
 
 [[headers]]
   for = "/*"

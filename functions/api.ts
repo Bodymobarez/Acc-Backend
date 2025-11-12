@@ -8,10 +8,9 @@ const getHandler = async (): Promise<Handler> => {
   
   const { app } = await import('../server/index.js');
   
-  // Configure serverless-http with explicit options
+  // Configure serverless-http - no basePath since Netlify redirects handle it
   cachedHandler = serverless(app, {
     provider: 'aws',
-    basePath: '/api',
   }) as Handler;
   
   return cachedHandler;
