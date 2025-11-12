@@ -1,5 +1,6 @@
 [build]
-  command = "npm install --include=dev && npx prisma generate"
+  command = "npm install --include=dev && npx prisma generate && mkdir -p dist"
+  publish = "dist"
   functions = "functions"
 
 [build.environment]

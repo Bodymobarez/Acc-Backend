@@ -1,20 +1,19 @@
 import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-// Load environment variables early - handle serverless environments where import.meta.url might be undefined
+// Load environment variables - compatible with both ESM and CommonJS
 const getDirectoryPath = () => {
-  if (typeof import.meta.url !== 'undefined') {
-    const __filename = fileURLToPath(import.meta.url);
-    return path.dirname(__filename);
+  // Check if running in CommonJS mode (bundled by esbuild)
+  if (typeof __dirname !== 'undefined') {
+    return __dirname;
   }
-  // Fallback for serverless/bundled environments  
+  // Fallback for other environments
   return process.cwd();
 };
 
-const __dirname = getDirectoryPath();
-dotenv.config({ path: path.join(__dirname, '../../.env') });
+const dirPath = getDirectoryPath();
+dotenv.config({ path: path.join(dirPath, '../../.env') });
 
 // Singleton pattern for Prisma Client
 // Prevents multiple instances that can exhaust database connections
