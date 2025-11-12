@@ -8,23 +8,7 @@
   NODE_ENV = "production"
 
 [functions]
-  node_bundler = "esbuild"
-  external_node_modules = [
-    "@prisma/client",
-    "prisma",
-    "pdfkit",
-    "jspdf",
-    "express",
-    "bcryptjs",
-    "cors",
-    "jsonwebtoken",
-    "express-validator",
-    "multer",
-    "node-cron",
-    "pg",
-    "dotenv",
-    "serverless-http"
-  ]
+  node_bundler = "nft"
   directory = "functions"
 
 [functions."*"]
