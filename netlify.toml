@@ -14,10 +14,10 @@
 [functions."*"]
   timeout = 26
 
-# API routes - redirect everything to the function
+# API routes - add /api prefix before forwarding to function
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/api/:splat"
+  to = "/.netlify/functions/api/api/:splat"
   status = 200
   force = true
 
