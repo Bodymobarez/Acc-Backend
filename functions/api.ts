@@ -1,14 +1,14 @@
 import serverless from 'serverless-http';
 import type { Handler } from '@netlify/functions';
 
-let handler: any = null;
+let cachedHandler: any = null;
 
 const getHandler = async () => {
-  if (handler) return handler;
+  if (cachedHandler) return cachedHandler;
   
   const { default: app } = await import('../server/index.js');
-  handler = serverless(app);
-  return handler;
+  cachedHandler = serverless(app);
+  return cachedHandler;
 };
 
 export const handler: Handler = async (event, context) => {
