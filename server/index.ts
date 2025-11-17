@@ -200,13 +200,13 @@ app.use('/api/bank-accounts', bankAccountRoutes);
 //   });
 // }
 
-// 404 handler for API routes
-app.use('/api/*', (req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    error: 'API route not found'
-  });
-});
+// 404 handler for API routes - disabled in serverless, handled by routes
+// app.use('/api/*', (req: Request, res: Response) => {
+//   res.status(404).json({
+//     success: false,
+//     error: 'API route not found'
+//   });
+// });
 
 // Global error handler
 app.use((err: any, req: Request, res: Response, next: any) => {
