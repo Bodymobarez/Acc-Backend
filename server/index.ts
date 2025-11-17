@@ -98,8 +98,8 @@ app.use((req: Request, res: Response, next) => {
   next();
 });
 
-// Handle preflight requests
-app.options('*', (req: Request, res: Response) => {
+// Handle preflight requests - use regex to match all paths
+app.options(/.*/, (req: Request, res: Response) => {
   res.status(200).end();
 });
 
