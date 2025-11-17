@@ -98,10 +98,10 @@ app.use((req: Request, res: Response, next) => {
   next();
 });
 
-// Handle preflight requests
-app.options('*', (req: Request, res: Response) => {
-  res.status(200).end();
-});
+// Handle preflight requests - removed because CORS middleware handles it
+// app.options(/.*/, (req: Request, res: Response) => {
+//   res.status(200).end();
+// });
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {
