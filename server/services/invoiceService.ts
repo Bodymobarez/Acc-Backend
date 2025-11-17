@@ -101,14 +101,21 @@ export class InvoiceService {
       }
     });
     
-    // Update booking status to CONFIRMED when invoice is generated
-    await prisma.bookings.update({
+    // Update booking status to CONFIRMED when invoice is generated (only if not already CONFIRMED)
+    const currentBooking = await prisma.bookings.findUnique({
       where: { id: input.bookingId },
-      data: { 
-        status: 'CONFIRMED',
-        updatedAt: new Date()
-      }
+      select: { status: true }
     });
+    
+    if (currentBooking && currentBooking.status !== 'CONFIRMED') {
+      await prisma.bookings.update({
+        where: { id: input.bookingId },
+        data: { 
+          status: 'CONFIRMED',
+          updatedAt: new Date()
+        }
+      });
+    }
     
     // Create accounting journal entry
     await accountingService.createInvoiceJournalEntry(invoice);
@@ -224,6 +231,74 @@ export class InvoiceService {
     });
   }
   
+  /**
+   * Update invoice from booking changes
+   * Recalculates invoice amounts based on updated booking data
+   * and updates journal entries
+   */
+  async updateInvoiceFromBooking(invoiceId: string, booking: any): Promise<invoices> {
+    console.log(`🔄 Updating invoice ${invoiceId} from booking changes...`);
+
+    // Calculate new invoice amounts based on booking
+    let invoiceSubtotal: number;
+    let invoiceVAT: number;
+    let invoiceTotal: number;
+    
+    if (booking.serviceType === 'FLIGHT') {
+      // FLIGHT: Invoice shows sale amount only, NO VAT
+      invoiceSubtotal = booking.saleInAED;
+      invoiceVAT = 0;
+      invoiceTotal = booking.saleInAED;
+    } else {
+      // Other services: Calculate VAT properly
+      if (booking.vatApplicable && booking.isUAEBooking) {
+        // Sale amount INCLUDES VAT (5%)
+        invoiceSubtotal = booking.saleInAED / 1.05;
+        invoiceVAT = booking.saleInAED - invoiceSubtotal;
+        invoiceTotal = booking.saleInAED;
+      } else {
+        // No VAT applicable or non-UAE booking
+        invoiceSubtotal = booking.saleInAED;
+        invoiceVAT = 0;
+        invoiceTotal = booking.saleInAED;
+      }
+    }
+
+    // Update invoice
+    const updatedInvoice = await prisma.invoices.update({
+      where: { id: invoiceId },
+      data: {
+        subtotal: invoiceSubtotal,
+        vatAmount: invoiceVAT,
+        totalAmount: invoiceTotal,
+        updatedAt: new Date()
+      },
+      include: {
+        bookings: {
+          include: {
+            suppliers: true
+          }
+        },
+        customers: true,
+        users: true
+      }
+    });
+
+    // 🎯 DELETE old journal entries for this invoice
+    console.log('🗑️ Deleting old invoice journal entries...');
+    const deletedEntries = await prisma.journal_entries.deleteMany({
+      where: { invoiceId: invoiceId }
+    });
+    console.log(`   Deleted ${deletedEntries.count} old entries`);
+
+    // 🎯 CREATE new journal entries with updated amounts
+    console.log('📝 Creating new invoice journal entries...');
+    await accountingService.createInvoiceJournalEntry(updatedInvoice);
+
+    console.log('✅ Invoice and journal entries updated successfully');
+    return updatedInvoice;
+  }
+
   /**
    * Delete invoice
    */

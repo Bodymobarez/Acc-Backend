@@ -1,5 +1,5 @@
 import express from 'express';
-import { searchHotelDetails, searchHotelDetailsTripAdvisor, searchHotelsByCity } from '../controllers/placesController';
+import { searchHotelDetails, searchHotelDetailsTripAdvisor, searchHotelsByCity, searchHotelsWithQuery } from '../controllers/placesController';
 
 const router = express.Router();
 
@@ -11,5 +11,8 @@ router.post('/search-hotel-tripadvisor', searchHotelDetailsTripAdvisor);
 
 // POST /api/places/search-hotels-by-city - Search for hotels in a city using TripAdvisor
 router.post('/search-hotels-by-city', searchHotelsByCity);
+
+// POST /api/places/search-hotels-city - Search for hotels with query filter (autocomplete)
+router.post('/search-hotels-city', searchHotelsWithQuery);
 
 export default router;

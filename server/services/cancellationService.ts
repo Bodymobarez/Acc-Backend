@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { prisma } from '../lib/prisma';
+import { accountingService } from './accountingService';
 
 export const cancellationService = {
   /**
@@ -167,6 +168,15 @@ ${originalBooking.notes || 'N/A'}`,
     console.log(`✅ Refund Booking Created: ${refundBookingNumber}`);
     console.log(`   Sale Amount (Negative): ${refundBooking.saleInAED} AED`);
 
+    // 3.5. Create reverse journal entries for refund
+    console.log('\n📒 Creating Reverse Journal Entries for Refund...');
+    try {
+      await accountingService.createRefundJournalEntries(originalBooking);
+      console.log('✅ Reverse journal entries created successfully');
+    } catch (error: any) {
+      console.error('⚠️  Failed to create reverse journal entries:', error.message);
+    }
+
     // 4. Create refund booking for multi-suppliers if exists
     if (originalBooking.booking_suppliers && originalBooking.booking_suppliers.length > 0) {
       console.log(`\n📦 Creating Refund for ${originalBooking.booking_suppliers.length} Additional Suppliers...`);
@@ -202,6 +212,64 @@ ${originalBooking.notes || 'N/A'}`,
 
     console.log(`\n✅ Original Booking Status Updated: CANCELLED`);
 
+    // 6. 🎯 AUTO-GENERATE CREDIT NOTE (Invoice for refund)
+    console.log('\n💳 Auto-Generating Credit Note Invoice...');
+    let creditNoteInvoice = null;
+    
+    if (invoice && invoice.status === 'PAID') {
+      try {
+        // Import invoiceService dynamically to avoid circular dependency
+        const { invoiceService } = await import('./invoiceService');
+        
+        // Generate invoice number for credit note
+        const lastInvoice = await prisma.invoices.findFirst({
+          orderBy: { createdAt: 'desc' }
+        });
+        const settings = await prisma.company_settings.findFirst();
+        const prefix = 'CN'; // Credit Note prefix
+        const nextSequence = lastInvoice ? 
+          parseInt(lastInvoice.invoiceNumber.split('-').pop() || '0') + 1 : 1;
+        const creditNoteNumber = `${prefix}-${new Date().getFullYear()}-${String(nextSequence).padStart(6, '0')}`;
+
+        creditNoteInvoice = await prisma.invoices.create({
+          data: {
+            id: randomUUID(),
+            invoiceNumber: creditNoteNumber,
+            bookingId: refundBooking.id,
+            customerId: refundBooking.customerId,
+            subtotal: -invoice.subtotal,  // Negative amounts
+            vatAmount: -invoice.vatAmount,
+            totalAmount: -invoice.totalAmount,
+            currency: 'AED',
+            notes: `💳 CREDIT NOTE for cancelled invoice ${invoice.invoiceNumber}\n\nOriginal Booking: ${originalBooking.bookingNumber}\nRefund Amount: ${invoice.totalAmount} AED`,
+            termsConditions: settings?.invoiceTerms || undefined,
+            createdById,
+            status: 'PAID',  // Credit note is automatically "paid" (refunded)
+            paidDate: new Date(),
+            updatedAt: new Date()
+          } as any,
+          include: {
+            bookings: {
+              include: {
+                suppliers: true
+              }
+            },
+            customers: true
+          }
+        });
+
+        // Create journal entries for credit note (reversal entries)
+        const { accountingService } = await import('./accountingService');
+        await accountingService.createInvoiceJournalEntry(creditNoteInvoice);
+
+        console.log(`✅ Credit Note Invoice Created: ${creditNoteNumber}`);
+        console.log(`   Amount: ${creditNoteInvoice.totalAmount} AED`);
+      } catch (error: any) {
+        console.error('⚠️ Failed to create credit note invoice:', error.message);
+        // Continue even if credit note creation fails
+      }
+    }
+
     console.log('\n🎉 ═══════════════════════════════════════');
     console.log('   CANCELLATION COMPLETED SUCCESSFULLY');
     console.log('═══════════════════════════════════════\n');
@@ -210,8 +278,9 @@ ${originalBooking.notes || 'N/A'}`,
       originalBooking,
       refundBooking,
       invoice,
+      creditNoteInvoice,
       creditNoteInfo,
-      message: 'Booking cancelled successfully with refund booking created'
+      message: 'Booking cancelled successfully with refund booking and credit note created'
     };
   }
 };

@@ -48,6 +48,9 @@ import reportRoutes from './routes/reportRoutes';
 import advancedReportRoutes from './routes/advancedReportRoutes';
 import notificationRoutes from './routes/notifications';
 import employeeCommissionRoutes from './routes/employeeCommissionRoutes';
+import generalLedgerRoutes from './routes/generalLedgerRoutes';
+import paymentRoutes from './routes/paymentRoutes';
+import bankAccountRoutes from './routes/bankAccountRoutes';
 
 // Initialize Express app
 const app: Express = express();
@@ -167,9 +170,12 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/airlines', airlineRoutes);
 app.use('/api/migration', migrationRoutes);
 app.use('/api/reports/old', reportRoutes);
+app.use('/api/reports/employee-commissions', employeeCommissionRoutes);
+app.use('/api/reports/general-ledger', generalLedgerRoutes);
 app.use('/api/reports', advancedReportRoutes);
-app.use('/api/reports/employee-commission', employeeCommissionRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/bank-accounts', bankAccountRoutes);
 
 // Serve static files from dist folder (for production)
 if (process.env.NODE_ENV === 'production') {

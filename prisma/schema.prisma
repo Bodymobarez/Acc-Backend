@@ -343,6 +343,7 @@ model suppliers {
   updatedAt         DateTime
   bookings          bookings[]
   booking_suppliers booking_suppliers[]
+  payments          payments[]
 }
 
 model booking_suppliers {
@@ -399,6 +400,7 @@ model users {
   employees                               employees?
   files                                   files[]
   invoices                                invoices[]
+  payments                                payments[]
   notifications_notifications_userIdTousers notifications[]      @relation("notifications_userIdTousers")
   activity_logs_activity_logs_userIdTousers activity_logs[]       @relation("activity_logs_userIdTousers")
   activity_logs_activity_logs_targetUserIdTousers activity_logs[] @relation("activity_logs_targetUserIdTousers")
@@ -443,4 +445,79 @@ model activity_logs {
   @@index([userId])
   @@index([entityType, entityId])
   @@index([createdAt])
+}
+
+model payments {
+  id              String    @id
+  paymentNumber   String    @unique
+  
+  // Link to supplier or expense
+  supplierId      String?
+  supplier        suppliers? @relation(fields: [supplierId], references: [id])
+  
+  // Payment Details
+  amount          Float
+  paymentMethod   String    @default("CASH") // CASH, BANK, CREDIT_CARD, CHECK
+  bankAccountId   String?
+  bankAccount     bank_accounts? @relation(fields: [bankAccountId], references: [id])
+  checkNumber     String?
+  reference       String?
+  category        String    @default("EXPENSE") // EXPENSE, SUPPLIER_PAYMENT
+  
+  // Dates
+  paymentDate     DateTime  @default(now())
+  
+  // Additional
+  notes           String?
+  status          String    @default("COMPLETED")
+  
+  // Metadata
+  createdById     String?
+  createdBy       users?    @relation(fields: [createdById], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model bank_accounts {
+  id              String    @id
+  accountNumber   String    @unique
+  accountName     String
+  bankName        String
+  
+  // Account Details
+  currency        String    @default("AED")
+  balance         Float     @default(0)
+  accountType     String    @default("CURRENT") // CURRENT, SAVINGS
+  
+  // Additional
+  branch          String?
+  swiftCode       String?
+  iban            String?
+  notes           String?
+  isActive        Boolean   @default(true)
+  
+  // Metadata
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  payments        payments[]
+}
+
+model cash_registers {
+  id              String    @id
+  name            String
+  location        String?
+  
+  // Register Details
+  currency        String    @default("AED")
+  balance         Float     @default(0)
+  
+  // Additional
+  notes           String?
+  isActive        Boolean   @default(true)
+  
+  // Metadata
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }

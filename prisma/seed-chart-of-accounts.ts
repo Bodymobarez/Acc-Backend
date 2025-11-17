@@ -155,9 +155,9 @@ const chartOfAccounts = [
     description: 'Foreign currency bank account (SAR)'
   },
 
-  // 1130 - Accounts Receivable
+  // 1150 - Accounts Receivable
   {
-    code: '1130',
+    code: '1150',
     name: 'Accounts Receivable',
     nameAr: 'الذمم المدينة',
     type: 'ASSET',
@@ -167,29 +167,59 @@ const chartOfAccounts = [
     description: 'Money owed by customers'
   },
   {
-    code: '1121',
+    code: '1151',
     name: 'Accounts Receivable - Customers',
     nameAr: 'الذمم المدينة - العملاء',
     type: 'ASSET',
     category: 'Current',
-    parentCode: '1120',
+    parentCode: '1150',
     allowManualEntry: true,
     description: 'Outstanding customer invoices'
   },
   {
-    code: '1122',
+    code: '1152',
     name: 'Allowance for Doubtful Accounts',
     nameAr: 'مخصص الديون المشكوك في تحصيلها',
     type: 'ASSET',
     category: 'Current',
-    parentCode: '1120',
+    parentCode: '1150',
     allowManualEntry: true,
     description: 'Reserve for uncollectible receivables'
   },
-
-  // 1130 - Advances and Deposits
   {
-    code: '1130',
+    code: '1153',
+    name: 'Supplier Refunds Receivable',
+    nameAr: 'مردودات الموردين المستحقة القبض',
+    type: 'ASSET',
+    category: 'Current',
+    parentCode: '1150',
+    allowManualEntry: true,
+    description: 'Refunds due from suppliers for cancelled bookings'
+  },
+  {
+    code: '1154',
+    name: 'Agent Commission Refunds Receivable',
+    nameAr: 'مردودات عمولات الوكلاء المستحقة القبض',
+    type: 'ASSET',
+    category: 'Current',
+    parentCode: '1150',
+    allowManualEntry: true,
+    description: 'Commission refunds due from booking agents for cancelled bookings'
+  },
+  {
+    code: '1155',
+    name: 'Sales Commission Refunds Receivable',
+    nameAr: 'مردودات عمولات المبيعات المستحقة القبض',
+    type: 'ASSET',
+    category: 'Current',
+    parentCode: '1150',
+    allowManualEntry: true,
+    description: 'Commission refunds due from sales agents for cancelled bookings'
+  },
+
+  // 1160 - Advances and Deposits
+  {
+    code: '1160',
     name: 'Advances and Deposits',
     nameAr: 'السلف والودائع',
     type: 'ASSET',
@@ -199,49 +229,49 @@ const chartOfAccounts = [
     description: 'Prepaid expenses and supplier advances'
   },
   {
-    code: '1131',
+    code: '1161',
     name: 'Advances to Suppliers',
     nameAr: 'سلف الموردين',
     type: 'ASSET',
     category: 'Current',
-    parentCode: '1130',
+    parentCode: '1160',
     allowManualEntry: true,
     description: 'Prepayments to suppliers for bookings'
   },
   {
-    code: '1132',
+    code: '1162',
     name: 'Supplier Deposits',
     nameAr: 'ودائع الموردين',
     type: 'ASSET',
     category: 'Current',
-    parentCode: '1130',
+    parentCode: '1160',
     allowManualEntry: true,
     description: 'Security deposits with suppliers'
   },
   {
-    code: '1133',
+    code: '1163',
     name: 'Employee Advances',
     nameAr: 'سلف الموظفين',
     type: 'ASSET',
     category: 'Current',
-    parentCode: '1130',
+    parentCode: '1160',
     allowManualEntry: true,
     description: 'Advances given to employees'
   },
   {
-    code: '1135',
+    code: '1164',
     name: 'Prepaid Expenses',
     nameAr: 'المصروفات المدفوعة مقدماً',
     type: 'ASSET',
     category: 'Current',
-    parentCode: '1130',
+    parentCode: '1160',
     allowManualEntry: true,
     description: 'Expenses paid in advance'
   },
 
-  // 1140 - Inventory & Booking Deposits
+  // 1170 - Inventory & Booking Deposits
   {
-    code: '1140',
+    code: '1170',
     name: 'Booking Deposits & Advance Payments',
     nameAr: 'ودائع الحجوزات والدفعات المقدمة',
     type: 'ASSET',
@@ -251,32 +281,32 @@ const chartOfAccounts = [
     description: 'Deposits for confirmed bookings'
   },
   {
-    code: '1141',
+    code: '1171',
     name: 'Flight Booking Deposits',
     nameAr: 'ودائع حجز الرحلات',
     type: 'ASSET',
     category: 'Current',
-    parentCode: '1140',
+    parentCode: '1170',
     allowManualEntry: true,
     description: 'Deposits paid for flight reservations'
   },
   {
-    code: '1142',
+    code: '1172',
     name: 'Hotel Booking Deposits',
     nameAr: 'ودائع حجز الفنادق',
     type: 'ASSET',
     category: 'Current',
-    parentCode: '1140',
+    parentCode: '1170',
     allowManualEntry: true,
     description: 'Deposits paid for hotel reservations'
   },
   {
-    code: '1143',
+    code: '1173',
     name: 'Tour Package Deposits',
     nameAr: 'ودائع الباقات السياحية',
     type: 'ASSET',
     category: 'Current',
-    parentCode: '1140',
+    parentCode: '1170',
     allowManualEntry: true,
     description: 'Deposits for tour packages'
   },
@@ -516,36 +546,6 @@ const chartOfAccounts = [
     allowManualEntry: true,
     description: 'Refunds owed to customers for cancelled bookings'
   },
-  {
-    code: '2152',
-    name: 'Supplier Refunds Receivable',
-    nameAr: 'مردودات الموردين المستحقة القبض',
-    type: 'ASSET',
-    category: 'Current',
-    parentCode: '1120',
-    allowManualEntry: true,
-    description: 'Refunds due from suppliers for cancelled bookings'
-  },
-  {
-    code: '2153',
-    name: 'Agent Commission Refunds Receivable',
-    nameAr: 'مردودات عمولات الوكلاء المستحقة القبض',
-    type: 'ASSET',
-    category: 'Current',
-    parentCode: '1120',
-    allowManualEntry: true,
-    description: 'Commission refunds due from booking agents for cancelled bookings'
-  },
-  {
-    code: '2154',
-    name: 'Sales Commission Refunds Receivable',
-    nameAr: 'مردودات عمولات المبيعات المستحقة القبض',
-    type: 'ASSET',
-    category: 'Current',
-    parentCode: '1120',
-    allowManualEntry: true,
-    description: 'Commission refunds due from sales agents for cancelled bookings'
-  },
 
   // ============================================
   // 3000 - EQUITY
@@ -761,76 +761,76 @@ const chartOfAccounts = [
     description: 'Fees for booking modifications'
   },
 
-  // 4400 - Refund and Credit Note Accounts
+  // 4400 - Refund and Credit Note Accounts (Contra Revenue)
   {
     code: '4400',
-    name: 'Refunds and Credit Notes',
-    nameAr: 'المردودات والمذكرات الدائنة',
+    name: 'Sales Returns and Refunds',
+    nameAr: 'مردودات المبيعات والمبالغ المستردة',
     type: 'REVENUE',
-    category: 'Refund',
+    category: 'Contra',
     parentCode: '4000',
     allowManualEntry: false,
-    description: 'Refund transactions and credit note reversals'
+    description: 'Revenue reversals for cancelled services (reduces revenue)'
   },
   {
     code: '4410',
     name: 'Flight Booking Refunds',
     nameAr: 'مردودات حجز الرحلات',
     type: 'REVENUE',
-    category: 'Refund',
+    category: 'Contra',
     parentCode: '4400',
     allowManualEntry: true,
-    description: 'Refunds for cancelled flight bookings (Contra Revenue)'
+    description: 'Revenue reversal for cancelled flight bookings (debit to reduce revenue)'
   },
   {
     code: '4420',
     name: 'Hotel Booking Refunds',
     nameAr: 'مردودات حجز الفنادق',
     type: 'REVENUE',
-    category: 'Refund',
+    category: 'Contra',
     parentCode: '4400',
     allowManualEntry: true,
-    description: 'Refunds for cancelled hotel reservations (Contra Revenue)'
+    description: 'Revenue reversal for cancelled hotel reservations (debit to reduce revenue)'
   },
   {
     code: '4430',
     name: 'Tour Package Refunds',
     nameAr: 'مردودات الباقات السياحية',
     type: 'REVENUE',
-    category: 'Refund',
+    category: 'Contra',
     parentCode: '4400',
     allowManualEntry: true,
-    description: 'Refunds for cancelled tour packages (Contra Revenue)'
+    description: 'Revenue reversal for cancelled tour packages (debit to reduce revenue)'
   },
   {
     code: '4440',
     name: 'Visa Services Refunds',
     nameAr: 'مردودات خدمات التأشيرات',
     type: 'REVENUE',
-    category: 'Refund',
+    category: 'Contra',
     parentCode: '4400',
     allowManualEntry: true,
-    description: 'Refunds for visa processing services (Contra Revenue)'
+    description: 'Revenue reversal for visa processing services (debit to reduce revenue)'
   },
   {
     code: '4450',
     name: 'Transfer Services Refunds',
     nameAr: 'مردودات خدمات النقل',
     type: 'REVENUE',
-    category: 'Refund',
+    category: 'Contra',
     parentCode: '4400',
     allowManualEntry: true,
-    description: 'Refunds for transportation services (Contra Revenue)'
+    description: 'Revenue reversal for transportation services (debit to reduce revenue)'
   },
   {
     code: '4460',
     name: 'Cruise Booking Refunds',
     nameAr: 'مردودات حجز الرحلات البحرية',
     type: 'REVENUE',
-    category: 'Refund',
+    category: 'Contra',
     parentCode: '4400',
     allowManualEntry: true,
-    description: 'Refunds for cancelled cruise reservations (Contra Revenue)'
+    description: 'Revenue reversal for cancelled cruise reservations (debit to reduce revenue)'
   },
 
   // ============================================
@@ -1255,56 +1255,36 @@ const chartOfAccounts = [
     description: 'Uncollectible customer receivables'
   },
 
-  // 6760 - Refund Processing Expenses
+  // 6760 - Cancellation and Refund Expenses
   {
     code: '6760',
-    name: 'Refund Processing Expenses',
-    nameAr: 'مصاريف معالجة المردودات',
+    name: 'Cancellation and Refund Expenses',
+    nameAr: 'مصاريف الإلغاء والمردودات',
     type: 'EXPENSE',
     category: 'Operating',
     parentCode: '6700',
     allowManualEntry: false,
-    description: 'Costs associated with processing refunds'
+    description: 'Costs and charges related to booking cancellations'
   },
   {
     code: '6761',
-    name: 'Cancellation Processing Fees',
-    nameAr: 'رسوم معالجة الإلغاء',
-    type: 'EXPENSE',
-    category: 'Operating',
-    parentCode: '6760',
-    allowManualEntry: true,
-    description: 'Internal costs for processing booking cancellations'
-  },
-  {
-    code: '6762',
     name: 'Supplier Cancellation Charges',
     nameAr: 'رسوم إلغاء الموردين',
     type: 'EXPENSE',
     category: 'Operating',
     parentCode: '6760',
     allowManualEntry: true,
-    description: 'Charges imposed by suppliers for cancellations'
+    description: 'Non-refundable charges imposed by suppliers for cancelled bookings'
   },
   {
-    code: '6763',
-    name: 'Agent Commission Refund Processing',
-    nameAr: 'معالجة مردودات عمولات الوكلاء',
+    code: '6762',
+    name: 'Cancellation Processing Fees',
+    nameAr: 'رسوم معالجة الإلغاء',
     type: 'EXPENSE',
     category: 'Operating',
     parentCode: '6760',
     allowManualEntry: true,
-    description: 'Processing expenses for agent commission refunds'
-  },
-  {
-    code: '6764',
-    name: 'Sales Commission Refund Processing',
-    nameAr: 'معالجة مردودات عمولات المبيعات',
-    type: 'EXPENSE',
-    category: 'Operating',
-    parentCode: '6760',
-    allowManualEntry: true,
-    description: 'Processing expenses for sales commission refunds'
+    description: 'Administrative costs for processing cancellations and refunds'
   },
 
   // 6800 - Financial Expenses

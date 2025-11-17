@@ -16,6 +16,17 @@ router.use(requirePermission('viewReports'));
 router.get('/dashboard', reportController.getDashboardData.bind(reportController));
 
 /**
+ * @route   GET /api/reports/financial-summary
+ * @desc    Get financial summary with key metrics (NEW - with refunds)
+ * @access  Private (viewFinancialReports permission)
+ */
+router.get(
+  '/financial-summary',
+  requirePermission('viewFinancialReports'),
+  reportController.getFinancialSummary.bind(reportController)
+);
+
+/**
  * @route   GET /api/reports/financial/summary
  * @desc    Get financial summary with key metrics
  * @access  Private (viewFinancialReports permission)

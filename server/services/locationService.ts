@@ -1,4 +1,6 @@
 import { prisma } from '../lib/prisma';
+import fs from 'fs';
+import path from 'path';
 
 export interface Country {
   id: string;
@@ -24,20 +26,125 @@ export interface Hotel {
   rating: number;
 }
 
+// Load world data from JSON file
+let worldData: any = null;
+function loadWorldData() {
+  if (!worldData) {
+    try {
+      const dataPath = path.join(__dirname, '../../countries-cities.json');
+      const rawData = fs.readFileSync(dataPath, 'utf8');
+      worldData = JSON.parse(rawData);
+      console.log(`✅ Loaded ${worldData.length} countries from JSON file`);
+    } catch (error) {
+      console.error('❌ Failed to load countries-cities.json:', error);
+      worldData = [];
+    }
+  }
+  return worldData;
+}
+
+// Cache for external API calls
+let countriesCache: { data: Country[], timestamp: number } | null = null;
+const citiesCache: Map<string, { data: City[], timestamp: number }> = new Map();
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours for countries
+const CITIES_CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours for cities
+
 class LocationService {
   /**
-   * Get all countries
+   * Get all countries from JSON file
    */
   async getAllCountries(): Promise<Country[]> {
-    return await prisma.countries.findMany({
-      orderBy: { name: 'asc' },
-    });
+    try {
+      // Check cache first
+      if (countriesCache && Date.now() - countriesCache.timestamp < CACHE_DURATION) {
+        return countriesCache.data;
+      }
+
+      // Load from JSON file
+      const data = loadWorldData();
+      
+      const countries = data.map((country: any) => ({
+        id: country.iso2,
+        code: country.iso2,
+        name: country.name
+      })).sort((a: any, b: any) => a.name.localeCompare(b.name));
+
+      // Update cache
+      countriesCache = { data: countries, timestamp: Date.now() };
+      
+      console.log(`✅ Loaded ${countries.length} countries from JSON`);
+      return countries;
+    } catch (error) {
+      console.error('❌ Error loading countries from JSON:', error);
+      
+      // Fallback to database
+      return await prisma.countries.findMany({
+        orderBy: { name: 'asc' },
+      });
+    }
   }
 
   /**
-   * Get cities by country
+   * Get cities by country from JSON file
    */
   async getCitiesByCountry(countryId: string): Promise<City[]> {
+    try {
+      // Check cache first
+      const cached = citiesCache.get(countryId);
+      if (cached && Date.now() - cached.timestamp < CITIES_CACHE_DURATION) {
+        console.log(`💾 Using cached cities for ${countryId}`);
+        return cached.data;
+      }
+
+      // Load from JSON file
+      const data = loadWorldData();
+      
+      // Find the country
+      const country = data.find((c: any) => c.iso2 === countryId);
+      
+      if (!country) {
+        console.log(`⚠️  Country ${countryId} not found in JSON`);
+        return [];
+      }
+
+      const citiesSet = new Set<string>();
+      
+      // Extract all cities from all states
+      if (country.states && Array.isArray(country.states)) {
+        country.states.forEach((state: any) => {
+          if (state.cities && Array.isArray(state.cities)) {
+            state.cities.forEach((city: any) => {
+              if (city.name && city.name.trim()) {
+                citiesSet.add(city.name.trim());
+              }
+            });
+          }
+        });
+      }
+
+      console.log(`✅ Found ${citiesSet.size} cities for ${country.name} from JSON`);
+
+      // If we got results, format and return them
+      if (citiesSet.size > 0) {
+        const cities: City[] = Array.from(citiesSet)
+          .sort((a, b) => a.localeCompare(b))
+          .map(name => ({
+            id: `${countryId}-${name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`,
+            name: name,
+            countryId: countryId
+          }));
+
+        // Update cache
+        citiesCache.set(countryId, { data: cities, timestamp: Date.now() });
+        
+        return cities;
+      }
+    } catch (error) {
+      console.error(`❌ Error fetching cities for ${countryId}:`, error);
+    }
+
+    // Final fallback to database
+    console.log(`📂 Using database fallback for ${countryId}`);
     return await prisma.cities.findMany({
       where: { countryId },
       include: { country: true },

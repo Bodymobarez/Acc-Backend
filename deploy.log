@@ -1,0 +1,51 @@
+[96m[1m​[22m[39m
+[96m[1mNetlify Build                                                 [22m[39m
+[96m[1m────────────────────────────────────────────────────────────────[22m[39m
+[36m[1m​[22m[39m
+[36m[1m❯ Version[22m[39m
+  @netlify/build 35.0.7
+[36m[1m​[22m[39m
+[36m[1m❯ Flags[22m[39m
+  accountId: 681b1ce4c347c90e472a557c
+[36m[1m​[22m[39m
+[36m[1m❯ Current directory[22m[39m
+  /Users/Mobarez/Acc-File-Invoice-main/backend
+[36m[1m​[22m[39m
+[36m[1m❯ Config file[22m[39m
+  /Users/Mobarez/Acc-File-Invoice-main/backend/netlify.toml
+[36m[1m​[22m[39m
+[36m[1m❯ Context[22m[39m
+  production
+[36m[1m​[22m[39m
+[36m[1m❯ Installing extensions[22m[39m
+   - neon
+   - fireproof
+[36m[1m​[22m[39m
+[36m[1m❯ Loading extensions[22m[39m
+   - neon
+   - fireproof
+[96m[1m​[22m[39m
+[96m[1mbuild.command from netlify.toml                               [22m[39m
+[96m[1m────────────────────────────────────────────────────────────────[22m[39m
+​
+[36m$ npm install --include=dev && npx prisma generate[39m
+
+> backend@1.0.0 postinstall
+> prisma generate
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v6.19.0) to ./node_modules/@prisma/client in 309ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+
+up to date, audited 250 packages in 3s
+
+24 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities

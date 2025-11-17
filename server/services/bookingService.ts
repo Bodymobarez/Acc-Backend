@@ -3,6 +3,9 @@ import { randomUUID } from 'crypto';
 import { calculateVAT, calculateCommissions, calculateVATOnProfit, convertToAED, generateBookingNumber } from '../utils/calculations';
 import { accountingService } from './accountingService';
 import { prisma } from '../lib/prisma';
+import { InvoiceService } from './invoiceService';
+
+const invoiceService = new InvoiceService();
 
 export interface CreateBookingInput {
   customerId: string;
@@ -247,6 +250,19 @@ export class BookingService {
           await accountingService.createCommissionJournalEntry(booking, 'CS');
         }
         
+        // Auto-generate Invoice for CONFIRMED booking
+        console.log('📄 Auto-generating invoice for booking:', booking.bookingNumber);
+        try {
+          await invoiceService.createInvoice({
+            bookingId: booking.id,
+            createdById: input.createdById,
+            dueDate: input.travelDate ? new Date(new Date(input.travelDate).getTime() - 3 * 24 * 60 * 60 * 1000) : undefined
+          });
+          console.log('✅ Invoice auto-generated successfully');
+        } catch (error: any) {
+          console.error('⚠️  Invoice auto-generation failed:', error.message);
+        }
+        
         // Save additional suppliers if provided
         await this.saveAdditionalSuppliers(booking.id, input.additionalSuppliers || []);
         
@@ -331,6 +347,19 @@ export class BookingService {
         }
         if (booking.csCommissionAmount && booking.csCommissionAmount > 0) {
           await accountingService.createCommissionJournalEntry(booking, 'CS');
+        }
+        
+        // Auto-generate Invoice for CONFIRMED booking
+        console.log('📄 Auto-generating invoice for booking:', booking.bookingNumber);
+        try {
+          await invoiceService.createInvoice({
+            bookingId: booking.id,
+            createdById: input.createdById,
+            dueDate: input.travelDate ? new Date(new Date(input.travelDate).getTime() - 3 * 24 * 60 * 60 * 1000) : undefined
+          });
+          console.log('✅ Invoice auto-generated successfully');
+        } catch (error: any) {
+          console.error('⚠️  Invoice auto-generation failed:', error.message);
         }
         
         // Save additional suppliers if provided
@@ -423,6 +452,19 @@ export class BookingService {
       }
       if (booking.csCommissionAmount && booking.csCommissionAmount > 0) {
         await accountingService.createCommissionJournalEntry(booking, 'CS');
+      }
+      
+      // Auto-generate Invoice for CONFIRMED booking
+      console.log('📄 Auto-generating invoice for booking:', booking.bookingNumber);
+      try {
+        await invoiceService.createInvoice({
+          bookingId: booking.id,
+          createdById: input.createdById,
+          dueDate: input.travelDate ? new Date(new Date(input.travelDate).getTime() - 3 * 24 * 60 * 60 * 1000) : undefined
+        });
+        console.log('✅ Invoice auto-generated successfully');
+      } catch (error: any) {
+        console.error('⚠️  Invoice auto-generation failed:', error.message);
       }
       
       // Save additional suppliers if provided
@@ -518,6 +560,16 @@ export class BookingService {
       }
     });
     
+    // 🎯 AUTO-UPDATE JOURNAL ENTRIES for commission changes
+    console.log('\n📒 Updating journal entries for commission changes...');
+    const { accountingService } = await import('./accountingService');
+    try {
+      await accountingService.updateBookingJournalEntries(bookingId);
+      console.log('✅ Journal entries updated successfully');
+    } catch (error: any) {
+      console.error('⚠️ Failed to update journal entries:', error.message);
+    }
+    
     return updated;
   }
   
@@ -568,7 +620,7 @@ export class BookingService {
       ...(filters.customerId && { customerId: filters.customerId }),
       ...(filters.supplierId && { supplierId: filters.supplierId }),
       ...(filters.startDate && filters.endDate && {
-        createdAt: {
+        bookingDate: {
           gte: filters.startDate,
           lte: filters.endDate
         }
@@ -831,7 +883,7 @@ export class BookingService {
         finalNetProfit = commissionCalc.profitAfterCommission;
       }
       
-      return await prisma.bookings.update({
+      const updatedBooking = await prisma.bookings.update({
         where: { id },
         data: {
           costInAED,
@@ -866,6 +918,35 @@ export class BookingService {
           updatedAt: new Date()
         }
       });
+
+      // 🎯 AUTO-UPDATE JOURNAL ENTRIES for booking changes
+      console.log('\n📒 Updating journal entries for booking changes...');
+      const { accountingService } = await import('./accountingService');
+      try {
+        await accountingService.updateBookingJournalEntries(id);
+        console.log('✅ Journal entries updated successfully');
+      } catch (error: any) {
+        console.error('⚠️ Failed to update journal entries:', error.message);
+      }
+
+      // 🎯 AUTO-UPDATE INVOICE if exists
+      console.log('\n📝 Checking for existing invoice to update...');
+      const existingInvoice = await prisma.invoices.findUnique({
+        where: { bookingId: id }
+      });
+
+      if (existingInvoice) {
+        console.log(`📄 Found invoice ${existingInvoice.invoiceNumber}, updating...`);
+        const { invoiceService } = await import('./invoiceService');
+        try {
+          await invoiceService.updateInvoiceFromBooking(existingInvoice.id, updatedBooking);
+          console.log('✅ Invoice updated successfully');
+        } catch (error: any) {
+          console.error('⚠️ Failed to update invoice:', error.message);
+        }
+      }
+
+      return updatedBooking;
     }
     
     console.log('📦 Simple update with data:', updateData);

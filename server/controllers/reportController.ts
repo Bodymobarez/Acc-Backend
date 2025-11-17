@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import { reportService, ReportFilters } from '../services/reportService';
 import { format, subDays, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 /**
  * Advanced Report Controller
@@ -12,7 +15,75 @@ export class ReportController {
   async getFinancialSummary(req: Request, res: Response) {
     try {
       const filters = this.parseFilters(req.query);
-      const summary = await reportService.getFinancialSummary(filters);
+      
+      console.log('🎯 Controller getFinancialSummary called');
+      console.log('  filters:', filters);
+      
+      // Direct calculation with correct date parsing
+      const startDate = new Date(filters.startDate);
+      const endDate = new Date(filters.endDate);
+      
+      console.log('  Date range:', startDate, 'to', endDate);
+      
+      // Get CONFIRMED bookings
+      const confirmedBookings = await prisma.bookings.findMany({
+        where: {
+          bookingDate: { gte: startDate, lte: endDate },
+          status: 'CONFIRMED'
+        },
+        select: { saleInAED: true, costInAED: true, totalCommission: true }
+      });
+      
+      // Get REFUNDED bookings
+      const refundedBookings = await prisma.bookings.findMany({
+        where: {
+          bookingDate: { gte: startDate, lte: endDate },
+          status: 'REFUNDED'
+        },
+        select: { bookingNumber: true, saleInAED: true, costInAED: true }
+      });
+      
+      console.log('  Found', confirmedBookings.length, 'CONFIRMED and', refundedBookings.length, 'REFUNDED bookings');
+      
+      // Calculate
+      const totalRevenue = confirmedBookings.reduce((sum, b) => sum + Math.abs(Number(b.saleInAED) || 0), 0);
+      const totalCost = confirmedBookings.reduce((sum, b) => sum + Math.abs(Number(b.costInAED) || 0), 0);
+      const totalCommissions = confirmedBookings.reduce((sum, b) => sum + Math.abs(Number(b.totalCommission) || 0), 0);
+      
+      const totalRefunds = refundedBookings.reduce((sum, b) => sum + Math.abs(Number(b.saleInAED) || 0), 0);
+      const refundCost = refundedBookings.reduce((sum, b) => sum + Math.abs(Number(b.costInAED) || 0), 0);
+      
+      const netRevenue = totalRevenue - totalRefunds;
+      const netCost = totalCost - refundCost;
+      const grossProfit = netRevenue - netCost;
+      const netProfit = grossProfit - totalCommissions;
+      const profitMargin = netRevenue > 0 ? ((netProfit / netRevenue) * 100) : 0;
+      
+      console.log('💰 Results: totalRefunds=', totalRefunds, ', refundCost=', refundCost);
+      
+      const summary = {
+        totalRevenue,
+        totalRefunds,
+        netRevenue,
+        refundCost,
+        totalCost,
+        netCost,
+        grossProfit,
+        totalCommissions,
+        netProfit,
+        profitMargin,
+        revenue: netRevenue,
+        costs: netCost,
+        operatingExpenses: totalCommissions,
+        confirmedBookingsCount: confirmedBookings.length,
+        refundedBookingsCount: refundedBookings.length,
+        cashFlow: 0,
+        receivables: 0,
+        payables: 0,
+        workingCapital: 0,
+        ebitda: netProfit + totalCommissions,
+        monthlyBreakdown: []
+      };
       
       res.json({
         success: true,
@@ -415,8 +486,8 @@ export class ReportController {
     const startOfThisMonth = startOfMonth(today);
     
     return {
-      startDate: query.startDate || format(startOfThisMonth, 'yyyy-MM-dd'),
-      endDate: query.endDate || format(today, 'yyyy-MM-dd'),
+      startDate: query.startDate || query.dateFrom || format(startOfThisMonth, 'yyyy-MM-dd'),
+      endDate: query.endDate || query.dateTo || format(today, 'yyyy-MM-dd'),
       customerId: query.customerId,
       supplierId: query.supplierId,
       employeeId: query.employeeId,

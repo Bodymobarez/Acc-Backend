@@ -23,11 +23,18 @@ export interface ReportFilters extends DateRange {
 
 export interface FinancialMetrics {
   revenue: number;
+  totalRevenue?: number;
+  totalRefunds?: number;
+  refundCost?: number;
+  netRevenue?: number;
   costs: number;
+  totalCost?: number;
+  netCost?: number;
   grossProfit: number;
   netProfit: number;
   profitMargin: number;
   operatingExpenses: number;
+  totalCommissions?: number;
   ebitda: number;
   cashFlow: number;
   receivables: number;
@@ -63,45 +70,51 @@ export class ReportService {
   async getFinancialSummary(filters: ReportFilters): Promise<FinancialMetrics> {
     const { startDate, endDate, currency = 'AED' } = filters;
 
-    // Get all receipts (revenue)
-    const receipts = await prisma.receipts.findMany({
+    console.log('🎯 reportService.getFinancialSummary called');
+    console.log('  startDate:', startDate);
+    console.log('  endDate:', endDate);
+    console.log('  Date objects:', new Date(startDate), 'to', new Date(endDate));
+
+    // Get CONFIRMED bookings for revenue
+    const confirmedBookings = await prisma.bookings.findMany({
       where: {
-        receiptDate: { gte: new Date(startDate), lte: new Date(endDate) },
-        status: 'POSTED',
-        currency
+        createdAt: { gte: new Date(startDate), lte: new Date(endDate) },
+        status: 'CONFIRMED'
       },
-      select: { amount: true }
+      select: { saleInAED: true, saleAmount: true, saleCurrency: true, costInAED: true, costAmount: true, costCurrency: true, totalCommission: true }
     });
 
-    const revenue = receipts.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
-
-    // Get all journal entries for costs and expenses
-    const journalEntries = await prisma.journalEntries.findMany({
+    // Get REFUNDED bookings
+    const refundedBookings = await prisma.bookings.findMany({
       where: {
-        date: { gte: new Date(startDate), lte: new Date(endDate) },
-        status: 'POSTED'
+        createdAt: { gte: new Date(startDate), lte: new Date(endDate) },
+        status: 'REFUNDED'
       },
-      include: { lines: true }
+      select: { saleInAED: true, saleAmount: true, saleCurrency: true, costInAED: true, costAmount: true, costCurrency: true }
     });
 
-    // Calculate costs (supplier payments, booking costs)
-    const costEntries = journalEntries.filter(e => 
-      ['BOOKING_COST', 'SUPPLIER_PAYMENT'].includes(e.transactionType)
-    );
-    const costs = costEntries.reduce((sum, e) => 
-      sum + e.lines.filter(l => l.type === 'DEBIT').reduce((s, l) => s + Number(l.amount), 0), 0
-    );
+    // Calculate revenue from CONFIRMED bookings
+    const totalRevenue = confirmedBookings.reduce((sum, b) => sum + Math.abs(Number(b.saleInAED) || 0), 0);
+    const totalCost = confirmedBookings.reduce((sum, b) => sum + Math.abs(Number(b.costInAED) || 0), 0);
+    const totalCommissions = confirmedBookings.reduce((sum, b) => sum + Math.abs(Number(b.totalCommission) || 0), 0);
 
-    // Calculate operating expenses (commissions, salaries, overhead)
-    const expenseEntries = journalEntries.filter(e => 
-      ['COMMISSION_AGENT', 'COMMISSION_CS', 'EXPENSE', 'SALARY'].includes(e.transactionType)
-    );
-    const operatingExpenses = expenseEntries.reduce((sum, e) => 
-      sum + e.lines.filter(l => l.type === 'DEBIT').reduce((s, l) => s + Number(l.amount), 0), 0
-    );
+    // Calculate refunds from REFUNDED bookings
+    const totalRefunds = refundedBookings.reduce((sum, b) => sum + Math.abs(Number(b.saleInAED) || 0), 0);
+    const refundCost = refundedBookings.reduce((sum, b) => sum + Math.abs(Number(b.costInAED) || 0), 0);
 
-    const grossProfit = revenue - costs;
-    const netProfit = grossProfit - operatingExpenses;
+    console.log('🎯 reportService.getFinancialSummary:');
+    console.log('  Confirmed bookings:', confirmedBookings.length);
+    console.log('  Refunded bookings:', refundedBookings.length);
+    console.log('  totalRefunds:', totalRefunds);
+    console.log('  refundCost:', refundCost);
+
+    // Calculate net values
+    const revenue = totalRevenue - totalRefunds;
+
+    const netCost = totalCost - refundCost;
+    const grossProfit = revenue - netCost;
+    const netProfit = grossProfit - totalCommissions;
+    const operatingExpenses = totalCommissions;
     const profitMargin = revenue > 0 ? (netProfit / revenue) * 100 : 0;
     const ebitda = netProfit + operatingExpenses; // Simplified EBITDA
 
@@ -126,16 +139,23 @@ export class ReportService {
     const payables = unpaidBookings.reduce((sum, b) => sum + (Number(b.supplierCost) || 0), 0);
 
     const workingCapital = receivables - payables;
-    const cashFlow = revenue - costs - operatingExpenses + (receivables - payables);
+    const cashFlow = revenue - netCost - operatingExpenses + (receivables - payables);
 
     return {
       revenue,
-      costs,
+      totalRevenue,
+      totalRefunds,
+      netRevenue: revenue,
+      refundCost,
+      costs: netCost,
+      totalCost,
+      netCost,
       grossProfit,
       netProfit,
       profitMargin,
       operatingExpenses,
-      ebitda,
+      totalCommissions,
+      ebitda: netProfit + operatingExpenses,
       cashFlow,
       receivables,
       payables,

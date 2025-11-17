@@ -1,7 +1,39 @@
-node_modules/
-dist/
-.env.local
-*.log
-.DS_Store
-.vercel
-.netlify
+# Test and debug scripts
+check-*.ts
+test-*.ts
+audit-*.ts
+analyze-*.ts
+create-*.ts
+debug-*.ts
+fix-*.ts
+rebuild-*.ts
+recalculate-*.ts
+recreate-*.ts
+reset-*.ts
+update-*.ts
+verify-*.ts
+clean-*.ts
+compare-*.ts
+generate-*.ts
+find-*.ts
+delete-*.ts
+final-*.ts
+get-*.ts
+list-*.ts
+move-*.ts
+
+# Temporary files
+countries-cities.json
+0
+
+# Lock files (keep package-lock.json but ignore others)
+bun.lock
+
+# Scripts directory temporary files
+scripts/add-*.ts
+scripts/find-*.ts
+scripts/list-*.ts
+scripts/show-*.ts
+scripts/sum-*.ts
+scripts/test-*.js
+node_modules

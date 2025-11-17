@@ -63,6 +63,13 @@ export class BookingController {
         startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
         endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined
       };
+
+      if (filters.startDate) {
+        filters.startDate.setHours(0, 0, 0, 0);
+      }
+      if (filters.endDate) {
+        filters.endDate.setHours(23, 59, 59, 999);
+      }
       
       const bookings = await bookingService.getBookings(filters, rbacFilter);
       

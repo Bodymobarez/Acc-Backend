@@ -327,3 +327,107 @@ export const searchHotelDetails = async (req: Request, res: Response) => {
     });
   }
 };
+
+/**
+ * Search for hotels in a city with query filter (for autocomplete)
+ */
+export const searchHotelsWithQuery = async (req: Request, res: Response) => {
+  try {
+    const { city, query } = req.body;
+
+    if (!city || !query) {
+      return res.status(400).json({
+        error: 'City and query are required'
+      });
+    }
+
+    console.log(`🔍 [TripAdvisor Autocomplete] Searching: "${query}" in ${city}`);
+
+    // Try multiple search variations to get more results
+    const searchVariations = [
+      `${query} hotels in ${city}`,
+      `${query} hotel ${city}`,
+      `hotels ${query} ${city}`
+    ];
+
+    const allHotels = new Map<string, any>(); // Use Map to avoid duplicates
+
+    for (const searchQuery of searchVariations) {
+      try {
+        const searchUrl = `https://api.content.tripadvisor.com/api/v1/location/search?key=${TRIPADVISOR_API_KEY}&searchQuery=${encodeURIComponent(searchQuery)}&category=hotels&language=en`;
+        
+        const searchResponse = await fetch(searchUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+        if (searchResponse.ok) {
+          const searchData = await searchResponse.json();
+          
+          if (searchData.data && Array.isArray(searchData.data)) {
+            searchData.data.forEach((location: any) => {
+              // Use location_id as unique key to avoid duplicates
+              if (!allHotels.has(location.location_id)) {
+                allHotels.set(location.location_id, location);
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.log(`⚠️  Search variation failed: ${searchQuery}`);
+      }
+
+      // Stop if we have enough results
+      if (allHotels.size >= 30) break;
+    }
+
+    console.log(`✅ Found ${allHotels.size} unique hotels`);
+
+    if (allHotels.size === 0) {
+      return res.json({
+        success: true,
+        source: 'TripAdvisor',
+        data: []
+      });
+    }
+
+    // Extract hotel list with full details
+    const hotels = Array.from(allHotels.values()).slice(0, 30).map((location: any) => {
+      const addressObj = location.address_obj || {};
+      const addressParts = [
+        addressObj.street1,
+        addressObj.street2,
+        addressObj.city,
+        addressObj.state,
+        addressObj.country
+      ].filter(Boolean);
+
+      return {
+        id: `tripadvisor-${location.location_id}`,
+        name: location.name,
+        address: addressParts.length > 0 ? addressParts.join(', ') : addressObj.address_string || '',
+        city: addressObj.city || city,
+        country: addressObj.country || '',
+        rating: location.rating || null,
+        phone: addressObj.phone || '',
+        email: addressObj.email || ''
+      };
+    });
+
+    res.json({
+      success: true,
+      source: 'TripAdvisor',
+      data: hotels
+    });
+
+  } catch (error: any) {
+    console.error('❌ Error in searchHotelsWithQuery:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: error.message
+    });
+  }
+};

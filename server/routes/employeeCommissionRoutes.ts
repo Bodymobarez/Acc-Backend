@@ -4,8 +4,8 @@ import { prisma } from '../lib/prisma';
 
 const router = Router();
 
-// Get monthly employee commission report
-router.get('/employee-commissions', authenticateToken, async (req: Request, res: Response) => {
+// Get monthly employee commission report (all employees aggregated)
+router.get('/', authenticateToken, async (req: Request, res: Response) => {
   try {
     const { month, year } = req.query;
     
@@ -19,201 +19,138 @@ router.get('/employee-commissions', authenticateToken, async (req: Request, res:
     const startDate = new Date(Number(year), Number(month) - 1, 1);
     const endDate = new Date(Number(year), Number(month), 0, 23, 59, 59, 999);
 
-    // Get all bookings for the period with employee and customer data
-    const bookings = await prisma.booking.findMany({
+    // Get all bookings for the period with employee data
+    const bookings = await prisma.bookings.findMany({
       where: {
-        createdAt: {
+        bookingDate: {
           gte: startDate,
           lte: endDate,
         },
         status: {
-          in: ['CONFIRMED', 'REFUND']
+          in: ['CONFIRMED', 'REFUNDED']
         }
       },
-      include: {
-        bookingAgent: {
+      select: {
+        id: true,
+        bookingNumber: true,
+        bookingDate: true,
+        agentCommissionAmount: true,
+        csCommissionAmount: true,
+        employees_bookings_bookingAgentIdToemployees: {
           select: {
             id: true,
-            firstName: true,
-            lastName: true,
-            role: true,
-          },
+            users: {
+              select: {
+                firstName: true,
+                lastName: true
+              }
+            },
+            department: true
+          }
         },
-        customerService: {
+        employees_bookings_customerServiceIdToemployees: {
           select: {
             id: true,
-            firstName: true,
-            lastName: true,
-            role: true,
-          },
-        },
-        customer: {
-          select: {
-            name: true,
-          },
-        },
-      },
+            users: {
+              select: {
+                firstName: true,
+                lastName: true
+              }
+            },
+            department: true
+          }
+        }
+      }
     });
 
-    // Calculate exchange rates (you might want to get these from your currency service)
-    const exchangeRates: Record<string, number> = {
-      USD: 3.67,
-      EUR: 4.10,
-      GBP: 4.75,
-      SAR: 0.98,
-      AED: 1.00,
-    };
-
-    // Helper function to convert to AED
-    const convertToAED = (amount: number, currency: string): number => {
-      const rate = exchangeRates[currency] || 1;
-      return amount * rate;
-    };
-
-    // Process employee commissions
+    // Aggregate commissions by employee
     const employeeMap = new Map<string, {
       employeeId: string;
       employeeName: string;
-      role: string;
+      department: string;
       totalBookings: number;
-      totalCommission: number;
       agentCommission: number;
       csCommission: number;
-      totalCommissionRate: number;
-      bookings: any[];
+      totalCommission: number;
     }>();
 
     for (const booking of bookings) {
-      const saleAmountAED = convertToAED(booking.saleAmount, booking.saleCurrency);
-      const vatApplicable = booking.vatApplicable;
-      const baseAmount = vatApplicable ? saleAmountAED / 1.05 : saleAmountAED;
-
       // Process booking agent commission
-      if (booking.bookingAgent && booking.agentCommissionRate) {
-        const agentId = booking.bookingAgent.id;
-        const agentName = `${booking.bookingAgent.firstName} ${booking.bookingAgent.lastName}`;
-        const commissionAmount = baseAmount * (booking.agentCommissionRate / 100);
+      if (booking.employees_bookings_bookingAgentIdToemployees && booking.agentCommissionAmount) {
+        const agent = booking.employees_bookings_bookingAgentIdToemployees;
+        const agentId = agent.id;
+        const agentName = `${agent.users.firstName} ${agent.users.lastName}`;
+        const commission = Number(booking.agentCommissionAmount);
 
         if (!employeeMap.has(agentId)) {
           employeeMap.set(agentId, {
             employeeId: agentId,
             employeeName: agentName,
-            role: booking.bookingAgent.role,
+            department: agent.department || 'N/A',
             totalBookings: 0,
-            totalCommission: 0,
             agentCommission: 0,
             csCommission: 0,
-            totalCommissionRate: 0,
-            bookings: [],
+            totalCommission: 0
           });
         }
 
-        const employee = employeeMap.get(agentId)!;
-        employee.totalBookings++;
-        employee.totalCommission += commissionAmount;
-        employee.agentCommission += commissionAmount;
-        employee.totalCommissionRate += booking.agentCommissionRate;
-        employee.bookings.push({
-          bookingId: booking.id,
-          bookingDate: booking.createdAt,
-          customerName: booking.customer?.name || 'N/A',
-          serviceType: booking.serviceType,
-          saleAmount: booking.saleAmount,
-          saleCurrency: booking.saleCurrency,
-          saleAmountAED: saleAmountAED,
-          commissionType: 'agent',
-          commissionRate: booking.agentCommissionRate,
-          commissionAmount: commissionAmount,
-          vatAmount: vatApplicable ? saleAmountAED - baseAmount : 0,
-          status: booking.status,
-        });
+        const emp = employeeMap.get(agentId)!;
+        emp.totalBookings++;
+        emp.agentCommission += commission;
+        emp.totalCommission += commission;
       }
 
       // Process customer service commission
-      if (booking.customerService && booking.csCommissionRate) {
-        const csId = booking.customerService.id;
-        const csName = `${booking.customerService.firstName} ${booking.customerService.lastName}`;
-        const commissionAmount = baseAmount * (booking.csCommissionRate / 100);
+      if (booking.employees_bookings_customerServiceIdToemployees && booking.csCommissionAmount) {
+        const cs = booking.employees_bookings_customerServiceIdToemployees;
+        const csId = cs.id;
+        const csName = `${cs.users.firstName} ${cs.users.lastName}`;
+        const commission = Number(booking.csCommissionAmount);
 
         if (!employeeMap.has(csId)) {
           employeeMap.set(csId, {
             employeeId: csId,
             employeeName: csName,
-            role: booking.customerService.role,
+            department: cs.department || 'N/A',
             totalBookings: 0,
-            totalCommission: 0,
             agentCommission: 0,
             csCommission: 0,
-            totalCommissionRate: 0,
-            bookings: [],
+            totalCommission: 0
           });
         }
 
-        const employee = employeeMap.get(csId)!;
-        employee.totalBookings++;
-        employee.totalCommission += commissionAmount;
-        employee.csCommission += commissionAmount;
-        employee.totalCommissionRate += booking.csCommissionRate;
-        employee.bookings.push({
-          bookingId: booking.id,
-          bookingDate: booking.createdAt,
-          customerName: booking.customer?.name || 'N/A',
-          serviceType: booking.serviceType,
-          saleAmount: booking.saleAmount,
-          saleCurrency: booking.saleCurrency,
-          saleAmountAED: saleAmountAED,
-          commissionType: 'cs',
-          commissionRate: booking.csCommissionRate,
-          commissionAmount: commissionAmount,
-          vatAmount: vatApplicable ? saleAmountAED - baseAmount : 0,
-          status: booking.status,
-        });
+        const emp = employeeMap.get(csId)!;
+        emp.totalBookings++;
+        emp.csCommission += commission;
+        emp.totalCommission += commission;
       }
     }
 
-    // Convert map to array and calculate averages
-    const employees = Array.from(employeeMap.values()).map((emp) => ({
-      ...emp,
-      avgCommissionRate: emp.totalBookings > 0 ? emp.totalCommissionRate / emp.totalBookings : 0,
-    }));
+    // Convert to array and sort by total commission
+    const employees = Array.from(employeeMap.values()).sort((a, b) => b.totalCommission - a.totalCommission);
 
-    // Calculate totals and summary
+    // Calculate summary
     const totalEmployees = employees.length;
     const totalBookings = bookings.length;
     const totalCommissions = employees.reduce((sum, emp) => sum + emp.totalCommission, 0);
     const totalAgentCommissions = employees.reduce((sum, emp) => sum + emp.agentCommission, 0);
     const totalCSCommissions = employees.reduce((sum, emp) => sum + emp.csCommission, 0);
 
-    const sortedByCommission = [...employees].sort((a, b) => b.totalCommission - a.totalCommission);
-    const highestEarner = sortedByCommission[0] || { employeeName: 'N/A', totalCommission: 0 };
-    const lowestEarner = sortedByCommission[sortedByCommission.length - 1] || { employeeName: 'N/A', totalCommission: 0 };
-
-    const report = {
-      month: Number(month),
-      year: Number(year),
-      totalEmployees,
-      totalBookings,
-      totalCommissions,
-      totalAgentCommissions,
-      totalCSCommissions,
-      employees,
-      summary: {
-        highestEarner: {
-          name: highestEarner.employeeName,
-          amount: highestEarner.totalCommission,
-        },
-        lowestEarner: {
-          name: lowestEarner.employeeName,
-          amount: lowestEarner.totalCommission,
-        },
-        avgCommissionPerEmployee: totalEmployees > 0 ? totalCommissions / totalEmployees : 0,
-        avgCommissionPerBooking: totalBookings > 0 ? totalCommissions / totalBookings : 0,
-      },
-    };
-
     res.json({
       success: true,
-      data: report,
+      data: {
+        month: Number(month),
+        year: Number(year),
+        employees,
+        summary: {
+          totalEmployees,
+          totalBookings,
+          totalCommissions,
+          totalAgentCommissions,
+          totalCSCommissions,
+          avgCommissionPerEmployee: totalEmployees > 0 ? totalCommissions / totalEmployees : 0
+        }
+      }
     });
   } catch (error) {
     console.error('Error generating employee commission report:', error);
@@ -225,7 +162,7 @@ router.get('/employee-commissions', authenticateToken, async (req: Request, res:
 });
 
 // Export employee commission report to Excel
-router.get('/employee-commissions/export', authenticateToken, async (req: Request, res: Response) => {
+router.get('/export', authenticateToken, async (req: Request, res: Response) => {
   try {
     const { month, year, format } = req.query;
     

@@ -11,7 +11,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "types": ["node"]
+    "types": ["bun", "node"]
   },
   "include": ["server/**/*", "functions/**/*"],
   "exclude": ["node_modules", "dist"]

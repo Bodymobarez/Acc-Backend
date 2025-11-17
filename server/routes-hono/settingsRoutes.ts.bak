@@ -1,0 +1,102 @@
+import { Hono } from 'hono';
+import type { Context } from 'hono';
+import { authenticate } from '../middleware-hono/auth';
+import { settingsController } from '../controllers/settingsController';
+
+const settings = new Hono();
+settings.use('*', authenticate);
+
+// Company Settings
+settings.get('/company', async (c) => {
+  const fakeReq: any = { user: c.get('user') };
+  const fakeRes: any = {
+    json: (data: any) => c.json(data),
+    status: (code: number) => ({ json: (data: any) => c.json(data, code) })
+  };
+  await settingsController.getCompanySettings(fakeReq, fakeRes);
+  return fakeRes._result || c.json({ success: true });
+});
+
+settings.put('/company/:id', async (c) => {
+  const fakeReq: any = { params: { id: c.req.param('id') }, body: await c.req.json(), user: c.get('user') };
+  const fakeRes: any = {
+    json: (data: any) => c.json(data),
+    status: (code: number) => ({ json: (data: any) => c.json(data, code) })
+  };
+  await settingsController.updateCompanySettings(fakeReq, fakeRes);
+  return fakeRes._result || c.json({ success: true });
+});
+
+// System Settings
+settings.get('/system', async (c) => {
+  const fakeReq: any = { user: c.get('user') };
+  const fakeRes: any = {
+    json: (data: any) => c.json(data),
+    status: (code: number) => ({ json: (data: any) => c.json(data, code) })
+  };
+  await settingsController.getAllSystemSettings(fakeReq, fakeRes);
+  return fakeRes._result || c.json({ success: true });
+});
+
+settings.get('/system/:key', async (c) => {
+  const fakeReq: any = { params: { key: c.req.param('key') }, user: c.get('user') };
+  const fakeRes: any = {
+    json: (data: any) => c.json(data),
+    status: (code: number) => ({ json: (data: any) => c.json(data, code) })
+  };
+  await settingsController.getSystemSetting(fakeReq, fakeRes);
+  return fakeRes._result || c.json({ success: true });
+});
+
+settings.post('/system', async (c) => {
+  const fakeReq: any = { body: await c.req.json(), user: c.get('user') };
+  const fakeRes: any = {
+    json: (data: any) => c.json(data),
+    status: (code: number) => ({ json: (data: any) => c.json(data, code) })
+  };
+  await settingsController.upsertSystemSetting(fakeReq, fakeRes);
+  return fakeRes._result || c.json({ success: true });
+});
+
+settings.put('/system/:key', async (c) => {
+  const fakeReq: any = { params: { key: c.req.param('key') }, body: await c.req.json(), user: c.get('user') };
+  const fakeRes: any = {
+    json: (data: any) => c.json(data),
+    status: (code: number) => ({ json: (data: any) => c.json(data, code) })
+  };
+  await settingsController.upsertSystemSetting(fakeReq, fakeRes);
+  return fakeRes._result || c.json({ success: true });
+});
+
+settings.delete('/system/:key', async (c) => {
+  const fakeReq: any = { params: { key: c.req.param('key') }, user: c.get('user') };
+  const fakeRes: any = {
+    json: (data: any) => c.json(data),
+    status: (code: number) => ({ json: (data: any) => c.json(data, code) })
+  };
+  await settingsController.deleteSystemSetting(fakeReq, fakeRes);
+  return fakeRes._result || c.json({ success: true });
+});
+
+// Print Settings
+settings.get('/print', async (c) => {
+  const fakeReq: any = { user: c.get('user') };
+  const fakeRes: any = {
+    json: (data: any) => c.json(data),
+    status: (code: number) => ({ json: (data: any) => c.json(data, code) })
+  };
+  await settingsController.getPrintSettings(fakeReq, fakeRes);
+  return fakeRes._result || c.json({ success: true });
+});
+
+settings.put('/print', async (c) => {
+  const fakeReq: any = { body: await c.req.json(), user: c.get('user') };
+  const fakeRes: any = {
+    json: (data: any) => c.json(data),
+    status: (code: number) => ({ json: (data: any) => c.json(data, code) })
+  };
+  await settingsController.updatePrintSettings(fakeReq, fakeRes);
+  return fakeRes._result || c.json({ success: true });
+});
+
+export default settings;

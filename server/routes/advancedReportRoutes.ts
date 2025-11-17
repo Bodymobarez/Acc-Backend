@@ -53,8 +53,9 @@ const convertCurrency = (amount: number, fromCurrency: string, toCurrency: strin
   return convertFromAED(amountInAED, toCurrency);
 };
 
-// Financial Summary Report
-router.get('/financial', authenticate, async (req: AuthRequest, res: Response) => {
+// OLD Financial Report - DEPRECATED - Use /financial-summary instead
+// This route is kept for backwards compatibility but will be removed
+router.get('/financial-old-deprecated', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { dateFrom, dateTo } = req.query;
     
@@ -65,7 +66,7 @@ router.get('/financial', authenticate, async (req: AuthRequest, res: Response) =
     const bookings = await prisma.bookings.findMany({
       where: {
         bookingDate: { gte: startDate, lte: endDate },
-        status: { in: ['CONFIRMED', 'REFUND'] }
+        status: { in: ['CONFIRMED', 'REFUNDED'] }
       },
       include: {
         customers: { select: { firstName: true, lastName: true, companyName: true } },
@@ -141,7 +142,7 @@ router.get('/bookings', authenticate, async (req: AuthRequest, res: Response) =>
         summary: {
           'Total Bookings': bookings.length,
           'Confirmed': bookings.filter(b => b.status === 'CONFIRMED').length,
-          'Refunded': bookings.filter(b => b.status === 'REFUND').length,
+          'Refunded': bookings.filter(b => b.status === 'REFUNDED' || b.status === 'REFUNDED').length,
         },
         details: bookings.map(b => ({
           Date: new Date(b.bookingDate).toLocaleDateString(),
@@ -171,7 +172,7 @@ router.get('/employees', authenticate, async (req: AuthRequest, res: Response) =
     const bookings = await prisma.bookings.findMany({
       where: {
         bookingDate: { gte: startDate, lte: endDate },
-        status: { in: ['CONFIRMED', 'REFUND'] }
+        status: { in: ['CONFIRMED', 'REFUNDED'] }
       },
       include: {
         bookingAgent: {
@@ -428,111 +429,8 @@ router.get('/vat', authenticate, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Profit & Loss Report
-router.get('/profit-loss', authenticate, async (req: AuthRequest, res: Response) => {
-  try {
-    const { dateFrom, dateTo } = req.query;
-    
-    const startDate = new Date(dateFrom as string);
-    const endDate = new Date(dateTo as string);
-
-    const bookings = await prisma.bookings.findMany({
-      where: {
-        bookingDate: { gte: startDate, lte: endDate },
-        status: 'CONFIRMED'
-      }
-    });
-
-    let totalRevenue = 0;
-    let totalCost = 0;
-    let totalCommissions = 0;
-    let totalVAT = 0;
-
-    bookings.forEach(booking => {
-      totalRevenue += convertToAED(booking.saleAmount, booking.saleCurrency);
-      totalCost += convertToAED(booking.costAmount, booking.costCurrency);
-      totalCommissions += (booking.totalCommission || 0);
-      totalVAT += (booking.vatAmount || 0);
-    });
-
-    const grossProfit = totalRevenue - totalCost;
-    const netProfit = grossProfit - totalCommissions;
-
-    res.json({
-      success: true,
-      data: {
-        summary: {
-          'Total Revenue': totalRevenue,
-          'Total Cost': totalCost,
-          'Gross Profit': grossProfit,
-          'Total Commissions': totalCommissions,
-          'Net Profit': netProfit,
-          'Profit Margin %': totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(2) : 0,
-        },
-        details: []
-      }
-    });
-  } catch (error) {
-    console.error('Error generating P&L report:', error);
-    res.status(500).json({ success: false, error: 'Failed to generate report' });
-  }
-});
-
 // Cash Flow Report
-router.get('/cash-flow', authenticate, async (req: AuthRequest, res: Response) => {
-  try {
-    const { dateFrom, dateTo } = req.query;
-    
-    const startDate = new Date(dateFrom as string);
-    const endDate = new Date(dateTo as string);
-
-    const receipts = await prisma.receipts.findMany({
-      where: {
-        receiptDate: { gte: startDate, lte: endDate }
-      }
-    });
-
-    const payments = await prisma.payments.findMany({
-      where: {
-        paymentDate: { gte: startDate, lte: endDate }
-      }
-    });
-
-    const totalInflows = receipts.reduce((sum, r) => sum + r.amount, 0);
-    const totalOutflows = payments.reduce((sum, p) => sum + p.amount, 0);
-    const netCashFlow = totalInflows - totalOutflows;
-
-    res.json({
-      success: true,
-      data: {
-        summary: {
-          'Total Inflows': totalInflows,
-          'Total Outflows': totalOutflows,
-          'Net Cash Flow': netCashFlow,
-        },
-        details: [
-          ...receipts.map(r => ({
-            Date: new Date(r.receiptDate).toLocaleDateString(),
-            Type: 'Inflow',
-            Reference: r.receiptNumber,
-            Amount: r.amount,
-            Method: r.paymentMethod,
-          })),
-          ...payments.map(p => ({
-            Date: new Date(p.paymentDate).toLocaleDateString(),
-            Type: 'Outflow',
-            Reference: p.paymentNumber,
-            Amount: -p.amount,
-            Method: p.paymentMethod,
-          }))
-        ].sort((a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime())
-      }
-    });
-  } catch (error) {
-    console.error('Error generating cash flow report:', error);
-    res.status(500).json({ success: false, error: 'Failed to generate report' });
-  }
-});
+// OLD Cash Flow Route - REMOVED - Use the new implementation below
 
 // Customer Statement Report
 router.get('/customer-statement/:customerId', authenticate, async (req: AuthRequest, res: Response) => {
@@ -614,35 +512,64 @@ router.get('/customer-statement/:customerId', authenticate, async (req: AuthRequ
 router.get('/trial-balance', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { dateFrom, dateTo, currency } = req.query;
+    
+    const startDate = new Date(dateFrom as string);
+    const endDate = new Date(dateTo as string);
 
-    const accounts = await prisma.accounts.findMany({
-      include: {
-        journalEntryLines: {
-          where: {
-            journalEntry: {
-              date: { gte: new Date(dateFrom as string), lte: new Date(dateTo as string) }
-            }
-          }
-        }
+    // Get all journal entries in date range
+    const journalEntries = await prisma.journal_entries.findMany({
+      where: {
+        date: { gte: startDate, lte: endDate }
+      },
+      select: {
+        debitAccountId: true,
+        creditAccountId: true,
+        amount: true
       }
     });
 
-    const data = accounts.map(account => {
-      const debit = account.journalEntryLines
-        .filter(line => line.type === 'DEBIT')
-        .reduce((sum, line) => sum + (line.amount || 0), 0);
-      
-      const credit = account.journalEntryLines
-        .filter(line => line.type === 'CREDIT')
-        .reduce((sum, line) => sum + (line.amount || 0), 0);
+    // Get all accounts
+    const accounts = await prisma.accounts.findMany({
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        nameAr: true
+      }
+    });
 
-      return {
-        accountCode: account.accountNumber,
-        accountName: account.accountName,
-        debit,
-        credit
-      };
-    }).filter(a => a.debit !== 0 || a.credit !== 0);
+    // Calculate balances
+    const balanceMap = new Map<string, { debit: number; credit: number }>();
+    
+    journalEntries.forEach(entry => {
+      // Debit account
+      if (entry.debitAccountId) {
+        const current = balanceMap.get(entry.debitAccountId) || { debit: 0, credit: 0 };
+        current.debit += entry.amount;
+        balanceMap.set(entry.debitAccountId, current);
+      }
+      
+      // Credit account
+      if (entry.creditAccountId) {
+        const current = balanceMap.get(entry.creditAccountId) || { debit: 0, credit: 0 };
+        current.credit += entry.amount;
+        balanceMap.set(entry.creditAccountId, current);
+      }
+    });
+
+    // Build response
+    const data = accounts
+      .map(account => {
+        const balance = balanceMap.get(account.id) || { debit: 0, credit: 0 };
+        return {
+          accountCode: account.code,
+          accountName: account.name,
+          accountNameAr: account.nameAr,
+          debit: balance.debit,
+          credit: balance.credit
+        };
+      })
+      .filter(a => a.debit !== 0 || a.credit !== 0);
 
     const totalDebit = data.reduce((sum, a) => sum + a.debit, 0);
     const totalCredit = data.reduce((sum, a) => sum + a.credit, 0);
@@ -675,9 +602,18 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
     const bookings = await prisma.bookings.findMany({
       where: {
         bookingDate: { gte: startDate, lte: endDate },
-        status: { in: ['CONFIRMED', 'REFUND'] }
+        status: { in: ['CONFIRMED', 'REFUNDED'] }
       },
-      include: {
+      select: {
+        id: true,
+        bookingNumber: true,
+        bookingDate: true,
+        serviceType: true,
+        serviceDetails: true,
+        status: true,
+        saleCurrency: true,
+        agentCommissionAmount: true,
+        csCommissionAmount: true,
         employees_bookings_bookingAgentIdToemployees: {
           select: {
             id: true,
@@ -722,10 +658,51 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         const emp = employeeMap.get(id);
         emp.totalBookings += 1;
         emp.totalCommission += commissionInTargetCurrency;
+        
+        // Parse service details with proper formatting
+        let serviceDetailsText = '';
+        try {
+          const details = JSON.parse(booking.serviceDetails || '{}');
+          const hasDetails = Object.keys(details).length > 0;
+          
+          if (hasDetails) {
+            if (booking.serviceType === 'HOTEL') {
+              serviceDetailsText = details.hotelName || details.name || '';
+            } else if (booking.serviceType === 'FLIGHT') {
+              // For flights, show route (from → to)
+              const from = details.departureCity || details.from || '';
+              const to = details.arrivalCity || details.to || '';
+              if (from && to) {
+                serviceDetailsText = `${from} → ${to}`;
+              } else {
+                serviceDetailsText = details.airline || details.flightNumber || '';
+              }
+            } else if (booking.serviceType === 'VISA') {
+              serviceDetailsText = details.country || details.destination || '';
+            } else if (booking.serviceType === 'TRANSFER') {
+              serviceDetailsText = details.from && details.to ? `${details.from} → ${details.to}` : (details.route || '');
+            } else if (booking.serviceType === 'CRUISE') {
+              serviceDetailsText = details.cruiseName || details.shipName || '';
+            } else {
+              serviceDetailsText = details.description || details.name || '';
+            }
+          }
+        } catch (e) {
+          serviceDetailsText = '';
+        }
+        
+        // Fallback if empty
+        if (!serviceDetailsText || serviceDetailsText.trim() === '') {
+          serviceDetailsText = 'Not specified';
+        }
+        
         emp.breakdown.push({
           date: new Date(booking.bookingDate).toLocaleDateString(),
           bookingNumber: booking.bookingNumber,
           customer: booking.customers?.companyName || `${booking.customers?.firstName || ''} ${booking.customers?.lastName || ''}`.trim() || 'N/A',
+          service: booking.serviceType,
+          serviceDetails: serviceDetailsText,
+          status: booking.status,
           commission: commissionInTargetCurrency
         });
       }
@@ -753,10 +730,51 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         const emp = employeeMap.get(id);
         emp.totalBookings += 1;
         emp.totalCommission += commissionInTargetCurrency;
+        
+        // Parse service details with proper formatting
+        let serviceDetailsText = '';
+        try {
+          const details = JSON.parse(booking.serviceDetails || '{}');
+          const hasDetails = Object.keys(details).length > 0;
+          
+          if (hasDetails) {
+            if (booking.serviceType === 'HOTEL') {
+              serviceDetailsText = details.hotelName || details.name || '';
+            } else if (booking.serviceType === 'FLIGHT') {
+              // For flights, show route (from → to)
+              const from = details.departureCity || details.from || '';
+              const to = details.arrivalCity || details.to || '';
+              if (from && to) {
+                serviceDetailsText = `${from} → ${to}`;
+              } else {
+                serviceDetailsText = details.airline || details.flightNumber || '';
+              }
+            } else if (booking.serviceType === 'VISA') {
+              serviceDetailsText = details.country || details.destination || '';
+            } else if (booking.serviceType === 'TRANSFER') {
+              serviceDetailsText = details.from && details.to ? `${details.from} → ${details.to}` : (details.route || '');
+            } else if (booking.serviceType === 'CRUISE') {
+              serviceDetailsText = details.cruiseName || details.shipName || '';
+            } else {
+              serviceDetailsText = details.description || details.name || '';
+            }
+          }
+        } catch (e) {
+          serviceDetailsText = '';
+        }
+        
+        // Fallback if empty
+        if (!serviceDetailsText || serviceDetailsText.trim() === '') {
+          serviceDetailsText = 'Not specified';
+        }
+        
         emp.breakdown.push({
           date: new Date(booking.bookingDate).toLocaleDateString(),
           bookingNumber: booking.bookingNumber,
           customer: booking.customers?.companyName || `${booking.customers?.firstName || ''} ${booking.customers?.lastName || ''}`.trim() || 'N/A',
+          service: booking.serviceType,
+          serviceDetails: serviceDetailsText,
+          status: booking.status,
           commission: commissionInTargetCurrency
         });
       }
@@ -804,7 +822,7 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
           { customerServiceId: employeeId }
         ],
         bookingDate: { gte: startDate, lte: endDate },
-        status: { in: ['CONFIRMED', 'REFUND'] }
+        status: { in: ['CONFIRMED', 'REFUNDED'] }
       },
       include: {
         customers: { select: { firstName: true, lastName: true, companyName: true } }
@@ -813,7 +831,7 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
 
     const targetCurrency = (currency as string) || 'AED';
 
-    const breakdown = bookings.map(b => {
+    const transactions = bookings.map(b => {
       const agentCommission = b.agentCommissionAmount || 0;
       const csCommission = b.csCommissionAmount || 0;
       const totalCommissionInBookingCurrency = agentCommission + csCommission;
@@ -826,31 +844,26 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
       );
 
       return {
-        date: new Date(b.bookingDate).toLocaleDateString(),
+        date: b.bookingDate.toISOString(),
         bookingNumber: b.bookingNumber,
+        bookingId: b.id,
         customer: b.customers?.companyName || `${b.customers?.firstName || ''} ${b.customers?.lastName || ''}`.trim() || 'N/A',
-        commission: commissionInTargetCurrency
+        serviceType: b.serviceType || 'N/A',
+        serviceDetails: b.serviceDetails || '',
+        commission: commissionInTargetCurrency,
+        currency: targetCurrency
       };
     });
 
-    const totalCommission = breakdown.reduce((sum, b) => sum + b.commission, 0);
+    const totalCommission = transactions.reduce((sum, t) => sum + t.commission, 0);
 
     res.json({
       success: true,
       data: {
-        employees: [{
-          employeeName: 'Selected Employee',
-          totalBookings: bookings.length,
-          totalCommission,
-          averageCommission: bookings.length > 0 ? totalCommission / bookings.length : 0,
-          currency: currency || 'AED',
-          breakdown
-        }],
+        transactions,
         summary: {
-          totalEmployees: 1,
-          totalBookings: bookings.length,
-          totalCommissions: totalCommission,
-          averagePerEmployee: totalCommission
+          totalCommission,
+          bookingsCount: bookings.length
         }
       }
     });
@@ -957,9 +970,9 @@ router.get('/supplier-statement/:supplierId', authenticate, async (req: AuthRequ
     const payments = await prisma.payments.findMany({
       where: {
         supplierId,
-        date: { gte: startDate, lte: endDate }
+        paymentDate: { gte: startDate, lte: endDate }
       },
-      orderBy: { date: 'asc' }
+      orderBy: { paymentDate: 'asc' }
     });
 
     // Calculate opening balance (all transactions before dateFrom)
@@ -967,17 +980,19 @@ router.get('/supplier-statement/:supplierId', authenticate, async (req: AuthRequ
       where: { supplierId, bookingDate: { lt: startDate } }
     });
     const previousPayments = await prisma.payments.findMany({
-      where: { supplierId, date: { lt: startDate } }
+      where: { supplierId, paymentDate: { lt: startDate } }
     });
 
     const targetCurrency = (currency as string) || 'AED';
 
     let openingBalance = 0;
     previousBookings.forEach(b => {
-      openingBalance += convertCurrency(b.costAmount, b.costCurrency, targetCurrency);
+      const amountInAED = b.costInAED || convertToAED(b.costAmount, b.costCurrency);
+      openingBalance += convertFromAED(amountInAED, targetCurrency);
     });
     previousPayments.forEach(p => {
-      openingBalance -= convertCurrency(p.amount, p.currency || 'AED', targetCurrency);
+      const amountInAED = p.amount; // Already in AED
+      openingBalance -= convertFromAED(amountInAED, targetCurrency);
     });
 
     // Build transactions array
@@ -988,38 +1003,44 @@ router.get('/supplier-statement/:supplierId', authenticate, async (req: AuthRequ
 
     // Add bookings (Credits - we owe supplier) - convert to target currency
     bookings.forEach(b => {
-      const amount = convertCurrency(b.costAmount, b.costCurrency, targetCurrency);
+      const amountInAED = b.costInAED || convertToAED(b.costAmount, b.costCurrency);
+      const amount = convertFromAED(amountInAED, targetCurrency);
       runningBalance += amount;
       totalCredit += amount;
       transactions.push({
-        Date: b.bookingDate.toISOString(),
-        Type: 'Booking',
-        Reference: b.bookingNumber,
-        Description: `Booking ${b.bookingNumber}`,
-        Debit: 0,
-        Credit: amount,
-        Balance: runningBalance
+        date: b.bookingDate.toISOString(),
+        type: 'Booking',
+        reference: b.bookingNumber,
+        description: `Booking ${b.bookingNumber}`,
+        serviceDetails: b.serviceType || '',
+        bookingId: b.id,
+        debit: 0,
+        credit: amount,
+        balance: runningBalance,
+        currency: targetCurrency
       });
     });
 
-    // Add payments (Debits - we paid supplier) - convert to target currency
+    // Add payments (Debits - we paid supplier) - amounts already in AED
     payments.forEach(p => {
-      const amount = convertCurrency(p.amount, p.currency || 'AED', targetCurrency);
+      const amountInAED = p.amount; // Already in AED
+      const amount = convertFromAED(amountInAED, targetCurrency);
       runningBalance -= amount;
       totalDebit += amount;
       transactions.push({
-        Date: p.date.toISOString(),
-        Type: 'Payment',
-        Reference: p.paymentNumber,
-        Description: p.description || 'Payment',
-        Debit: amount,
-        Credit: 0,
-        Balance: runningBalance
+        date: p.paymentDate.toISOString(),
+        type: 'Payment',
+        reference: p.paymentNumber,
+        description: p.notes || 'Payment',
+        debit: amount,
+        credit: 0,
+        balance: runningBalance,
+        currency: targetCurrency
       });
     });
 
     // Sort by date
-    transactions.sort((a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime());
+    transactions.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     res.json({
       success: true,
@@ -1045,76 +1066,172 @@ router.get('/supplier-statement/:supplierId', authenticate, async (req: AuthRequ
 
 // Financial Summary Report
 router.get('/financial-summary', authenticate, async (req: AuthRequest, res: Response) => {
+  console.log('🎯 Financial Summary API called');
   try {
     const { dateFrom, dateTo, currency = 'AED' } = req.query;
+    console.log('📅 Date range:', dateFrom, 'to', dateTo);
     
-    const startDate = new Date(dateFrom as string);
-    const endDate = new Date(dateTo as string);
+    // Normalize date range to full days to avoid timezone truncation
+    const startDate = new Date(String(dateFrom));
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(String(dateTo));
+    endDate.setHours(23, 59, 59, 999);
 
-    // Get all bookings in period
-    const bookings = await prisma.bookings.findMany({
+    // Get CONFIRMED bookings
+    const confirmedBookings = await prisma.bookings.findMany({
       where: {
         bookingDate: { gte: startDate, lte: endDate },
-        status: { in: ['CONFIRMED', 'REFUND'] }
+        status: 'CONFIRMED'
       },
       orderBy: { bookingDate: 'asc' }
     });
 
-    // Calculate totals
+    // Get REFUNDED bookings only
+    console.log('🔍 Querying REFUNDED bookings with dates:', startDate, 'to', endDate);
+    const refundedBookings = await prisma.bookings.findMany({
+      where: {
+        bookingDate: { gte: startDate, lte: endDate },
+        status: 'REFUNDED'
+      },
+      orderBy: { bookingDate: 'asc' }
+    });
+    console.log('📊 Found', refundedBookings.length, 'refunded bookings');
+
+    // Calculate Revenue from CONFIRMED bookings
     let totalRevenue = 0;
     let totalCost = 0;
     let totalCommissions = 0;
 
-    bookings.forEach(b => {
-      totalRevenue += convertToAED(b.saleAmount, b.saleCurrency);
-      totalCost += convertToAED(b.costAmount, b.costCurrency);
-      totalCommissions += convertToAED(b.totalCommission || 0, b.saleCurrency);
+    confirmedBookings.forEach(b => {
+      // Use saleInAED if available, otherwise convert
+      const saleInAED = b.saleInAED || convertToAED(b.saleAmount, b.saleCurrency);
+      const costInAED = b.costInAED || convertToAED(b.costAmount, b.costCurrency);
+      totalRevenue += Math.abs(saleInAED);
+      totalCost += Math.abs(costInAED);
+      totalCommissions += Math.abs(b.totalCommission || 0);
     });
 
-    const grossProfit = totalRevenue - totalCost;
+    // Calculate Refunds from REFUNDED bookings
+    let totalRefunds = 0;
+    let refundCost = 0;
+
+    refundedBookings.forEach(b => {
+      // Use saleInAED if available, otherwise convert
+      const saleInAED = b.saleInAED || convertToAED(b.saleAmount, b.saleCurrency);
+      const costInAED = b.costInAED || convertToAED(b.costAmount, b.costCurrency);
+      console.log(`  → ${b.bookingNumber}: saleInAED=${saleInAED}, Math.abs=${Math.abs(saleInAED)}`);
+      totalRefunds += Math.abs(saleInAED);
+      refundCost += Math.abs(costInAED);
+    });
+    console.log('💰 Final totalRefunds:', totalRefunds, '| refundCost:', refundCost);
+
+    // Calculate Net values
+    const netRevenue = totalRevenue - totalRefunds;
+    const netCost = totalCost - refundCost;
+    const grossProfit = netRevenue - netCost;
     const netProfit = grossProfit - totalCommissions;
-    const profitMargin = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(2) : '0.00';
+    const profitMargin = netRevenue > 0 ? ((netProfit / netRevenue) * 100).toFixed(2) : '0.00';
 
     // Monthly breakdown
     const monthlyData: Record<string, any> = {};
-    bookings.forEach(b => {
+    
+    // Add confirmed bookings to monthly data
+    confirmedBookings.forEach(b => {
       const monthKey = b.bookingDate.toISOString().substring(0, 7); // YYYY-MM
       if (!monthlyData[monthKey]) {
         monthlyData[monthKey] = {
           revenue: 0,
+          refunds: 0,
           cost: 0,
+          refundCost: 0,
           commissions: 0,
           bookings: 0
         };
       }
-      monthlyData[monthKey].revenue += convertToAED(b.saleAmount, b.saleCurrency);
-      monthlyData[monthKey].cost += convertToAED(b.costAmount, b.costCurrency);
-      monthlyData[monthKey].commissions += convertToAED(b.totalCommission || 0, b.saleCurrency);
+      const saleInAED = b.saleInAED || convertToAED(b.saleAmount, b.saleCurrency);
+      const costInAED = b.costInAED || convertToAED(b.costAmount, b.costCurrency);
+      monthlyData[monthKey].revenue += Math.abs(saleInAED);
+      monthlyData[monthKey].cost += Math.abs(costInAED);
+      monthlyData[monthKey].commissions += Math.abs(b.totalCommission || 0);
       monthlyData[monthKey].bookings += 1;
+    });
+
+    // Subtract refunds from monthly data
+    refundedBookings.forEach(b => {
+      const monthKey = b.bookingDate.toISOString().substring(0, 7); // YYYY-MM
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = {
+          revenue: 0,
+          refunds: 0,
+          cost: 0,
+          refundCost: 0,
+          commissions: 0,
+          bookings: 0
+        };
+      }
+      const saleInAED = b.saleInAED || convertToAED(b.saleAmount, b.saleCurrency);
+      const costInAED = b.costInAED || convertToAED(b.costAmount, b.costCurrency);
+      monthlyData[monthKey].refunds += Math.abs(saleInAED);
+      monthlyData[monthKey].refundCost += Math.abs(costInAED);
     });
 
     const monthlyBreakdown = Object.entries(monthlyData).map(([month, data]: [string, any]) => ({
       Month: month,
       Revenue: data.revenue,
+      Refunds: data.refunds,
+      'Net Revenue': data.revenue - data.refunds,
       Cost: data.cost,
-      'Gross Profit': data.revenue - data.cost,
+      'Refund Cost': data.refundCost,
+      'Net Cost': data.cost - data.refundCost,
+      'Gross Profit': (data.revenue - data.refunds) - (data.cost - data.refundCost),
       Commissions: data.commissions,
-      'Net Profit': (data.revenue - data.cost - data.commissions),
+      'Net Profit': ((data.revenue - data.refunds) - (data.cost - data.refundCost) - data.commissions),
       Bookings: data.bookings
     }));
 
-    res.json({
+    // Convert all amounts to target currency
+    const targetCurrency = currency as string;
+    const convertedMonthlyBreakdown = monthlyBreakdown.map(month => ({
+      ...month,
+      Revenue: convertFromAED(month.Revenue, targetCurrency),
+      Refunds: convertFromAED(month.Refunds, targetCurrency),
+      'Net Revenue': convertFromAED(month['Net Revenue'], targetCurrency),
+      Cost: convertFromAED(month.Cost, targetCurrency),
+      'Refund Cost': convertFromAED(month['Refund Cost'], targetCurrency),
+      'Net Cost': convertFromAED(month['Net Cost'], targetCurrency),
+      'Gross Profit': convertFromAED(month['Gross Profit'], targetCurrency),
+      Commissions: convertFromAED(month.Commissions, targetCurrency),
+      'Net Profit': convertFromAED(month['Net Profit'], targetCurrency)
+    }));
+
+    const responseData = {
       success: true,
       data: {
-        totalRevenue,
-        totalCost,
-        grossProfit,
-        totalCommissions,
-        netProfit,
+        totalRevenue: convertFromAED(totalRevenue, targetCurrency),
+        totalRefunds: convertFromAED(totalRefunds, targetCurrency),
+        netRevenue: convertFromAED(netRevenue, targetCurrency),
+        totalCost: convertFromAED(totalCost, targetCurrency),
+        refundCost: convertFromAED(refundCost, targetCurrency),
+        netCost: convertFromAED(netCost, targetCurrency),
+        grossProfit: convertFromAED(grossProfit, targetCurrency),
+        totalCommissions: convertFromAED(totalCommissions, targetCurrency),
+        netProfit: convertFromAED(netProfit, targetCurrency),
         profitMargin: parseFloat(profitMargin),
-        monthlyBreakdown
+        monthlyBreakdown: convertedMonthlyBreakdown,
+        confirmedBookingsCount: confirmedBookings.length,
+        refundedBookingsCount: refundedBookings.length
       }
-    });
+    };
+    
+    console.log('📤 Sending response:', JSON.stringify({
+      totalRevenue,
+      totalRefunds,
+      refundCost,
+      confirmedCount: confirmedBookings.length,
+      refundedCount: refundedBookings.length
+    }));
+    
+    res.json(responseData);
   } catch (error) {
     console.error('Error generating financial summary:', error);
     res.status(500).json({ success: false, error: 'Failed to generate financial summary' });
@@ -1129,37 +1246,68 @@ router.get('/profit-loss', authenticate, async (req: AuthRequest, res: Response)
     const startDate = new Date(dateFrom as string);
     const endDate = new Date(dateTo as string);
 
-    // Get all bookings
-    const bookings = await prisma.bookings.findMany({
+    // Get CONFIRMED bookings
+    const confirmedBookings = await prisma.bookings.findMany({
       where: {
         bookingDate: { gte: startDate, lte: endDate },
-        status: { in: ['CONFIRMED', 'REFUND'] }
+        status: 'CONFIRMED'
       }
     });
 
-    // Calculate P&L components
+    // Get REFUNDED bookings only
+    const refundedBookings = await prisma.bookings.findMany({
+      where: {
+        bookingDate: { gte: startDate, lte: endDate },
+        status: 'REFUNDED'
+      }
+    });
+
+    // Calculate P&L components from CONFIRMED
     let totalRevenue = 0;
     let totalCost = 0;
     let totalCommissions = 0;
 
-    bookings.forEach(b => {
-      totalRevenue += convertToAED(b.saleAmount, b.saleCurrency);
-      totalCost += convertToAED(b.costAmount, b.costCurrency);
-      totalCommissions += convertToAED(b.totalCommission || 0, b.saleCurrency);
+    confirmedBookings.forEach(b => {
+      const saleInAED = b.saleInAED || convertToAED(b.saleAmount, b.saleCurrency);
+      const costInAED = b.costInAED || convertToAED(b.costAmount, b.costCurrency);
+      totalRevenue += Math.abs(saleInAED);
+      totalCost += Math.abs(costInAED);
+      totalCommissions += Math.abs(b.totalCommission || 0);
     });
 
-    const grossProfit = totalRevenue - totalCost;
-    const netProfit = grossProfit - totalCommissions;
-    const profitMargin = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(2) : '0.00';
+    // Calculate Refunds
+    let totalRefunds = 0;
+    let refundCost = 0;
 
+    refundedBookings.forEach(b => {
+      const saleInAED = b.saleInAED || convertToAED(b.saleAmount, b.saleCurrency);
+      const costInAED = b.costInAED || convertToAED(b.costAmount, b.costCurrency);
+      totalRefunds += Math.abs(saleInAED);
+      refundCost += Math.abs(costInAED);
+    });
+
+    // Calculate Net values
+    const netRevenue = totalRevenue - totalRefunds;
+    const netCost = totalCost - refundCost;
+    const grossProfit = netRevenue - netCost;
+    const netProfit = grossProfit - totalCommissions;
+    const profitMargin = netRevenue > 0 ? ((netProfit / netRevenue) * 100).toFixed(2) : '0.00';
+
+    // Convert all amounts to target currency
+    const targetCurrency = currency as string;
+    
     res.json({
       success: true,
       data: {
-        totalRevenue,
-        totalCost,
-        grossProfit,
-        totalCommissions,
-        netProfit,
+        totalRevenue: convertFromAED(totalRevenue, targetCurrency),
+        totalRefunds: convertFromAED(totalRefunds, targetCurrency),
+        netRevenue: convertFromAED(netRevenue, targetCurrency),
+        totalCost: convertFromAED(totalCost, targetCurrency),
+        refundCost: convertFromAED(refundCost, targetCurrency),
+        netCost: convertFromAED(netCost, targetCurrency),
+        grossProfit: convertFromAED(grossProfit, targetCurrency),
+        totalCommissions: convertFromAED(totalCommissions, targetCurrency),
+        netProfit: convertFromAED(netProfit, targetCurrency),
         profitMargin: parseFloat(profitMargin)
       }
     });
@@ -1180,52 +1328,52 @@ router.get('/cash-flow', authenticate, async (req: AuthRequest, res: Response) =
     // Get all receipts (cash inflows)
     const receipts = await prisma.receipts.findMany({
       where: {
-        date: { gte: startDate, lte: endDate }
+        receiptDate: { gte: startDate, lte: endDate }
       },
       include: {
         customers: { select: { firstName: true, lastName: true, companyName: true } }
       },
-      orderBy: { date: 'asc' }
+      orderBy: { receiptDate: 'asc' }
     });
 
     // Get all payments (cash outflows)
     const payments = await prisma.payments.findMany({
       where: {
-        date: { gte: startDate, lte: endDate }
+        paymentDate: { gte: startDate, lte: endDate }
       },
       include: {
-        suppliers: { select: { companyName: true } }
+        supplier: { select: { companyName: true } }
       },
-      orderBy: { date: 'asc' }
+      orderBy: { paymentDate: 'asc' }
     });
 
     let totalInflows = 0;
     let totalOutflows = 0;
     const details: any[] = [];
 
-    // Add receipts (inflows)
+    // Add receipts (inflows) - amounts are already in AED
     receipts.forEach(r => {
-      const amount = convertToAED(r.amount, r.currency || 'AED');
-      totalInflows += amount;
+      const amountInTargetCurrency = convertFromAED(r.amount, currency as string);
+      totalInflows += amountInTargetCurrency;
       details.push({
-        Date: r.date.toISOString(),
+        Date: r.receiptDate.toISOString(),
         Type: 'Inflow',
         Reference: r.receiptNumber,
         Method: r.paymentMethod,
-        Amount: amount
+        Amount: amountInTargetCurrency
       });
     });
 
-    // Add payments (outflows)
+    // Add payments (outflows) - amounts are already in AED
     payments.forEach(p => {
-      const amount = convertToAED(p.amount, p.currency || 'AED');
-      totalOutflows += amount;
+      const amountInTargetCurrency = convertFromAED(p.amount, currency as string);
+      totalOutflows += amountInTargetCurrency;
       details.push({
-        Date: p.date.toISOString(),
+        Date: p.paymentDate.toISOString(),
         Type: 'Outflow',
         Reference: p.paymentNumber,
         Method: p.paymentMethod,
-        Amount: -amount
+        Amount: -amountInTargetCurrency
       });
     });
 
