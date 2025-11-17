@@ -178,26 +178,27 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/bank-accounts', bankAccountRoutes);
 
 // Serve static files from dist folder (for production)
-if (process.env.NODE_ENV === 'production') {
-  const distPath = path.join(dirPath, '../dist');
-  console.log('📁 Serving static files from:', distPath);
-  
-  // Serve static assets
-  app.use(express.static(distPath));
-  
-  // SPA fallback - serve index.html for all non-API routes
-  app.get('*', (req: Request, res: Response) => {
-    // Don't serve index.html for API routes
-    if (req.path.startsWith('/api')) {
-      return res.status(404).json({
-        success: false,
-        error: 'API route not found'
-      });
-    }
-    
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
-}
+// NOTE: Disabled for Netlify Functions - frontend is served separately
+// if (process.env.NODE_ENV === 'production' && !process.env.NETLIFY) {
+//   const distPath = path.join(dirPath, '../dist');
+//   console.log('📁 Serving static files from:', distPath);
+//   
+//   // Serve static assets
+//   app.use(express.static(distPath));
+//   
+//   // SPA fallback - serve index.html for all non-API routes
+//   app.get('*', (req: Request, res: Response) => {
+//     // Don't serve index.html for API routes
+//     if (req.path.startsWith('/api')) {
+//       return res.status(404).json({
+//         success: false,
+//         error: 'API route not found'
+//       });
+//     }
+//     
+//     res.sendFile(path.join(distPath, 'index.html'));
+//   });
+// }
 
 // 404 handler for API routes
 app.use('/api/*', (req: Request, res: Response) => {
