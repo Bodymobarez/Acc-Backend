@@ -688,6 +688,9 @@ export class BookingService {
       const sample = bookings[0];
       console.log('ID:', sample.id);
       console.log('Booking Number:', sample.bookingNumber);
+      console.log('Status:', sample.status);
+      console.log('\n📄 INVOICE DATA:');
+      console.log('  Invoices:', sample.invoices);
       console.log('\n💰 FINANCIAL DATA:');
       console.log('  Sale in AED:', sample.saleInAED);
       console.log('  Cost in AED:', sample.costInAED);
