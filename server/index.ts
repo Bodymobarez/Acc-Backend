@@ -51,6 +51,7 @@ import employeeCommissionRoutes from './routes/employeeCommissionRoutes';
 import generalLedgerRoutes from './routes/generalLedgerRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import bankAccountRoutes from './routes/bankAccountRoutes';
+import cashRegisterRoutes from './routes/cashRegisterRoutes';
 
 // Initialize Express app
 const app: Express = express();
@@ -176,6 +177,7 @@ app.use('/api/reports', advancedReportRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/bank-accounts', bankAccountRoutes);
+app.use('/api/cash-registers', cashRegisterRoutes);
 
 // Serve static files from dist folder (for production)
 // NOTE: Disabled for Netlify Functions - frontend is served separately
