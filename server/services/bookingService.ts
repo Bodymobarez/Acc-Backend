@@ -997,10 +997,58 @@ export class BookingService {
   
   /**
    * Delete booking
+   * Also deletes related journal entries and invoice
    */
   async deleteBooking(id: string) {
-    return await prisma.bookings.delete({  where: { id }
+    // 🔍 First, check if booking exists
+    const booking = await prisma.bookings.findUnique({
+      where: { id },
+      include: {
+        invoices: true,
+        journal_entries: true,
+      }
     });
+
+    if (!booking) {
+      throw new Error('Booking not found');
+    }
+
+    console.log(`🗑️  Deleting booking ${id}...`);
+    console.log(`   - Found ${booking.journal_entries?.length || 0} journal entries to delete`);
+    console.log(`   - Found ${booking.invoices?.length || 0} invoices to delete`);
+
+    // 🗑️ Delete journal entries related to this booking
+    if (booking.journal_entries && booking.journal_entries.length > 0) {
+      const deletedJournals = await prisma.journal_entries.deleteMany({
+        where: { bookingId: id }
+      });
+      console.log(`   ✅ Deleted ${deletedJournals.count} journal entries for booking`);
+    }
+
+    // 🗑️ Delete invoices related to this booking (and their journal entries)
+    if (booking.invoices && booking.invoices.length > 0) {
+      for (const invoice of booking.invoices) {
+        // Delete journal entries for each invoice
+        const deletedInvoiceJournals = await prisma.journal_entries.deleteMany({
+          where: { invoiceId: invoice.id }
+        });
+        console.log(`   ✅ Deleted ${deletedInvoiceJournals.count} journal entries for invoice ${invoice.invoiceNumber}`);
+        
+        // Delete the invoice
+        await prisma.invoices.delete({
+          where: { id: invoice.id }
+        });
+        console.log(`   ✅ Deleted invoice ${invoice.invoiceNumber}`);
+      }
+    }
+
+    // 🗑️ Finally, delete the booking
+    const deletedBooking = await prisma.bookings.delete({
+      where: { id }
+    });
+
+    console.log(`   ✅ Booking deleted successfully`);
+    return deletedBooking;
   }
 
   /**

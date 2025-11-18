@@ -126,6 +126,7 @@ model bookings {
   booking_suppliers                               booking_suppliers[]
   files                                           files?
   invoices                                        invoices?
+  journal_entries                                 journal_entries[]  @relation("bookings_journal_entries")
 }
 
 model company_settings {
@@ -251,27 +252,28 @@ model files {
 }
 
 model invoices {
-  id              String    @id
-  invoiceNumber   String    @unique
-  bookingId       String    @unique
-  customerId      String
-  subtotal        Float
-  vatAmount       Float
-  totalAmount     Float
-  currency        String    @default("AED")
-  invoiceDate     DateTime  @default(now())
-  dueDate         DateTime?
-  paidDate        DateTime?
-  status          String    @default("UNPAID")
-  notes           String?
-  termsConditions String?
-  pdfPath         String?
-  createdById     String
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime
-  bookings        bookings  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  users           users     @relation(fields: [createdById], references: [id])
-  customers       customers @relation(fields: [customerId], references: [id])
+  id               String            @id
+  invoiceNumber    String            @unique
+  bookingId        String            @unique
+  customerId       String
+  subtotal         Float
+  vatAmount        Float
+  totalAmount      Float
+  currency         String            @default("AED")
+  invoiceDate      DateTime          @default(now())
+  dueDate          DateTime?
+  paidDate         DateTime?
+  status           String            @default("UNPAID")
+  notes            String?
+  termsConditions  String?
+  pdfPath          String?
+  createdById      String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime
+  bookings         bookings          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  users            users             @relation(fields: [createdById], references: [id])
+  customers        customers         @relation(fields: [customerId], references: [id])
+  journal_entries  journal_entries[] @relation("invoices_journal_entries")
 }
 
 model journal_entries {
@@ -295,6 +297,8 @@ model journal_entries {
   updatedAt                                          DateTime
   accounts_journal_entries_creditAccountIdToaccounts accounts  @relation("journal_entries_creditAccountIdToaccounts", fields: [creditAccountId], references: [id])
   accounts_journal_entries_debitAccountIdToaccounts  accounts  @relation("journal_entries_debitAccountIdToaccounts", fields: [debitAccountId], references: [id])
+  bookings                                           bookings? @relation("bookings_journal_entries", fields: [bookingId], references: [id])
+  invoices                                           invoices? @relation("invoices_journal_entries", fields: [invoiceId], references: [id])
 }
 
 model receipts {
