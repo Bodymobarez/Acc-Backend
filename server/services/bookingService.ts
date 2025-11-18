@@ -241,8 +241,14 @@ export class BookingService {
           }
         });
         
-        // Create accounting journal entries for FLIGHT booking
+        // Create accounting journal entries for FLIGHT booking - 4 entries
+        // 1. Cost entry (with supplier)
         await accountingService.createBookingJournalEntry(booking);
+        // 2. Revenue entry (with customer)
+        await accountingService.createBookingRevenueJournalEntry(booking);
+        // 3. VAT entry (if applicable)
+        await accountingService.createBookingVATJournalEntry(booking);
+        // 4. Commission entries (for AGENT and CS)
         if (booking.agentCommissionAmount && booking.agentCommissionAmount > 0) {
           await accountingService.createCommissionJournalEntry(booking, 'AGENT');
         }
@@ -340,8 +346,14 @@ export class BookingService {
           }
         });
         
-        // Create accounting journal entries for non-FLIGHT UAE booking
+        // Create accounting journal entries for non-FLIGHT UAE booking - 4 entries
+        // 1. Cost entry (with supplier)
         await accountingService.createBookingJournalEntry(booking);
+        // 2. Revenue entry (with customer)
+        await accountingService.createBookingRevenueJournalEntry(booking);
+        // 3. VAT entry (if applicable)
+        await accountingService.createBookingVATJournalEntry(booking);
+        // 4. Commission entries (for AGENT and CS)
         if (booking.agentCommissionAmount && booking.agentCommissionAmount > 0) {
           await accountingService.createCommissionJournalEntry(booking, 'AGENT');
         }
@@ -445,8 +457,14 @@ export class BookingService {
         }
       });
       
-      // Create accounting journal entries
+      // Create accounting journal entries - 4 entries
+      // 1. Cost entry (with supplier)
       await accountingService.createBookingJournalEntry(booking);
+      // 2. Revenue entry (with customer)
+      await accountingService.createBookingRevenueJournalEntry(booking);
+      // 3. VAT entry (if applicable)
+      await accountingService.createBookingVATJournalEntry(booking);
+      // 4. Commission entries (for AGENT and CS)
       if (booking.agentCommissionAmount && booking.agentCommissionAmount > 0) {
         await accountingService.createCommissionJournalEntry(booking, 'AGENT');
       }

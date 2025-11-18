@@ -9,6 +9,7 @@ interface CreateReceiptInput {
   amount: number;
   paymentMethod: string;
   bankAccountId?: string;
+  supplierId?: string;
   checkNumber?: string;
   reference?: string;
   receiptDate?: string;
@@ -40,6 +41,7 @@ export const receiptService = {
         amount: input.amount,
         paymentMethod: input.paymentMethod.toUpperCase(),
         bankAccountId: input.bankAccountId || null,
+        supplierId: input.supplierId || null,
         checkNumber: input.checkNumber || null,
         reference: input.reference || null,
         receiptDate: input.receiptDate ? new Date(input.receiptDate) : new Date(),

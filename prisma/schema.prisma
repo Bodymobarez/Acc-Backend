@@ -302,24 +302,26 @@ model journal_entries {
 }
 
 model receipts {
-  id             String    @id
-  receiptNumber  String    @unique
+  id             String     @id
+  receiptNumber  String     @unique
   customerId     String
   invoiceId      String?
   amount         Float
-  paymentMethod  String    @default("CASH")
+  paymentMethod  String     @default("CASH")
   bankAccountId  String?
+  supplierId     String?
   checkNumber    String?
   reference      String?
-  receiptDate    DateTime  @default(now())
+  receiptDate    DateTime   @default(now())
   notes          String?
-  status         String    @default("COMPLETED")
+  status         String     @default("COMPLETED")
   createdById    String?
-  createdAt      DateTime  @default(now())
+  createdAt      DateTime   @default(now())
   updatedAt      DateTime
-  matchedAmount  Float     @default(0)
-  matchingStatus String    @default("NOT_MATCHED")
-  customers      customers @relation(fields: [customerId], references: [id])
+  matchedAmount  Float      @default(0)
+  matchingStatus String     @default("NOT_MATCHED")
+  customers      customers  @relation(fields: [customerId], references: [id])
+  suppliers      suppliers? @relation(fields: [supplierId], references: [id])
 }
 
 model suppliers {
@@ -348,6 +350,7 @@ model suppliers {
   bookings          bookings[]
   booking_suppliers booking_suppliers[]
   payments          payments[]
+  receipts          receipts[]
 }
 
 model booking_suppliers {

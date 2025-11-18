@@ -48,12 +48,26 @@ export class AccountingService {
   }
 
   /**
-   * Create journal entry for booking creation
-   * Records cost and revenue
+   * Create journal entry for booking creation - COST ONLY
+   * Records cost with supplier
    * Handles both single and multi-supplier bookings
+   * PREVENTS DUPLICATE ENTRIES
    */
   async createBookingJournalEntry(booking: any): Promise<void> {
     try {
+      // Check if cost entry already exists
+      const existingCostEntry = await prisma.journal_entries.findFirst({
+        where: {
+          bookingId: booking.id,
+          transactionType: 'BOOKING_COST'
+        }
+      });
+
+      if (existingCostEntry) {
+        console.log(`✅ Booking ${booking.bookingNumber} already has cost entry, skipping (no duplication)`);
+        return;
+      }
+
       // Check if this is a multi-supplier booking
       const isMultiSupplier = booking.booking_suppliers && booking.booking_suppliers.length > 0;
       
@@ -146,12 +160,26 @@ export class AccountingService {
   }
 
   /**
-   * Create journal entry for invoice generation
+   * Create journal entry for booking revenue with customer
    * Records accounts receivable and revenue
-   * Handles UAE Booking vs Non-UAE Booking VAT calculation
+   * This is called at booking creation, not at invoice generation
+   * PREVENTS DUPLICATE ENTRIES
    */
-  async createInvoiceJournalEntry(invoice: any): Promise<void> {
+  async createBookingRevenueJournalEntry(booking: any): Promise<void> {
     try {
+      // Check if revenue entry already exists
+      const existingRevenueEntry = await prisma.journal_entries.findFirst({
+        where: {
+          bookingId: booking.id,
+          transactionType: 'BOOKING_REVENUE'
+        }
+      });
+
+      if (existingRevenueEntry) {
+        console.log(`✅ Booking ${booking.bookingNumber} already has revenue entry, skipping (no duplication)`);
+        return;
+      }
+
       // Generate entry number
       const lastEntry = await prisma.journal_entries.findFirst({
         orderBy: { createdAt: 'desc' }
@@ -165,7 +193,191 @@ export class AccountingService {
 
       // Find account IDs
       const accountsReceivableAccount = await prisma.accounts.findFirst({
-        where: { code: '1151' } // Accounts Receivable - Customers (NEW CODE)
+        where: { code: '1121' } // Customers - Trade Receivables
+      });
+
+      const revenueCode = this.getRevenueAccountCode(booking.serviceType || 'OTHER');
+      const revenueAccount = await prisma.accounts.findFirst({
+        where: { code: revenueCode }
+      });
+
+      if (!accountsReceivableAccount || !revenueAccount) {
+        console.warn('⚠️  Accounting accounts not found, skipping revenue journal entry');
+        return;
+      }
+
+      // Calculate amounts
+      const subtotal = Math.round((booking.netBeforeVAT || 0) * 100) / 100;
+      
+      if (subtotal <= 0) {
+        console.warn('⚠️  Booking subtotal is zero or negative, skipping revenue entry');
+        return;
+      }
+
+      // Entry: Debit A/R, Credit Revenue (for subtotal)
+      const revenueEntry = await prisma.journal_entries.create({
+        data: {
+          id: randomUUID(),
+          entryNumber,
+          date: booking.bookingDate || new Date(),
+          description: `إيراد حجز - ${booking.bookingNumber}`,
+          reference: booking.bookingNumber,
+          debitAccountId: accountsReceivableAccount.id,
+          creditAccountId: revenueAccount.id,
+          amount: subtotal,
+          bookingId: booking.id,
+          transactionType: 'BOOKING_REVENUE',
+          status: 'DRAFT',
+          createdBy: booking.createdById,
+          updatedAt: new Date()
+        }
+      });
+      // Auto-post revenue entry
+      await this.postJournalEntry(revenueEntry.id);
+
+      console.log(`✅ Created booking revenue journal entry: ${entryNumber}`);
+    } catch (error: any) {
+      console.error('❌ Error creating booking revenue journal entry:', error.message);
+    }
+  }
+
+  /**
+   * Create journal entry for booking VAT
+   * Records VAT payable
+   * This is called at booking creation, not at invoice generation
+   * PREVENTS DUPLICATE ENTRIES
+   */
+  async createBookingVATJournalEntry(booking: any): Promise<void> {
+    try {
+      const vatAmount = Math.round((booking.vatAmount || 0) * 100) / 100;
+      
+      // Skip if no VAT
+      if (vatAmount <= 0) {
+        return;
+      }
+
+      // Check if VAT entry already exists
+      const existingVATEntry = await prisma.journal_entries.findFirst({
+        where: {
+          bookingId: booking.id,
+          transactionType: { in: ['BOOKING_VAT_UAE', 'BOOKING_VAT_NON_UAE'] }
+        }
+      });
+
+      if (existingVATEntry) {
+        console.log(`✅ Booking ${booking.bookingNumber} already has VAT entry, skipping (no duplication)`);
+        return;
+      }
+
+      // Generate entry number
+      const lastEntry = await prisma.journal_entries.findFirst({
+        orderBy: { createdAt: 'desc' }
+      });
+      let nextNumber = 1;
+      if (lastEntry && lastEntry.entryNumber) {
+        const match = lastEntry.entryNumber.match(/JE-(\d+)/);
+        if (match) nextNumber = parseInt(match[1]) + 1;
+      }
+      const entryNumber = `JE-${String(nextNumber).padStart(6, '0')}`;
+
+      // Find account IDs
+      const accountsReceivableAccount = await prisma.accounts.findFirst({
+        where: { code: '1121' } // Customers - Trade Receivables
+      });
+
+      const vatPayableAccount = await prisma.accounts.findFirst({
+        where: { code: '2121' } // VAT Payable
+      });
+
+      if (!accountsReceivableAccount || !vatPayableAccount) {
+        console.warn('⚠️  Accounting accounts not found, skipping VAT journal entry');
+        return;
+      }
+
+      // Check if this is UAE Booking or Non-UAE
+      const isUAEBooking = booking.isUAEBooking || false;
+      const description = `ضريبة قيمة مضافة - ${booking.bookingNumber}`;
+      
+      const vatEntry = await prisma.journal_entries.create({
+        data: {
+          id: randomUUID(),
+          entryNumber,
+          date: booking.bookingDate || new Date(),
+          description,
+          reference: booking.bookingNumber,
+          debitAccountId: accountsReceivableAccount.id,
+          creditAccountId: vatPayableAccount.id,
+          amount: vatAmount,
+          bookingId: booking.id,
+          transactionType: isUAEBooking ? 'BOOKING_VAT_UAE' : 'BOOKING_VAT_NON_UAE',
+          status: 'DRAFT',
+          createdBy: booking.createdById,
+          updatedAt: new Date()
+        }
+      });
+      // Auto-post VAT entry
+      await this.postJournalEntry(vatEntry.id);
+
+      console.log(`✅ Created booking VAT journal entry: ${entryNumber}`);
+    } catch (error: any) {
+      console.error('❌ Error creating booking VAT journal entry:', error.message);
+    }
+  }
+
+  /**
+   * Create journal entry for invoice generation
+   * DEPRECATED: Revenue and VAT are now recorded at booking creation
+   * This method is kept for backward compatibility with old invoices
+   * that don't have associated booking journal entries
+   * PREVENTS DUPLICATE ENTRIES
+   */
+  async createInvoiceJournalEntry(invoice: any): Promise<void> {
+    try {
+      // Check if this invoice has a booking with journal entries
+      if (invoice.bookingId) {
+        const existingRevenueEntry = await prisma.journal_entries.findFirst({
+          where: {
+            bookingId: invoice.bookingId,
+            transactionType: 'BOOKING_REVENUE'
+          }
+        });
+
+        if (existingRevenueEntry) {
+          console.log('✅ Booking already has revenue entry, skipping invoice journal entries (no duplication)');
+          return;
+        }
+      }
+
+      // Check if invoice already has entries
+      const existingInvoiceEntry = await prisma.journal_entries.findFirst({
+        where: {
+          invoiceId: invoice.id,
+          transactionType: { in: ['INVOICE_REVENUE', 'INVOICE_VAT_UAE', 'INVOICE_VAT_NON_UAE'] }
+        }
+      });
+
+      if (existingInvoiceEntry) {
+        console.log('✅ Invoice already has journal entries, skipping (no duplication)');
+        return;
+      }
+
+      // Only create entries for old invoices without booking entries
+      console.warn('⚠️  Creating invoice journal entries (legacy mode - booking has no entries)');
+
+      // Generate entry number
+      const lastEntry = await prisma.journal_entries.findFirst({
+        orderBy: { createdAt: 'desc' }
+      });
+      let nextNumber = 1;
+      if (lastEntry && lastEntry.entryNumber) {
+        const match = lastEntry.entryNumber.match(/JE-(\d+)/);
+        if (match) nextNumber = parseInt(match[1]) + 1;
+      }
+      const entryNumber = `JE-${String(nextNumber).padStart(6, '0')}`;
+
+      // Find account IDs
+      const accountsReceivableAccount = await prisma.accounts.findFirst({
+        where: { code: '1121' } // Customers - Trade Receivables
       });
 
       const revenueCode = this.getRevenueAccountCode(invoice.bookings?.serviceType || 'OTHER');
@@ -207,7 +419,7 @@ export class AccountingService {
       // If there's VAT, create separate entry
       if (vatAmount > 0) {
         const vatPayableAccount = await prisma.accounts.findFirst({
-          where: { code: '2131' } // VAT Payable (UPDATED CODE)
+          where: { code: '2121' } // VAT Payable
         });
 
         if (vatPayableAccount) {
@@ -239,7 +451,7 @@ export class AccountingService {
         }
       }
 
-      console.log(`✅ Created invoice journal entries: ${entryNumber}`);
+      console.log(`✅ Created invoice journal entries (legacy mode): ${entryNumber}`);
     } catch (error: any) {
       console.error('❌ Error creating invoice journal entry:', error.message);
     }
@@ -248,9 +460,23 @@ export class AccountingService {
   /**
    * Create journal entry for payment received
    * Records cash/bank and reduces accounts receivable
+   * PREVENTS DUPLICATE ENTRIES
    */
   async createReceiptJournalEntry(receipt: any): Promise<void> {
     try {
+      // Check if receipt entry already exists
+      const existingReceiptEntry = await prisma.journal_entries.findFirst({
+        where: {
+          reference: receipt.receiptNumber,
+          transactionType: 'RECEIPT_PAYMENT'
+        }
+      });
+
+      if (existingReceiptEntry) {
+        console.log(`✅ Receipt ${receipt.receiptNumber} already has journal entry, skipping (no duplication)`);
+        return;
+      }
+
       // Generate entry number
       const lastEntry = await prisma.journal_entries.findFirst({
         orderBy: { createdAt: 'desc' }
@@ -262,14 +488,44 @@ export class AccountingService {
       }
       const entryNumber = `JE-${String(nextNumber).padStart(6, '0')}`;
 
-      // Determine cash/bank account
-      const cashAccountCode = receipt.paymentMethod === 'CASH' ? '1111' : '1117'; // Cash on Hand - AED or Bank Account - AED (UPDATED)
-      const cashAccount = await prisma.accounts.findFirst({
-        where: { code: cashAccountCode }
-      });
+      // Determine cash/bank account based on payment method and bank account
+      let cashAccount = null;
+      
+      if (receipt.paymentMethod === 'CASH') {
+        // For cash payments, default to AED cash
+        cashAccount = await prisma.accounts.findFirst({
+          where: { code: '1111' } // Cash on Hand - AED
+        });
+      } else if (receipt.bankAccountId) {
+        // For bank/card/check payments, use the specified bank account
+        const bankAccount = await prisma.bank_accounts.findUnique({
+          where: { id: receipt.bankAccountId }
+        });
+        
+        if (bankAccount) {
+          // Determine account based on bank currency and name
+          let bankCode = '1114'; // Default to Bank Account - Main AED
+          
+          if (bankAccount.currency === 'USD') {
+            bankCode = '1115'; // Bank Account - USD
+          }
+          // You can add more logic here if needed for specific bank accounts
+          
+          cashAccount = await prisma.accounts.findFirst({
+            where: { code: bankCode }
+          });
+        }
+      }
+      
+      // Fallback to main AED bank account if nothing found
+      if (!cashAccount) {
+        cashAccount = await prisma.accounts.findFirst({
+          where: { code: '1114' } // Bank Account - Main AED
+        });
+      }
 
       const accountsReceivableAccount = await prisma.accounts.findFirst({
-        where: { code: '1151' } // Accounts Receivable - Customers (NEW CODE)
+        where: { code: '1121' } // Customers - Trade Receivables
       });
 
       if (!cashAccount || !accountsReceivableAccount) {
@@ -309,6 +565,7 @@ export class AccountingService {
   /**
    * Create journal entry for commission payment
    * Records commission expense and payable to employee
+   * PREVENTS DUPLICATE ENTRIES
    */
   async createCommissionJournalEntry(booking: any, employeeType: 'AGENT' | 'CS'): Promise<void> {
     try {
@@ -316,6 +573,20 @@ export class AccountingService {
       
       if (!amount || amount === 0) {
         return; // No commission to record
+      }
+
+      // Check if commission entry already exists
+      const transactionType = `COMMISSION_${employeeType}`;
+      const existingCommissionEntry = await prisma.journal_entries.findFirst({
+        where: {
+          bookingId: booking.id,
+          transactionType: transactionType
+        }
+      });
+
+      if (existingCommissionEntry) {
+        console.log(`✅ Booking ${booking.bookingNumber} already has ${employeeType} commission entry, skipping (no duplication)`);
+        return;
       }
 
       // Round commission amount to 2 decimals
@@ -339,11 +610,11 @@ export class AccountingService {
       });
 
       const accountsPayableAccount = await prisma.accounts.findFirst({
-        where: { code: '2142' } // Commissions Payable
+        where: { code: '2132' } // Commissions Payable
       });
 
       if (!commissionExpenseAccount || !accountsPayableAccount) {
-        console.warn(`⚠️  Accounting accounts not found (6120 or 2142), skipping journal entry`);
+        console.warn(`⚠️  Accounting accounts not found (6120 or 2132), skipping journal entry`);
         return;
       }
 
@@ -379,6 +650,7 @@ export class AccountingService {
   /**
    * Post journal entry - update account balances
    * All amounts are rounded to 2 decimal places
+   * Prevents duplicate posting
    */
   async postJournalEntry(entryId: string): Promise<void> {
     try {
@@ -391,7 +663,8 @@ export class AccountingService {
       }
 
       if (entry.status === 'POSTED') {
-        throw new Error('Journal entry already posted');
+        console.warn(`⚠️  Journal entry ${entry.entryNumber} is already posted, skipping...`);
+        return; // Don't throw error, just skip
       }
 
       // Round amount to 2 decimals
@@ -461,6 +734,7 @@ export class AccountingService {
   /**
    * Update parent account balances recursively
    * This updates all parent accounts including root accounts (1000, 2000, etc)
+   * Ensures correct balance calculation based on account type
    */
   private async updateParentAccountBalances(accountId: string): Promise<void> {
     try {
@@ -505,6 +779,9 @@ export class AccountingService {
 
   /**
    * Update an account's balances from its direct children
+   * Calculates balance correctly based on account type:
+   * - Assets & Expenses: Debit increases balance
+   * - Liabilities, Equity & Revenue: Credit increases balance
    */
   private async updateAccountFromChildren(accountId: string): Promise<void> {
     try {
@@ -534,13 +811,18 @@ export class AccountingService {
         balance = totalCredit - totalDebit;
       }
 
+      // Round to 2 decimal places
+      const roundedDebit = Math.round(totalDebit * 100) / 100;
+      const roundedCredit = Math.round(totalCredit * 100) / 100;
+      const roundedBalance = Math.round(balance * 100) / 100;
+
       // Update parent account
       await prisma.accounts.update({
         where: { id: accountId },
         data: {
-          debitBalance: totalDebit,
-          creditBalance: totalCredit,
-          balance: balance,
+          debitBalance: roundedDebit,
+          creditBalance: roundedCredit,
+          balance: roundedBalance,
           updatedAt: new Date()
         }
       });
@@ -583,19 +865,25 @@ export class AccountingService {
         where: { 
           bookingId: bookingId,
           transactionType: {
-            in: ['BOOKING_COST', 'COMMISSION_AGENT', 'COMMISSION_CS']
+            in: ['BOOKING_COST', 'BOOKING_REVENUE', 'BOOKING_VAT_UAE', 'BOOKING_VAT_NON_UAE', 'COMMISSION_AGENT', 'COMMISSION_CS']
           }
         }
       });
       console.log(`   Deleted ${deletedEntries.count} old booking entries`);
 
-      // 🎯 CREATE new journal entries with updated amounts
+      // 🎯 CREATE new journal entries with updated amounts - 4 entries
       console.log('📝 Creating new booking journal entries...');
       
       // 1. Create booking cost entries
       await this.createBookingJournalEntry(booking);
       
-      // 2. Create commission entries if applicable
+      // 2. Create revenue entry
+      await this.createBookingRevenueJournalEntry(booking);
+      
+      // 3. Create VAT entry (if applicable)
+      await this.createBookingVATJournalEntry(booking);
+      
+      // 4. Create commission entries if applicable
       if (booking.agentCommissionAmount && booking.agentCommissionAmount > 0) {
         await this.createCommissionJournalEntry(booking, 'AGENT');
       }
@@ -628,16 +916,16 @@ export class AccountingService {
 
       // Find account IDs
       const accountsReceivableAccount = await prisma.accounts.findFirst({
-        where: { code: '1151' } // Accounts Receivable (NEW CODE)
+        where: { code: '1121' } // Customers - Trade Receivables
       });
       const supplierPayableAccount = await prisma.accounts.findFirst({
-        where: { code: '2111' } // Accounts Payable
+        where: { code: '2111' } // Suppliers - Trade Payables
       });
       const vatPayableAccount = await prisma.accounts.findFirst({
-        where: { code: '2131' } // VAT Payable (UPDATED CODE)
+        where: { code: '2121' } // VAT Payable
       });
       const commissionPayableAccount = await prisma.accounts.findFirst({
-        where: { code: '2142' } // Commission Payable (UPDATED CODE)
+        where: { code: '2132' } // Commissions Payable
       });
       const commissionExpenseAccount = await prisma.accounts.findFirst({
         where: { code: '6120' } // Commission Expense

@@ -363,6 +363,7 @@ import customerAssignmentRoutes from './routes-hono/customerAssignmentRoutes';
 import airlineRoutes from './routes-hono/airlineRoutes';
 import migrationRoutes from './routes-hono/migrationRoutes';
 import bankAccountRoutes from './routes-hono/bankAccountRoutes';
+import cashRegisterRoutes from './routes-hono/cashRegisterRoutes';
 import reportRoutes from './routes-hono/reportRoutes';
 import notificationRoutes from './routes-hono/notificationRoutes';
 import employeeCommissionRoutes from './routes-hono/employeeCommissionRoutes';
@@ -396,6 +397,7 @@ app.route('/api/customer-assignments', customerAssignmentRoutes);
 app.route('/api/airlines', airlineRoutes);
 app.route('/api/migration', migrationRoutes);
 app.route('/api/bank-accounts', bankAccountRoutes);
+app.route('/api/cash-registers', cashRegisterRoutes);
 app.route('/api/notifications', notificationRoutes);
 app.route('/api/reports/employee-commissions', employeeCommissionRoutes);
 
