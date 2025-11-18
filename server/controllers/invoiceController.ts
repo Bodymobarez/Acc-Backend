@@ -86,6 +86,34 @@ export class InvoiceController {
       });
     }
   }
+
+  /**
+   * Get invoice by booking ID
+   */
+  async getByBooking(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { bookingId } = req.params;
+      const invoice = await invoiceService.getInvoiceByBooking(bookingId);
+      
+      if (!invoice) {
+        res.status(404).json({
+          success: false,
+          error: 'Invoice not found for this booking'
+        });
+        return;
+      }
+      
+      res.json({
+        success: true,
+        data: invoice
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message
+      });
+    }
+  }
   
   /**
    * Update invoice status

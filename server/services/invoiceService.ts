@@ -141,6 +141,25 @@ export class InvoiceService {
       }
     });
   }
+
+  /**
+   * Get invoice by booking ID
+   */
+  async getInvoiceByBooking(bookingId: string) {
+    return await prisma.invoices.findUnique({
+      where: { bookingId },
+      include: {
+        bookings: {
+          include: {
+            suppliers: true,
+            customers: true
+          }
+        },
+        customers: true,
+        users: true
+      }
+    });
+  }
   
   /**
    * Get all invoices with filters

@@ -28,6 +28,13 @@ router.get(
   invoiceController.getAll.bind(invoiceController)
 );
 
+// Get invoice by booking ID (must be before /:id route)
+router.get(
+  '/booking/:bookingId',
+  requirePermission('viewInvoices'),
+  invoiceController.getByBooking.bind(invoiceController)
+);
+
 // Get invoice by ID (with access check)
 router.get(
   '/:id',
