@@ -666,7 +666,14 @@ export class BookingService {
             }
           }
         },
-        users: true
+        users: true,
+        invoices: {
+          select: {
+            id: true,
+            invoiceNumber: true,
+            status: true
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc'
