@@ -5,11 +5,19 @@ import { prisma } from '../lib/prisma';
 
 export class AccountController {
   /**
-   * Get all accounts
+   * Get all accounts (with optional filter by code)
    */
   async getAll(req: AuthRequest, res: Response): Promise<void> {
     try {
+      const { code } = req.query;
+      
+      const whereClause: any = {};
+      if (code) {
+        whereClause.code = code as string;
+      }
+      
       const accounts = await prisma.accounts.findMany({
+        where: whereClause,
         include: {
           accounts: true,
           other_accounts: true
