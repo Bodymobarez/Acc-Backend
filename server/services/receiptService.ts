@@ -70,6 +70,71 @@ export const receiptService = {
     // Create accounting journal entry
     await accountingService.createReceiptJournalEntry(receipt);
 
+    // If receipt is linked to an invoice, auto-update invoice status
+    if (input.invoiceId) {
+      // Get invoice details
+      const invoice = await prisma.invoices.findUnique({
+        where: { id: input.invoiceId },
+        select: { totalAmount: true, paidAmount: true }
+      });
+      
+      if (invoice) {
+        // Calculate new paid amount
+        const newPaidAmount = (invoice.paidAmount || 0) + input.amount;
+        
+        // Use epsilon for floating-point comparison (allow 0.01 difference)
+        const epsilon = 0.01;
+        const difference = invoice.totalAmount - newPaidAmount;
+        
+        // Determine new status based on payments
+        let newStatus = 'UNPAID';
+        if (Math.abs(difference) < epsilon || newPaidAmount >= invoice.totalAmount) {
+          // Fully paid (within epsilon tolerance)
+          newStatus = 'PAID';
+        } else if (newPaidAmount > 0) {
+          // Partially paid
+          newStatus = 'PARTIALLY_PAID';
+        }
+        
+        console.log(`✅ Auto-updating invoice status:`);
+        console.log(`   Invoice Amount: ${invoice.totalAmount}`);
+        console.log(`   Previous Paid: ${invoice.paidAmount || 0}`);
+        console.log(`   Payment Amount: ${input.amount}`);
+        console.log(`   New Total Paid: ${newPaidAmount}`);
+        console.log(`   Difference: ${difference}`);
+        console.log(`   New Status: ${newStatus}`);
+        
+        // Update invoice status and paid amount
+        await prisma.invoices.update({
+          where: { id: input.invoiceId },
+          data: { 
+            status: newStatus,
+            paidAmount: newPaidAmount,
+            updatedAt: new Date()
+          },
+        });
+        
+        // If invoice is fully paid, update booking status to COMPLETE
+        if (newStatus === 'PAID') {
+          const invoiceWithBooking = await prisma.invoices.findUnique({
+            where: { id: input.invoiceId },
+            select: { bookingId: true }
+          });
+          
+          if (invoiceWithBooking?.bookingId) {
+            await prisma.bookings.update({
+              where: { id: invoiceWithBooking.bookingId },
+              data: { 
+                status: 'COMPLETE',
+                updatedAt: new Date()
+              }
+            });
+            console.log(`✅ Booking status updated to COMPLETE`);
+          }
+        }
+      }
+    }
+
     return receipt;
   },
 
