@@ -259,6 +259,7 @@ export class InvoiceService {
     console.log(`🔄 Updating invoice ${invoiceId} from booking changes...`);
 
     // Calculate new invoice amounts based on booking
+    // Use booking amounts directly - they are already calculated correctly
     let invoiceSubtotal: number;
     let invoiceVAT: number;
     let invoiceTotal: number;
@@ -269,19 +270,28 @@ export class InvoiceService {
       invoiceVAT = 0;
       invoiceTotal = booking.saleInAED;
     } else {
-      // Other services: Calculate VAT properly
-      if (booking.vatApplicable && booking.isUAEBooking) {
-        // Sale amount INCLUDES VAT (5%)
-        invoiceSubtotal = booking.saleInAED / 1.05;
-        invoiceVAT = booking.saleInAED - invoiceSubtotal;
+      // Use VAT amount from booking (already calculated correctly)
+      invoiceVAT = booking.vatAmount || 0;
+      
+      if (invoiceVAT > 0) {
+        // VAT exists - calculate subtotal by removing VAT
+        invoiceSubtotal = booking.saleInAED - invoiceVAT;
         invoiceTotal = booking.saleInAED;
       } else {
-        // No VAT applicable or non-UAE booking
+        // No VAT
         invoiceSubtotal = booking.saleInAED;
-        invoiceVAT = 0;
         invoiceTotal = booking.saleInAED;
       }
     }
+    
+    console.log('📊 Invoice amounts calculated:', {
+      serviceType: booking.serviceType,
+      saleInAED: booking.saleInAED,
+      vatAmount: booking.vatAmount,
+      invoiceSubtotal,
+      invoiceVAT,
+      invoiceTotal
+    });
 
     // Update invoice
     const updatedInvoice = await prisma.invoices.update({
