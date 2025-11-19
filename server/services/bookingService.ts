@@ -1000,25 +1000,25 @@ export class BookingService {
         }
       })();
 
-      // 🎯 AUTO-UPDATE INVOICE if exists (async - don't wait)
-      // Run in background to improve response time
-      (async () => {
-        try {
-          console.log('\n📝 Checking for existing invoice to update (background)...');
-          const existingInvoice = await prisma.invoices.findUnique({
-            where: { bookingId: id }
-          });
+      // 🎯 AUTO-UPDATE INVOICE if exists (SYNC - wait for completion)
+      // Update invoice immediately so frontend sees the changes
+      try {
+        console.log('\n📝 Checking for existing invoice to update...');
+        const existingInvoice = await prisma.invoices.findUnique({
+          where: { bookingId: id }
+        });
 
-          if (existingInvoice) {
-            console.log(`📄 Found invoice ${existingInvoice.invoiceNumber}, updating...`);
-            const { invoiceService } = await import('./invoiceService');
-            await invoiceService.updateInvoiceFromBooking(existingInvoice.id, updatedBooking);
-            console.log('✅ Invoice updated successfully');
-          }
-        } catch (error: any) {
-          console.error('⚠️ Failed to update invoice:', error.message);
+        if (existingInvoice) {
+          console.log(`📄 Found invoice ${existingInvoice.invoiceNumber}, updating...`);
+          const { invoiceService } = await import('./invoiceService');
+          await invoiceService.updateInvoiceFromBooking(existingInvoice.id, updatedBooking);
+          console.log('✅ Invoice updated successfully');
+        } else {
+          console.log('ℹ️ No invoice found for this booking');
         }
-      })();
+      } catch (error: any) {
+        console.error('⚠️ Failed to update invoice:', error.message);
+      }
 
       return updatedBooking;
     }
