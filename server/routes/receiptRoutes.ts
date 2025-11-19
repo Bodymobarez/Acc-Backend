@@ -24,7 +24,7 @@ router.post(
     body('receiptNumber').notEmpty().withMessage('Receipt number is required'),
     body('customerId').notEmpty().withMessage('Customer is required'),
     body('amount').isFloat({ min: 0.01 }).withMessage('Amount must be greater than 0'),
-    body('paymentMethod').isIn(['CASH', 'BANK', 'CREDIT_CARD', 'CHECK']).withMessage('Invalid payment method'),
+    body('paymentMethod').isIn(['CASH', 'BANK', 'CREDIT_CARD', 'CHECK', 'SUPPLIER']).withMessage('Invalid payment method'),
   ],
   handleValidationErrors,
   async (req: Request, res: Response) => {
