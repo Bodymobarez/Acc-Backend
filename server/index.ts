@@ -99,10 +99,9 @@ app.use((req: Request, res: Response, next) => {
   next();
 });
 
-// Handle preflight requests - removed because CORS middleware handles it
-// app.options(/.*/, (req: Request, res: Response) => {
-//   res.status(200).end();
-// });
+// Handle preflight requests explicitly for Netlify Functions
+// CORS middleware should handle it, but explicitly returning 200 for OPTIONS ensures compatibility
+app.options('*', cors(corsOptions));
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {
