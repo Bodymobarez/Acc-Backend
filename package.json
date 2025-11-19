@@ -6,8 +6,8 @@
     "bun": ">=1.1.0"
   },
   "scripts": {
-    "dev": "bun --watch server/index-hono.ts",
-    "start": "bun server/index-hono.ts",
+    "dev": "DATABASE_URL=\"postgresql://neondb_owner:npg_V8KJLriGjSn5@ep-lucky-cake-ae2hozjr-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" JWT_SECRET=\"Tjxquwvbnu6Knk988ZJbLdvoMfygmnNvPZ3n+MDzjSU=\" JWT_EXPIRES_IN=\"7d\" PORT=3001 NODE_ENV=development bun --watch server/index-hono.ts",
+    "start": "DATABASE_URL=\"postgresql://neondb_owner:npg_V8KJLriGjSn5@ep-lucky-cake-ae2hozjr-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" JWT_SECRET=\"Tjxquwvbnu6Knk988ZJbLdvoMfygmnNvPZ3n+MDzjSU=\" JWT_EXPIRES_IN=\"7d\" PORT=3001 NODE_ENV=development bun server/index-hono.ts",
     "dev:old": "bun --watch server/index.ts",
     "start:old": "bun server/index.ts",
     "build": "bun build server/index-hono.ts --outdir ./dist --target bun",
@@ -24,6 +24,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@upstash/redis": "^1.34.3",
+    "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "bullmq": "^5.12.0",
     "cors": "^2.8.5",
@@ -35,6 +36,7 @@
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.3",
     "multer": "^1.4.5-lts.2",
+    "nanoid": "^5.0.9",
     "pdfkit": "^0.17.2",
     "serverless-http": "^4.0.0",
     "zod": "^3.23.8"

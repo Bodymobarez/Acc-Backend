@@ -19,15 +19,25 @@ dotenv.config({ path: path.join(dirPath, '../../.env') });
 // Prevents multiple instances that can exhaust database connections
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
+// Get DATABASE_URL from environment
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  console.warn('⚠️  DATABASE_URL not found in environment variables');
+  console.warn('⚠️  Database operations will fail until DATABASE_URL is set');
+}
+
 export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL,
+    ...(databaseUrl && {
+      datasources: {
+        db: {
+          url: databaseUrl,
+        },
       },
-    },
+    }),
   });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;

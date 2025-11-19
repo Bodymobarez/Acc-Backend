@@ -277,6 +277,9 @@ bookings.put(
       const id = c.req.param('id');
       const data = await c.req.json();
       
+      console.log(`📝 PUT /bookings/${id} - Update request received`);
+      console.log(`📦 Data received:`, JSON.stringify(data, null, 2));
+      
       const booking = await bookingService.updateBooking(id, data);
       
       return c.json({
@@ -284,9 +287,17 @@ bookings.put(
         data: booking
       });
     } catch (error: any) {
+      console.error(`❌ Error updating booking:`, error);
+      console.error(`📋 Error details:`, {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      
       return c.json({
         success: false,
-        error: error.message
+        error: error.message || 'Failed to update booking',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       }, 400);
     }
   }

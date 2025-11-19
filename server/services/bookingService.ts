@@ -1,9 +1,43 @@
 import { bookings } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { calculateVAT, calculateCommissions, calculateVATOnProfit, convertToAED, generateBookingNumber } from '../utils/calculations';
-import { accountingService } from './accountingService';
 import { prisma } from '../lib/prisma';
 import { InvoiceService } from './invoiceService';
+
+// Lazy load accountingService to avoid issues in serverless environments
+let accountingServiceInstance: any = null;
+const getAccountingService = async () => {
+  try {
+    if (!accountingServiceInstance) {
+      // Try different import paths for different environments
+      try {
+        const module = await import('./accountingService');
+        accountingServiceInstance = module.accountingService;
+      } catch (e1) {
+        try {
+          // Try with .js extension (for compiled code)
+          const module = await import('./accountingService.js');
+          accountingServiceInstance = module.accountingService;
+        } catch (e2) {
+          console.error('❌ Failed to import accountingService with both paths:', e1.message, e2.message);
+          throw e2;
+        }
+      }
+    }
+    return accountingServiceInstance;
+  } catch (error: any) {
+    console.error('❌ Failed to load accountingService:', error.message);
+    console.error('❌ Error stack:', error.stack);
+    // Return a mock service that does nothing to prevent crashes
+    return {
+      createBookingJournalEntry: async () => { console.warn('⚠️ accountingService not available - skipping journal entry'); },
+      createBookingRevenueJournalEntry: async () => { console.warn('⚠️ accountingService not available - skipping journal entry'); },
+      createBookingVATJournalEntry: async () => { console.warn('⚠️ accountingService not available - skipping journal entry'); },
+      createCommissionJournalEntry: async () => { console.warn('⚠️ accountingService not available - skipping journal entry'); },
+      updateBookingJournalEntries: async () => { console.warn('⚠️ accountingService not available - skipping journal entry update'); }
+    };
+  }
+};
 
 const invoiceService = new InvoiceService();
 
@@ -242,6 +276,7 @@ export class BookingService {
         });
         
         // Create accounting journal entries for FLIGHT booking - 4 entries
+        const accountingService = await getAccountingService();
         // 1. Cost entry (with supplier)
         await accountingService.createBookingJournalEntry(booking);
         // 2. Revenue entry (with customer)
@@ -347,6 +382,7 @@ export class BookingService {
         });
         
         // Create accounting journal entries for non-FLIGHT UAE booking - 4 entries
+        const accountingService = await getAccountingService();
         // 1. Cost entry (with supplier)
         await accountingService.createBookingJournalEntry(booking);
         // 2. Revenue entry (with customer)
@@ -458,6 +494,7 @@ export class BookingService {
       });
       
       // Create accounting journal entries - 4 entries
+      const accountingService = await getAccountingService();
       // 1. Cost entry (with supplier)
       await accountingService.createBookingJournalEntry(booking);
       // 2. Revenue entry (with customer)
@@ -578,15 +615,18 @@ export class BookingService {
       }
     });
     
-    // 🎯 AUTO-UPDATE JOURNAL ENTRIES for commission changes
-    console.log('\n📒 Updating journal entries for commission changes...');
-    const { accountingService } = await import('./accountingService');
-    try {
-      await accountingService.updateBookingJournalEntries(bookingId);
-      console.log('✅ Journal entries updated successfully');
-    } catch (error: any) {
-      console.error('⚠️ Failed to update journal entries:', error.message);
-    }
+    // 🎯 AUTO-UPDATE JOURNAL ENTRIES for commission changes (async - don't wait)
+    // Run in background to improve response time
+    (async () => {
+      try {
+        console.log('\n📒 Updating journal entries for commission changes (background)...');
+        const accountingService = await getAccountingService();
+        await accountingService.updateBookingJournalEntries(bookingId);
+        console.log('✅ Journal entries updated successfully');
+      } catch (error: any) {
+        console.error('⚠️ Failed to update journal entries:', error.message);
+      }
+    })();
     
     return updated;
   }
@@ -947,32 +987,38 @@ export class BookingService {
         }
       });
 
-      // 🎯 AUTO-UPDATE JOURNAL ENTRIES for booking changes
-      console.log('\n📒 Updating journal entries for booking changes...');
-      const { accountingService } = await import('./accountingService');
-      try {
-        await accountingService.updateBookingJournalEntries(id);
-        console.log('✅ Journal entries updated successfully');
-      } catch (error: any) {
-        console.error('⚠️ Failed to update journal entries:', error.message);
-      }
-
-      // 🎯 AUTO-UPDATE INVOICE if exists
-      console.log('\n📝 Checking for existing invoice to update...');
-      const existingInvoice = await prisma.invoices.findUnique({
-        where: { bookingId: id }
-      });
-
-      if (existingInvoice) {
-        console.log(`📄 Found invoice ${existingInvoice.invoiceNumber}, updating...`);
-        const { invoiceService } = await import('./invoiceService');
+      // 🎯 AUTO-UPDATE JOURNAL ENTRIES for booking changes (async - don't wait)
+      // Run in background to improve response time
+      (async () => {
         try {
-          await invoiceService.updateInvoiceFromBooking(existingInvoice.id, updatedBooking);
-          console.log('✅ Invoice updated successfully');
+          console.log('\n📒 Updating journal entries for booking changes (background)...');
+          const accountingService = await getAccountingService();
+          await accountingService.updateBookingJournalEntries(id);
+          console.log('✅ Journal entries updated successfully');
+        } catch (error: any) {
+          console.error('⚠️ Failed to update journal entries:', error.message);
+        }
+      })();
+
+      // 🎯 AUTO-UPDATE INVOICE if exists (async - don't wait)
+      // Run in background to improve response time
+      (async () => {
+        try {
+          console.log('\n📝 Checking for existing invoice to update (background)...');
+          const existingInvoice = await prisma.invoices.findUnique({
+            where: { bookingId: id }
+          });
+
+          if (existingInvoice) {
+            console.log(`📄 Found invoice ${existingInvoice.invoiceNumber}, updating...`);
+            const { invoiceService } = await import('./invoiceService');
+            await invoiceService.updateInvoiceFromBooking(existingInvoice.id, updatedBooking);
+            console.log('✅ Invoice updated successfully');
+          }
         } catch (error: any) {
           console.error('⚠️ Failed to update invoice:', error.message);
         }
-      }
+      })();
 
       return updatedBooking;
     }

@@ -399,6 +399,7 @@ app.route('/api/migration', migrationRoutes);
 app.route('/api/bank-accounts', bankAccountRoutes);
 app.route('/api/cash-registers', cashRegisterRoutes);
 app.route('/api/notifications', notificationRoutes);
+app.route('/api/reports', reportRoutes);
 app.route('/api/reports/employee-commissions', employeeCommissionRoutes);
 
 // Temporary test route

@@ -157,12 +157,17 @@ customers.get(
         }
       });
       
-      return c.json(customerList);
+      return c.json({
+        success: true,
+        data: customerList
+      });
     } catch (error: any) {
-      console.error('Error fetching customers:', error);
+      console.error('❌ Error fetching customers:', error);
+      console.error('Error stack:', error.stack);
       return c.json({
         success: false,
-        error: error.message || 'Failed to fetch customers'
+        error: error.message || 'Failed to fetch customers',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       }, 500);
     }
   }
