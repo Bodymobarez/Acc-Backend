@@ -50,6 +50,8 @@ export const receiptService = {
         matchingStatus: (input as any).matchingStatus || 'NOT_MATCHED', // Add matching status
         matchedAmount: (input as any).matchedAmount || 0, // Add matched amount
         createdById: input.createdById || null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       } as any,
       include: {
         customers: {

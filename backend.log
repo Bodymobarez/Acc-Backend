@@ -7,12 +7,3 @@
 ✅ Database connected successfully
 ℹ️  Currency automatic updates DISABLED
    Updates will only occur when manually triggered via "Update Rates Online" button
-⏳ Attempting database connection...
-🚀 Server is running on port 3001
-📍 Environment: production
-🔗 Local: http://localhost:3001
-🌐 Network: http://0.0.0.0:3001
-❤️  Health check: http://localhost:3001/health
-✅ Database connected successfully
-ℹ️  Currency automatic updates DISABLED
-   Updates will only occur when manually triggered via "Update Rates Online" button
