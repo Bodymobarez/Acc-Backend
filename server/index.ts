@@ -100,8 +100,13 @@ app.use((req: Request, res: Response, next) => {
 });
 
 // Handle preflight requests explicitly for Netlify Functions
-// CORS middleware should handle it, but explicitly returning 200 for OPTIONS ensures compatibility
-app.options('*', cors(corsOptions));
+// CORS middleware handles most cases, but we add catch-all for Netlify compatibility
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {
