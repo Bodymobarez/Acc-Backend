@@ -31,6 +31,7 @@ interface UpdateReceiptInput {
 export const receiptService = {
   // Create new receipt
   async createReceipt(input: CreateReceiptInput) {
+    console.log('🧾 Creating receipt:', JSON.stringify(input, null, 2));
 
     const receipt = await prisma.receipts.create({
       data: {
@@ -75,62 +76,64 @@ export const receiptService = {
       // Get invoice details
       const invoice = await prisma.invoices.findUnique({
         where: { id: input.invoiceId },
-        select: { totalAmount: true, paidAmount: true }
+        select: { 
+          totalAmount: true, 
+          bookingId: true 
+        }
       });
       
       if (invoice) {
-        // Calculate new paid amount
-        const newPaidAmount = (invoice.paidAmount || 0) + input.amount;
+        // Calculate total paid from all receipts for this invoice
+        const allReceipts = await prisma.receipts.findMany({
+          where: {
+            invoiceId: input.invoiceId,
+            status: { not: 'CANCELLED' }
+          },
+          select: { amount: true }
+        });
+        
+        const totalPaid = allReceipts.reduce((sum, r) => sum + r.amount, 0);
         
         // Use epsilon for floating-point comparison (allow 0.01 difference)
         const epsilon = 0.01;
-        const difference = invoice.totalAmount - newPaidAmount;
+        const difference = invoice.totalAmount - totalPaid;
         
         // Determine new status based on payments
         let newStatus = 'UNPAID';
-        if (Math.abs(difference) < epsilon || newPaidAmount >= invoice.totalAmount) {
+        if (Math.abs(difference) < epsilon || totalPaid >= invoice.totalAmount) {
           // Fully paid (within epsilon tolerance)
           newStatus = 'PAID';
-        } else if (newPaidAmount > 0) {
+        } else if (totalPaid > 0) {
           // Partially paid
           newStatus = 'PARTIALLY_PAID';
         }
         
         console.log(`✅ Auto-updating invoice status:`);
         console.log(`   Invoice Amount: ${invoice.totalAmount}`);
-        console.log(`   Previous Paid: ${invoice.paidAmount || 0}`);
         console.log(`   Payment Amount: ${input.amount}`);
-        console.log(`   New Total Paid: ${newPaidAmount}`);
+        console.log(`   Total Paid: ${totalPaid}`);
         console.log(`   Difference: ${difference}`);
         console.log(`   New Status: ${newStatus}`);
         
-        // Update invoice status and paid amount
+        // Update invoice status
         await prisma.invoices.update({
           where: { id: input.invoiceId },
           data: { 
             status: newStatus,
-            paidAmount: newPaidAmount,
             updatedAt: new Date()
           },
         });
         
         // If invoice is fully paid, update booking status to COMPLETE
-        if (newStatus === 'PAID') {
-          const invoiceWithBooking = await prisma.invoices.findUnique({
-            where: { id: input.invoiceId },
-            select: { bookingId: true }
+        if (newStatus === 'PAID' && invoice.bookingId) {
+          await prisma.bookings.update({
+            where: { id: invoice.bookingId },
+            data: { 
+              status: 'COMPLETE',
+              updatedAt: new Date()
+            }
           });
-          
-          if (invoiceWithBooking?.bookingId) {
-            await prisma.bookings.update({
-              where: { id: invoiceWithBooking.bookingId },
-              data: { 
-                status: 'COMPLETE',
-                updatedAt: new Date()
-              }
-            });
-            console.log(`✅ Booking status updated to COMPLETE`);
-          }
+          console.log(`✅ Booking status updated to COMPLETE`);
         }
       }
     }

@@ -204,6 +204,13 @@ export class InvoiceService {
           where: {
             invoiceId: invoice.id,
             status: { not: 'CANCELLED' }
+          },
+          select: {
+            id: true,
+            receiptNumber: true,
+            amount: true,
+            receiptDate: true,
+            status: true
           }
         });
         
@@ -211,7 +218,8 @@ export class InvoiceService {
         
         return {
           ...invoice,
-          paidAmount
+          paidAmount,
+          receipts // Include receipts array
         };
       })
     );
