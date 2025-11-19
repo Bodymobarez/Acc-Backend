@@ -439,34 +439,182 @@ router.get('/customer-statement/:customerId', authenticate, async (req: AuthRequ
     const { dateFrom, dateTo, currency } = req.query;
     const targetCurrency = (currency as string) || 'AED';
 
-    const bookings = await prisma.bookings.findMany({
-      where: {
-        customerId,
-        bookingDate: { gte: new Date(dateFrom as string), lte: new Date(dateTo as string) }
-      },
-      orderBy: { bookingDate: 'asc' }
+    console.log('📊 Customer Statement Request:', {
+      customerId,
+      dateFrom,
+      dateTo,
+      currency: targetCurrency
     });
 
+    // Get invoices for this customer in date range
+    // Add one day to dateTo to include all transactions on the last day
+    const dateToEnd = new Date(dateTo as string);
+    dateToEnd.setDate(dateToEnd.getDate() + 1);
+    
+    const invoices = await prisma.invoices.findMany({
+      where: {
+        customerId,
+        invoiceDate: { 
+          gte: new Date(dateFrom as string), 
+          lt: dateToEnd
+        }
+      },
+      orderBy: { invoiceDate: 'asc' },
+      select: {
+        id: true,
+        invoiceNumber: true,
+        invoiceDate: true,
+        totalAmount: true,
+        status: true,
+        bookings: {
+          select: {
+            bookingNumber: true,
+            serviceType: true,
+            serviceDetails: true
+          }
+        }
+      }
+    });
+
+    console.log(`📄 Found ${invoices.length} invoices:`, invoices);
+
+    // Check all invoices for this customer (any date)
+    const allInvoices = await prisma.invoices.findMany({
+      where: { customerId },
+      select: { invoiceNumber: true, invoiceDate: true, totalAmount: true }
+    });
+    console.log(`📋 Total invoices for customer (any date): ${allInvoices.length}`, allInvoices);
+
+    // Get receipts for this customer in date range
     const receipts = await prisma.receipts.findMany({
       where: {
         customerId,
-        receiptDate: { gte: new Date(dateFrom as string), lte: new Date(dateTo as string) }
+        receiptDate: { 
+          gte: new Date(dateFrom as string), 
+          lt: dateToEnd
+        },
+        status: { not: 'CANCELLED' }
       },
-      orderBy: { receiptDate: 'asc' }
+      orderBy: { receiptDate: 'asc' },
+      select: {
+        id: true,
+        receiptNumber: true,
+        receiptDate: true,
+        amount: true,
+        paymentMethod: true,
+        reference: true,
+        invoiceId: true
+      }
     });
 
-    let balance = 0;
+    console.log(`💰 Found ${receipts.length} receipts:`, receipts);
+
+    // Calculate opening balance (all invoices before dateFrom minus all receipts before dateFrom)
+    const openingInvoices = await prisma.invoices.findMany({
+      where: {
+        customerId,
+        invoiceDate: { lt: new Date(dateFrom as string) }
+      },
+      select: { totalAmount: true }
+    });
+
+    const openingReceipts = await prisma.receipts.findMany({
+      where: {
+        customerId,
+        receiptDate: { lt: new Date(dateFrom as string) },
+        status: { not: 'CANCELLED' }
+      },
+      select: { amount: true }
+    });
+
+    // Get customer deposit and opening balance
+    const customer = await prisma.customers.findUnique({
+      where: { id: customerId },
+      select: { 
+        depositAmount: true,
+        openingBalance: true
+      }
+    });
+    const depositAmount = customer?.depositAmount || 0;
+    const customerOpeningBalance = customer?.openingBalance || 0;
+
+    // Calculate opening balance from transactions + customer's opening balance
+    const transactionsOpeningBalance = openingInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0) - 
+                          openingReceipts.reduce((sum, rec) => sum + rec.amount, 0);
+    
+    const openingBalance = transactionsOpeningBalance + customerOpeningBalance;
+
+    let balance = openingBalance;
     const transactions: any[] = [];
 
-    // Add bookings as debits (convert to target currency)
-    bookings.forEach(b => {
-      const amount = convertCurrency(b.saleAmount, b.saleCurrency, targetCurrency);
-      balance += amount;
+    // Add opening balance entry
+    if (Math.abs(openingBalance) > 0.01) {
       transactions.push({
-        date: b.bookingDate,
-        type: 'Invoice',
-        reference: b.bookingNumber,
-        description: `Booking ${b.bookingNumber}`,
+        date: new Date(dateFrom as string),
+        type: 'Opening Balance',
+        reference: '-',
+        description: 'Opening Balance',
+        debit: openingBalance > 0 ? openingBalance : 0,
+        credit: openingBalance < 0 ? Math.abs(openingBalance) : 0,
+        balance: openingBalance,
+        currency: targetCurrency
+      });
+    }
+
+    // Add invoices as debits
+    invoices.forEach(inv => {
+      const amount = inv.totalAmount;
+      balance += amount;
+      
+      // Build description with booking details
+      let description = `Invoice ${inv.invoiceNumber}`;
+      
+      if (inv.bookings) {
+        const serviceType = inv.bookings.serviceType || '';
+        let details: any = {};
+        
+        try {
+          details = typeof inv.bookings.serviceDetails === 'string' 
+            ? JSON.parse(inv.bookings.serviceDetails)
+            : inv.bookings.serviceDetails || {};
+        } catch (e) {
+          details = {};
+        }
+        
+        // Extract passenger name
+        let passengerName = '';
+        if (details.passengers && details.passengers.length > 0) {
+          const passenger = details.passengers[0];
+          passengerName = `${passenger.firstName || ''} ${passenger.lastName || ''}`.trim();
+        } else if (details.passengerName) {
+          passengerName = details.passengerName;
+        }
+        
+        // Extract service-specific details
+        let serviceInfo = '';
+        if (serviceType === 'HOTEL' && details.hotelName) {
+          serviceInfo = details.hotelName;
+        } else if (serviceType === 'FLIGHT' && details.airline) {
+          serviceInfo = details.airline;
+        } else if (serviceType === 'VISA') {
+          serviceInfo = details.visaType ? `${details.visaType} - ${details.country || ''}` : details.country || '';
+        }
+        
+        // Build final description (without service type since it's in the Type column)
+        const parts = [passengerName, serviceInfo].filter(Boolean);
+        if (parts.length > 0) {
+          description = parts.join(' - ');
+        }
+      }
+      
+      // Use service type as transaction type, fallback to 'Invoice'
+      const transactionType = inv.bookings?.serviceType || 'Invoice';
+      
+      transactions.push({
+        date: inv.invoiceDate,
+        type: transactionType,
+        reference: inv.invoiceNumber,
+        description,
         debit: amount,
         credit: 0,
         balance,
@@ -474,15 +622,15 @@ router.get('/customer-statement/:customerId', authenticate, async (req: AuthRequ
       });
     });
 
-    // Add receipts as credits (assuming receipts are in AED, convert to target)
-    receipts.forEach(r => {
-      const amount = convertCurrency(r.amount, 'AED', targetCurrency);
+    // Add receipts as credits
+    receipts.forEach(rec => {
+      const amount = rec.amount;
       balance -= amount;
       transactions.push({
-        date: r.receiptDate,
+        date: rec.receiptDate,
         type: 'Receipt',
-        reference: r.receiptNumber,
-        description: `Receipt ${r.receiptNumber}`,
+        reference: rec.receiptNumber,
+        description: `Receipt ${rec.receiptNumber} - ${rec.paymentMethod}${rec.reference ? ` (${rec.reference})` : ''}`,
         debit: 0,
         credit: amount,
         balance,
@@ -490,15 +638,34 @@ router.get('/customer-statement/:customerId', authenticate, async (req: AuthRequ
       });
     });
 
+    // Sort all transactions by date
+    const sortedTransactions = transactions.sort((a, b) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    // Recalculate running balance
+    let runningBalance = openingBalance;
+    const recalculatedTransactions = sortedTransactions.map((t, index) => {
+      if (index === 0 && t.type === 'Opening Balance') {
+        return t; // Keep opening balance as is
+      }
+      runningBalance += (t.debit - t.credit);
+      return { ...t, balance: runningBalance };
+    });
+
+    const totalDebit = invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+    const totalCredit = receipts.reduce((sum, rec) => sum + rec.amount, 0);
+
     res.json({
       success: true,
       data: {
-        transactions: transactions.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+        transactions: recalculatedTransactions,
         summary: {
-          openingBalance: 0,
-          totalDebit: bookings.reduce((sum, b) => sum + convertCurrency(b.saleAmount, b.saleCurrency, targetCurrency), 0),
-          totalCredit: receipts.reduce((sum, r) => sum + convertCurrency(r.amount, 'AED', targetCurrency), 0),
-          closingBalance: balance
+          openingBalance,
+          depositAmount,
+          totalDebit,
+          totalCredit,
+          closingBalance: openingBalance + totalDebit - totalCredit
         }
       }
     });

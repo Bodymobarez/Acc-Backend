@@ -208,6 +208,9 @@ model customers {
   postalCode           String?
   taxNumber            String?
   taxRegistered        Boolean                @default(false)
+  depositAmount        Float?                 @default(0)
+  openingBalance       Float?                 @default(0)
+  preferredCurrency    String?                @default("AED")
   notes                String?
   isActive             Boolean                @default(true)
   createdAt            DateTime               @default(now())

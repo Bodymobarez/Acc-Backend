@@ -127,6 +127,8 @@ router.post(
         postalCode: requestData.postalCode || null,
         taxNumber: requestData.emiratesId || null,
         taxRegistered: requestData.taxRegistered || false,
+        depositAmount: requestData.depositAmount || 0,
+        openingBalance: requestData.openingBalance || 0,
         notes: requestData.notes || null,
         isActive: true,
         updatedAt: new Date()
@@ -152,6 +154,58 @@ router.post(
         data: customerData
       });
 
+      // Create journal entry for deposit if amount > 0
+      if (requestData.depositAmount && requestData.depositAmount > 0) {
+        try {
+          // Find bank AED account (debit) and customer deposit account (credit)
+          const bankAccount = await prisma.accounts.findFirst({
+            where: { 
+              OR: [
+                { code: { startsWith: '1010' } }, // Bank AED
+                { name: { contains: 'Bank', mode: 'insensitive' } }
+              ]
+            }
+          });
+
+          const depositAccount = await prisma.accounts.findFirst({
+            where: { 
+              OR: [
+                { name: { contains: 'تأمين', mode: 'insensitive' } },
+                { name: { contains: 'Deposit', mode: 'insensitive' } },
+                { name: { contains: 'Customer Deposit', mode: 'insensitive' } }
+              ]
+            }
+          });
+
+          if (bankAccount && depositAccount) {
+            const entryNumber = `JE-${Date.now()}`;
+            const customerName = customer.companyName || `${customer.firstName} ${customer.lastName}`;
+            
+            await prisma.journal_entries.create({
+              data: {
+                id: randomUUID(),
+                entryNumber,
+                date: new Date(),
+                description: `Customer Deposit - ${customerName}`,
+                reference: customer.customerCode,
+                debitAccountId: depositAccount.id,
+                creditAccountId: bankAccount.id,
+                amount: requestData.depositAmount,
+                transactionType: 'DEPOSIT',
+                status: 'POSTED',
+                postedDate: new Date(),
+                createdAt: new Date(),
+                updatedAt: new Date()
+              }
+            });
+            console.log(`✅ Journal entry created for deposit: ${entryNumber}`);
+          }
+        } catch (journalError) {
+          console.error('⚠️ Failed to create journal entry for deposit:', journalError);
+          // Continue anyway - customer was created successfully
+        }
+      }
+
       res.status(201).json({
         success: true,
         data: customer
@@ -176,6 +230,14 @@ router.put(
       const { id } = req.params;
       const customerData = req.body;
 
+      console.log('📝 Update customer data:', customerData);
+
+      // Get old deposit amount to check if changed
+      const oldCustomer = await prisma.customers.findUnique({
+        where: { id },
+        select: { depositAmount: true, customerCode: true, firstName: true, lastName: true, companyName: true }
+      });
+
       const customer = await prisma.customers.update({
         where: { id },
         data: {
@@ -183,6 +245,62 @@ router.put(
           updatedAt: new Date()
         }
       });
+
+      // Create journal entry if deposit amount changed
+      const oldDeposit = oldCustomer?.depositAmount || 0;
+      const newDeposit = customerData.depositAmount || 0;
+      const depositDifference = newDeposit - oldDeposit;
+
+      if (depositDifference !== 0) {
+        try {
+          // Find bank AED account and customer deposit account
+          const bankAccount = await prisma.accounts.findFirst({
+            where: { 
+              OR: [
+                { code: { startsWith: '1010' } },
+                { name: { contains: 'Bank', mode: 'insensitive' } }
+              ]
+            }
+          });
+
+          const depositAccount = await prisma.accounts.findFirst({
+            where: { 
+              OR: [
+                { name: { contains: 'تأمين', mode: 'insensitive' } },
+                { name: { contains: 'Deposit', mode: 'insensitive' } },
+                { name: { contains: 'Customer Deposit', mode: 'insensitive' } }
+              ]
+            }
+          });
+
+          if (bankAccount && depositAccount) {
+            const entryNumber = `JE-${Date.now()}`;
+            const customerName = customer.companyName || `${customer.firstName} ${customer.lastName}`;
+            const isIncrease = depositDifference > 0;
+            
+            await prisma.journal_entries.create({
+              data: {
+                id: randomUUID(),
+                entryNumber,
+                date: new Date(),
+                description: `${isIncrease ? 'Increase' : 'Decrease'} Customer Deposit - ${customerName}`,
+                reference: oldCustomer?.customerCode || customer.customerCode,
+                debitAccountId: isIncrease ? depositAccount.id : bankAccount.id,
+                creditAccountId: isIncrease ? bankAccount.id : depositAccount.id,
+                amount: Math.abs(depositDifference),
+                transactionType: 'DEPOSIT',
+                status: 'POSTED',
+                postedDate: new Date(),
+                createdAt: new Date(),
+                updatedAt: new Date()
+              }
+            });
+            console.log(`✅ Journal entry created for deposit change: ${entryNumber}`);
+          }
+        } catch (journalError) {
+          console.error('⚠️ Failed to create journal entry for deposit change:', journalError);
+        }
+      }
 
       res.json({
         success: true,
