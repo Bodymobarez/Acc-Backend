@@ -46,31 +46,36 @@ export class InvoiceService {
     const invoiceNumber = generateInvoiceNumber(prefix, nextSequence);
     
     // Create invoice - ALWAYS use AED amounts
-    // For FLIGHT bookings: NO VAT in invoice (VAT is internal on profit only)
+    // For FLIGHT bookings: VAT is saved but NOT shown in print (only in list)
     let invoiceSubtotal: number;
     let invoiceVAT: number;
     let invoiceTotal: number;
     
     if (booking.serviceType === 'FLIGHT') {
-      // FLIGHT: Invoice shows sale amount only, NO VAT
+      // ✈️ FLIGHT: Total = Sale (VAT calculated on profit, shown in list only)
+      invoiceSubtotal = booking.saleInAED;
+      invoiceVAT = booking.vatAmount || 0; // Save VAT for display in list
+      invoiceTotal = booking.saleInAED; // Total = Sale (VAT not added to customer)
+    } else if (booking.vatApplicable) {
+      // VAT APPLICABLE - calculate based on UAE vs non-UAE
+      if (booking.isUAEBooking) {
+        // ✅ UAE BOOKING: Sale INCLUDES VAT (VAT is part of sale price)
+        // Sale = Subtotal + VAT, so Subtotal = Sale - VAT
+        invoiceVAT = booking.vatAmount || (booking.saleInAED - (booking.saleInAED / 1.05));
+        invoiceSubtotal = booking.saleInAED - invoiceVAT;
+        invoiceTotal = booking.saleInAED;
+      } else {
+        // ✅ NON-UAE BOOKING (Standard VAT): VAT is ADDED to sale
+        // Total = Sale + VAT
+        invoiceSubtotal = booking.saleInAED;
+        invoiceVAT = booking.vatAmount || (booking.saleInAED * 0.05);
+        invoiceTotal = booking.saleInAED + invoiceVAT;
+      }
+    } else {
+      // ❌ NO VAT APPLICABLE
       invoiceSubtotal = booking.saleInAED;
       invoiceVAT = 0;
       invoiceTotal = booking.saleInAED;
-    } else {
-      // Other services: Calculate VAT properly
-      // If booking has VAT applicable and is UAE booking
-      if (booking.vatApplicable && booking.isUAEBooking) {
-        // Sale amount INCLUDES VAT (5%)
-        // Calculate: Subtotal = Sale / 1.05, VAT = Sale - Subtotal
-        invoiceSubtotal = booking.saleInAED / 1.05;
-        invoiceVAT = booking.saleInAED - invoiceSubtotal;
-        invoiceTotal = booking.saleInAED;
-      } else {
-        // No VAT applicable or non-UAE booking
-        invoiceSubtotal = booking.saleInAED;
-        invoiceVAT = 0;
-        invoiceTotal = booking.saleInAED;
-      }
     }
     
     const invoice = await prisma.invoices.create({
@@ -273,23 +278,28 @@ export class InvoiceService {
     let invoiceTotal: number;
     
     if (booking.serviceType === 'FLIGHT') {
-      // FLIGHT: Invoice shows sale amount only, NO VAT
+      // ✈️ FLIGHT: Total = Sale (VAT calculated on profit, shown in list only)
       invoiceSubtotal = booking.saleInAED;
-      invoiceVAT = 0;
-      invoiceTotal = booking.saleInAED;
-    } else {
-      // Use VAT amount from booking (already calculated correctly)
+      invoiceVAT = booking.vatAmount || 0; // Save VAT for display in list
+      invoiceTotal = booking.saleInAED; // Total = Sale (VAT not added to customer)
+    } else if (booking.vatApplicable) {
+      // VAT APPLICABLE - calculate based on UAE vs non-UAE
       invoiceVAT = booking.vatAmount || 0;
       
-      if (invoiceVAT > 0) {
-        // VAT exists - calculate subtotal by removing VAT
+      if (booking.isUAEBooking) {
+        // ✅ UAE BOOKING: Sale INCLUDES VAT
         invoiceSubtotal = booking.saleInAED - invoiceVAT;
         invoiceTotal = booking.saleInAED;
       } else {
-        // No VAT
+        // ✅ NON-UAE BOOKING (Standard VAT): VAT is ADDED to sale
         invoiceSubtotal = booking.saleInAED;
-        invoiceTotal = booking.saleInAED;
+        invoiceTotal = booking.saleInAED + invoiceVAT;
       }
+    } else {
+      // ❌ NO VAT APPLICABLE
+      invoiceSubtotal = booking.saleInAED;
+      invoiceVAT = 0;
+      invoiceTotal = booking.saleInAED;
     }
     
     console.log('📊 Invoice amounts calculated:', {

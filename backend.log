@@ -10615,3 +10615,3786 @@ User permissions: {
   managePermissions: true,
 }
 ✅ Access granted: User has admin-level role
+2025-11-19T23:17:37.450Z - GET /api/customers
+Checking permission: viewCustomers
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-19T23:17:37.454Z - GET /api/customers
+Checking permission: viewCustomers
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-19T23:17:38.430Z - GET /api/customers
+Checking permission: viewCustomers
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+2025-11-20T15:00:46.778Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+2025-11-20T15:04:20.271Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+2025-11-20T15:05:52.515Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+2025-11-20T15:39:27.324Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T15:39:34.604Z - GET /api/invoices/0dee570b-a83b-411a-8b6b-b01dcc658f86
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+2025-11-20T16:22:40.942Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+2025-11-20T16:22:47.642Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:22:53.679Z - GET /api/invoices/0dee570b-a83b-411a-8b6b-b01dcc658f86
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:24:24.972Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+2025-11-20T16:24:33.601Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+2025-11-20T16:24:35.779Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:25:04.154Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:25:05.716Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+2025-11-20T16:25:11.934Z - GET /api/invoices/0dee570b-a83b-411a-8b6b-b01dcc658f86
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:25:18.610Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:25:52.006Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:25:52.012Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:28:24.866Z - GET /api/invoices/c8c42eee-b21e-4cbc-b045-f0648d4ef7cf
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:28:35.889Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:28:40.454Z - GET /api/receipts
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+2025-11-20T16:40:32.963Z - GET /api/receipts
+2025-11-20T16:41:52.386Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+2025-11-20T16:41:58.279Z - GET /api/receipts
+2025-11-20T16:41:58.281Z - GET /api/payments
+2025-11-20T16:41:58.285Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:41:58.288Z - GET /api/customers
+Checking permission: viewCustomers
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:41:58.293Z - GET /api/accounts
+2025-11-20T16:41:58.296Z - GET /api/journal-entries
+Checking permission: viewFinancialReports
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:41:58.610Z - GET /api/cash-registers
+2025-11-20T16:41:58.958Z - GET /api/bank-accounts
+2025-11-20T16:50:00.999Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:50:04.440Z - GET /api/cash-registers
+2025-11-20T16:50:04.443Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:50:04.450Z - GET /api/payments
+2025-11-20T16:50:04.454Z - GET /api/receipts
+2025-11-20T16:50:04.456Z - GET /api/customers
+Checking permission: viewCustomers
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+2025-11-20T16:50:05.811Z - GET /api/journal-entries
+Checking permission: viewFinancialReports
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:50:06.033Z - GET /api/accounts
+2025-11-20T16:50:06.074Z - GET /api/bank-accounts
+2025-11-20T16:50:12.378Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:50:17.292Z - GET /api/receipts
+2025-11-20T16:50:23.260Z - PUT /api/invoices/caf88618-2c9c-4d15-a259-e212d50be178
+Body: {"status":"PAID_AND_MATCHED"}
+Checking permission: editInvoice
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:50:23.896Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:50:26.884Z - GET /api/receipts
+2025-11-20T16:50:28.988Z - PUT /api/invoices/c8c42eee-b21e-4cbc-b045-f0648d4ef7cf
+Body: {"status":"PAID_AND_MATCHED"}
+Checking permission: editInvoice
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T16:50:29.650Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+2025-11-20T19:39:12.585Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T19:39:16.226Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+2025-11-20T19:54:52.017Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+2025-11-20T19:55:01.592Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+2025-11-20T20:04:21.001Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T20:04:22.556Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+2025-11-20T20:27:31.538Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T20:27:34.199Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T20:27:55.128Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T20:27:57.026Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+⏳ Attempting database connection...
+🚀 Server is running on port 3001
+📍 Environment: production
+🔗 Local: http://localhost:3001
+🌐 Network: http://0.0.0.0:3001
+❤️  Health check: http://localhost:3001/health
+✅ Database connected successfully
+ℹ️  Currency automatic updates DISABLED
+   Updates will only occur when manually triggered via "Update Rates Online" button
+⏳ Attempting database connection...
+🚀 Server is running on port 3001
+📍 Environment: production
+🔗 Local: http://localhost:3001
+🌐 Network: http://0.0.0.0:3001
+❤️  Health check: http://localhost:3001/health
+✅ Database connected successfully
+ℹ️  Currency automatic updates DISABLED
+   Updates will only occur when manually triggered via "Update Rates Online" button
+2025-11-20T20:35:09.410Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T20:35:12.470Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+2025-11-20T20:35:37.346Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T20:35:38.818Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+2025-11-20T20:37:06.509Z - GET /api/invoices/b54ab4e8-c81d-4e3b-b125-b60692dd234c
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T20:37:11.606Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T20:37:19.305Z - GET /api/invoices/bd82b278-10ba-4bc4-89d4-b961b9db2a16
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T20:37:28.097Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+⏳ Attempting database connection...
+🚀 Server is running on port 3001
+📍 Environment: production
+🔗 Local: http://localhost:3001
+🌐 Network: http://0.0.0.0:3001
+❤️  Health check: http://localhost:3001/health
+✅ Database connected successfully
+ℹ️  Currency automatic updates DISABLED
+   Updates will only occur when manually triggered via "Update Rates Online" button
+⏳ Attempting database connection...
+🚀 Server is running on port 3001
+📍 Environment: production
+🔗 Local: http://localhost:3001
+🌐 Network: http://0.0.0.0:3001
+❤️  Health check: http://localhost:3001/health
+✅ Database connected successfully
+ℹ️  Currency automatic updates DISABLED
+   Updates will only occur when manually triggered via "Update Rates Online" button
+⏳ Attempting database connection...
+🚀 Server is running on port 3001
+📍 Environment: production
+🔗 Local: http://localhost:3001
+🌐 Network: http://0.0.0.0:3001
+❤️  Health check: http://localhost:3001/health
+✅ Database connected successfully
+ℹ️  Currency automatic updates DISABLED
+   Updates will only occur when manually triggered via "Update Rates Online" button
+2025-11-20T20:42:17.801Z - GET /api/bookings
+Checking permission: viewBookings
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+2025-11-20T20:42:19.606Z - GET /api/invoices
+Checking permission: viewInvoices
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+
+═══════════════════════════════════════
+📦 SAMPLE BOOKING DATA (First Record):
+═══════════════════════════════════════
+ID: 0e1dba6d-54e9-443b-af29-13a86879713d
+Booking Number: BKG-2025-000024
+Status: CONFIRMED
+
+📄 INVOICE DATA:
+  Invoices: {
+  id: "0dee570b-a83b-411a-8b6b-b01dcc658f86",
+  invoiceNumber: "INV-2025-000024",
+  status: "UNPAID",
+}
+
+💰 FINANCIAL DATA:
+  Sale in AED: 2263
+  Cost in AED: 2094.56
+  Gross Profit: 168.44
+  Net Profit: 96.01
+
+👔 AGENT DATA:
+  Booking Agent ID: 7a42a502-0865-47a5-a4d4-86acb296ba3f
+  Booking Agent: {
+  id: "7a42a502-0865-47a5-a4d4-86acb296ba3f",
+  userId: "14171b9f-4c4c-4493-a4bc-29317940d926",
+  employeeCode: "EMP-007",
+  department: "Operation",
+  defaultCommissionRate: 10,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-31T20:18:17.355Z,
+  updatedAt: 2025-10-31T20:18:17.355Z,
+  users: {
+    id: "14171b9f-4c4c-4493-a4bc-29317940d926",
+    firstName: "Mohamed",
+    lastName: "Mossad",
+    email: "mohamed@bdesktravel.com",
+  },
+}
+  Agent Commission Rate: 10
+  Agent Commission Amount: 16.84
+
+💼 SALES AGENT DATA:
+  Customer Service ID: 24693b1a-355e-4de7-bd8f-4cf6d55d53e1
+  Customer Service: {
+  id: "24693b1a-355e-4de7-bd8f-4cf6d55d53e1",
+  userId: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+  employeeCode: "EMP-006",
+  department: "Sales",
+  defaultCommissionRate: 20,
+  customCommissionRates: "{}",
+  isActive: true,
+  createdAt: 2025-10-30T13:16:56.404Z,
+  updatedAt: 2025-10-30T13:16:56.404Z,
+  users: {
+    id: "6ec4ddad-c0cb-478e-90f3-ed0365e2f5a0",
+    firstName: "Amal",
+    lastName: "Elshafee",
+    email: "amal@bookingdesk.travel",
+  },
+}
+  CS Commission Rate: 30
+  CS Commission Amount: 50.53
+═══════════════════════════════════════
+
+⏳ Attempting database connection...
+🚀 Server is running on port 3001
+📍 Environment: production
+🔗 Local: http://localhost:3001
+🌐 Network: http://0.0.0.0:3001
+❤️  Health check: http://localhost:3001/health
+✅ Database connected successfully
+ℹ️  Currency automatic updates DISABLED
+   Updates will only occur when manually triggered via "Update Rates Online" button
+⏳ Attempting database connection...
+🚀 Server is running on port 3001
+📍 Environment: production
+🔗 Local: http://localhost:3001
+🌐 Network: http://0.0.0.0:3001
+❤️  Health check: http://localhost:3001/health
+✅ Database connected successfully
+ℹ️  Currency automatic updates DISABLED
+   Updates will only occur when manually triggered via "Update Rates Online" button

@@ -110,6 +110,10 @@ export function calculateVATOnProfit(
   profitAfterCommission: number,
   vatRate: number = 5.0
 ): number {
+  // VAT is only calculated on POSITIVE profit (no VAT on losses)
+  if (profitAfterCommission <= 0) {
+    return 0;
+  }
   return parseFloat(((profitAfterCommission * vatRate) / 100).toFixed(2));
 }
 
