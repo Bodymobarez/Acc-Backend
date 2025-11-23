@@ -35,25 +35,13 @@ async function updateAllInvoices() {
         let invoiceVAT: number;
         let invoiceTotal: number;
 
-        if (booking.serviceType === 'FLIGHT') {
-          // FLIGHT: No VAT
-          invoiceSubtotal = booking.saleInAED;
-          invoiceVAT = 0;
-          invoiceTotal = booking.saleInAED;
-        } else {
-          // Use VAT amount from booking
-          invoiceVAT = booking.vatAmount || 0;
-
-          if (invoiceVAT > 0) {
-            // VAT exists
-            invoiceSubtotal = booking.saleInAED - invoiceVAT;
-            invoiceTotal = booking.saleInAED;
-          } else {
-            // No VAT
-            invoiceSubtotal = booking.saleInAED;
-            invoiceTotal = booking.saleInAED;
-          }
-        }
+        // 🎯 NEW LOGIC: VAT is calculated on PROFIT but NOT added to total
+        // Total invoice = Sale amount (already includes everything)
+        // VAT is saved for display/reporting purposes only
+        
+        invoiceVAT = booking.vatAmount || 0; // VAT calculated on profit
+        invoiceSubtotal = booking.saleInAED - invoiceVAT; // Subtotal = Sale - VAT
+        invoiceTotal = booking.saleInAED; // Total = Sale (customer pays this amount)
 
         // Update invoice
         await prisma.invoices.update({

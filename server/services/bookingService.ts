@@ -469,7 +469,7 @@ export class BookingService {
           vatApplicable: input.vatApplicable,
           netBeforeVAT: saleInAED,
           vatAmount: finalVatAmount,
-          totalWithVAT: saleInAED + finalVatAmount,
+          totalWithVAT: saleInAED, // VAT calculated on profit, not added to customer total
           grossProfit: vatCalc.grossProfit,
           netProfit: finalNetProfit,
           agentCommissionRate,
@@ -958,7 +958,7 @@ export class BookingService {
           saleInAED,
           netBeforeVAT: isUAEBooking ? vatCalc.netBeforeVAT : saleInAED,
           vatAmount: finalVatAmount,
-          totalWithVAT: isUAEBooking ? saleInAED : saleInAED + finalVatAmount,
+          totalWithVAT: saleInAED, // VAT calculated on profit, not added to customer total
           grossProfit: vatCalc.grossProfit,
           netProfit: finalNetProfit,
           agentCommissionAmount: commissionCalc.agentCommissionAmount,
