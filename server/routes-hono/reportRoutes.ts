@@ -810,7 +810,7 @@ reports.get('/employee-commissions-monthly', async (c) => {
     
     const bookings = await prisma.bookings.findMany({
       where: {
-        bookingDate: { gte: startDate, lte: endDate },
+        createdAt: { gte: startDate, lte: endDate },
         status: { in: ['CONFIRMED', 'COMPLETE'] }
       },
       include: {
@@ -862,7 +862,7 @@ reports.get('/employee-commissions-monthly', async (c) => {
         emp.totalBookings++;
         emp.totalCommission += commission;
         emp.breakdown.push({
-          date: booking.bookingDate.toISOString().split('T')[0],
+          date: booking.createdAt.toISOString().split('T')[0],
           bookingNumber: booking.bookingNumber,
           customer: booking.customers?.companyName || 
                    `${booking.customers?.firstName || ''} ${booking.customers?.lastName || ''}`.trim(),
@@ -871,13 +871,13 @@ reports.get('/employee-commissions-monthly', async (c) => {
       }
       
       // Process CS commission
-      if (booking.employees_bookings_customerServiceIdToemployees && booking.csCommissionAmount) {
+      if (booking.employees_bookings_customerServiceIdToemployees && booking.salesCommissionAmount) {
         const cs = booking.employees_bookings_customerServiceIdToemployees;
         const id = cs.id;
         const name = `${cs.users.firstName} ${cs.users.lastName}`;
         
         const commission = await convertCurrency(
-          Number(booking.csCommissionAmount),
+          Number(booking.salesCommissionAmount),
           booking.saleCurrency,
           currency as string
         );
@@ -897,7 +897,7 @@ reports.get('/employee-commissions-monthly', async (c) => {
         emp.totalBookings++;
         emp.totalCommission += commission;
         emp.breakdown.push({
-          date: booking.bookingDate.toISOString().split('T')[0],
+          date: booking.createdAt.toISOString().split('T')[0],
           bookingNumber: booking.bookingNumber,
           customer: booking.customers?.companyName || 
                    `${booking.customers?.firstName || ''} ${booking.customers?.lastName || ''}`.trim(),
@@ -985,18 +985,18 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
             { bookingAgentId: employeeId },
             { customerServiceId: employeeId }
           ],
-          bookingDate: { gte: startDate, lte: endDate }
+          createdAt: { gte: startDate, lte: endDate }
         },
         select: {
           id: true,
           bookingNumber: true,
-          bookingDate: true,
+          createdAt: true,
           serviceType: true,
           serviceDetails: true,
           saleAmount: true,
           saleCurrency: true,
           agentCommissionAmount: true,
-          csCommissionAmount: true,
+          salesCommissionAmount: true,
           customers: {
             select: {
               firstName: true,
@@ -1005,7 +1005,7 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
             }
           }
         },
-        orderBy: { bookingDate: 'asc' }
+        orderBy: { createdAt: 'asc' }
       })
     ]);
     
@@ -1017,7 +1017,7 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
     let totalCommission = 0;
     
     for (const booking of bookings) {
-      const commission = (Number(booking.agentCommissionAmount) || 0) + (Number(booking.csCommissionAmount) || 0);
+      const commission = (Number(booking.agentCommissionAmount) || 0) + (Number(booking.salesCommissionAmount) || 0);
       const convertedCommission = await convertCurrency(commission, booking.saleCurrency || 'AED', currency);
       
       totalCommission += convertedCommission;
@@ -1040,29 +1040,36 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
       const customerName = booking.customers.companyName || `${booking.customers.firstName} ${booking.customers.lastName}`;
       
       transactions.push({
-        date: booking.bookingDate,
+        date: booking.createdAt.toISOString().split('T')[0],
         bookingNumber: booking.bookingNumber,
-        bookingId: booking.id,
         customer: customerName,
-        serviceType: booking.serviceType,
-        serviceDetails: serviceDetailsStr,
-        commission: convertedCommission,
-        currency: currency
+        commission: convertedCommission
       });
     }
+    
+    // Return same structure as all-employees endpoint
+    const employeeName = `${employee.users.firstName} ${employee.users.lastName}`;
+    const employees = [{
+      employeeName: employeeName,
+      totalBookings: transactions.length,
+      totalCommission: totalCommission,
+      averageCommission: transactions.length > 0 ? totalCommission / transactions.length : 0,
+      currency: currency,
+      breakdown: transactions
+    }];
+    
+    const summary = {
+      totalEmployees: 1,
+      totalBookings: transactions.length,
+      totalCommissions: totalCommission,
+      averagePerEmployee: totalCommission
+    };
     
     return c.json({
       success: true,
       data: {
-        employee: {
-          name: `${employee.users.firstName} ${employee.users.lastName}`,
-          email: employee.users.email
-        },
-        summary: {
-          totalCommission,
-          bookingsCount: transactions.length
-        },
-        transactions
+        employees,
+        summary
       }
     });
   } catch (error: any) {
