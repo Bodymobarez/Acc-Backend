@@ -1,0 +1,118 @@
+$ DATABASE_URL="postgresql://neondb_owner:npg_V8KJLriGjSn5@ep-lucky-cake-ae2hozjr-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require" JWT_SECRET="Tjxquwvbnu6Knk988ZJbLdvoMfygmnNvPZ3n+MDzjSU=" JWT_EXPIRES_IN="7d" PORT=3001 NODE_ENV=development bun --watch server/index-hono.ts
+
+🚀 Starting Backend Server (Hono + Bun)...
+📦 Runtime: Bun 1.3.2
+📍 Environment: development
+🔗 Port: 3001
+⏳ Connecting to database...
+Started development server: http://0.0.0.0:3001
+✅ Database connected successfully
+
+✅ Server initialized successfully
+🌐 Health check: http://localhost:3001/health
+🧪 Test route: http://localhost:3001/api/test
+
+<-- GET /health
+--> GET /health [32m200[0m 2ms
+<-- OPTIONS /api/reports/employee-commissions-monthly/cmhahfbgg0001ya8c6wnmww7f?year=2025&month=10&currency=EGP
+--> OPTIONS /api/reports/employee-commissions-monthly/cmhahfbgg0001ya8c6wnmww7f?year=2025&month=10&currency=EGP [32m204[0m 1ms
+<-- GET /api/reports/employee-commissions-monthly/cmhahfbgg0001ya8c6wnmww7f?year=2025&month=10&currency=EGP
+Checking permission: viewFinancialReports
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+--> GET /api/reports/employee-commissions-monthly/cmhahfbgg0001ya8c6wnmww7f?year=2025&month=10&currency=EGP [32m200[0m 5s
+<-- GET /api/reports/employee-commissions-monthly/cmhahfbgg0001ya8c6wnmww7f?year=2025&month=10&currency=AED
+Checking permission: viewFinancialReports
+User: ceo@bdesktravel.com
+User role: ADMIN
+User permissions: {
+  viewDashboard: true,
+  viewBookings: true,
+  createBooking: true,
+  editBooking: true,
+  deleteBooking: true,
+  reviewBooking: true,
+  viewCustomers: true,
+  createCustomer: true,
+  editCustomer: true,
+  deleteCustomer: true,
+  viewSuppliers: true,
+  createSupplier: true,
+  editSupplier: true,
+  deleteSupplier: true,
+  viewInvoices: true,
+  createInvoice: true,
+  editInvoice: true,
+  deleteInvoice: true,
+  generateInvoice: true,
+  viewFiles: true,
+  createFile: true,
+  editFile: true,
+  deleteFile: true,
+  generateFile: true,
+  viewReports: true,
+  viewFinancialReports: true,
+  viewCommissionReports: true,
+  viewVATReports: true,
+  exportReports: true,
+  viewEmployees: true,
+  createEmployee: true,
+  editEmployee: true,
+  deleteEmployee: true,
+  manageCommissions: true,
+  viewSettings: true,
+  editSettings: true,
+  manageUsers: true,
+  manageCurrencies: true,
+  accessAuditLogs: true,
+  managePermissions: true,
+}
+✅ Access granted: User has admin-level role
+--> GET /api/reports/employee-commissions-monthly/cmhahfbgg0001ya8c6wnmww7f?year=2025&month=10&currency=AED [32m200[0m 4s
+<-- GET /api/employees
+--> GET /api/employees [32m200[0m 742ms
+<-- GET /api/employees
+--> GET /api/employees [32m200[0m 358ms

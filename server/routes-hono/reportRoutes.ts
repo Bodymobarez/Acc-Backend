@@ -811,7 +811,7 @@ reports.get('/employee-commissions-monthly', async (c) => {
     const bookings = await prisma.bookings.findMany({
       where: {
         bookingDate: { gte: startDate, lte: endDate },
-        status: { in: ['CONFIRMED', 'COMPLETE'] }
+        status: { in: ['CONFIRMED', 'COMPLETE', 'REFUNDED'] }
       },
       include: {
         employees_bookings_bookingAgentIdToemployees: {
@@ -861,12 +861,26 @@ reports.get('/employee-commissions-monthly', async (c) => {
         const emp = employeeMap.get(id)!;
         emp.totalBookings++;
         emp.totalCommission += commission;
+        const saleOrig = Number(booking.saleAmount || 0);
+        const costOrig = Number(booking.costAmount || 0);
+        const profitInAED = Number(booking.grossProfit || 0);
+        const commissionRate = Number(booking.agentCommissionRate || 0);
+        const commissionOrig = Number(booking.agentCommissionInSaleCurrency) || (profitInAED * commissionRate) / 100;
+        const commissionInAED = await convertCurrency(commissionOrig, booking.saleCurrency, 'AED');
+        
         emp.breakdown.push({
           date: (booking.bookingDate || booking.createdAt).toISOString().split('T')[0],
           bookingNumber: booking.bookingNumber,
           customer: booking.customers?.companyName || 
                    `${booking.customers?.firstName || ''} ${booking.customers?.lastName || ''}`.trim(),
-          commission: commission
+          commission: commission,
+          commissionInAED: commissionInAED,
+          saleCurrency: booking.saleCurrency,
+          costCurrency: booking.costCurrency,
+          saleOriginal: saleOrig,
+          costOriginal: costOrig,
+          profitInAED: profitInAED,
+          commissionOriginal: commissionOrig
         });
       }
       
@@ -896,14 +910,41 @@ reports.get('/employee-commissions-monthly', async (c) => {
         const emp = employeeMap.get(id)!;
         emp.totalBookings++;
         emp.totalCommission += commission;
+        const saleOrig = Number(booking.saleAmount || 0);
+        const costOrig = Number(booking.costAmount || 0);
+        const profitInAED = Number(booking.grossProfit || 0);
+        const commissionRate = Number(booking.csCommissionRate || 0);
+        const commissionOrig = Number(booking.csCommissionInSaleCurrency) || (profitInAED * commissionRate) / 100;
+        const commissionInAED = await convertCurrency(commissionOrig, booking.saleCurrency, 'AED');
+        
         emp.breakdown.push({
           date: (booking.bookingDate || booking.createdAt).toISOString().split('T')[0],
           bookingNumber: booking.bookingNumber,
           customer: booking.customers?.companyName || 
                    `${booking.customers?.firstName || ''} ${booking.customers?.lastName || ''}`.trim(),
-          commission: commission
+          commission: commission,
+          commissionInAED: commissionInAED,
+          saleCurrency: booking.saleCurrency,
+          costCurrency: booking.costCurrency,
+          saleOriginal: saleOrig,
+          costOriginal: costOrig,
+          profitInAED: profitInAED,
+          commissionOriginal: commissionOrig
         });
       }
+    }
+    
+    // Calculate commission breakdown by original currency
+    const currencyBreakdown = new Map<string, number>();
+    for (const booking of bookings) {
+      const curr = booking.saleCurrency;
+      const totalComm = Number(booking.agentCommissionAmount || 0) + Number(booking.salesCommissionAmount || 0);
+      currencyBreakdown.set(curr, (currencyBreakdown.get(curr) || 0) + totalComm);
+    }
+    for (const booking of bookings) {
+      const curr = booking.saleCurrency;
+      const totalComm = Number(booking.agentCommissionAmount || 0) + Number(booking.salesCommissionAmount || 0);
+      currencyBreakdown.set(curr, (currencyBreakdown.get(curr) || 0) + totalComm);
     }
     
     const employees = Array.from(employeeMap.values()).map(emp => ({
@@ -917,7 +958,11 @@ reports.get('/employee-commissions-monthly', async (c) => {
       totalCommissions: employees.reduce((sum, e) => sum + e.totalCommission, 0),
       averagePerEmployee: employees.length > 0 
         ? employees.reduce((sum, e) => sum + e.totalCommission, 0) / employees.length 
-        : 0
+        : 0,
+      commissionsByCurrency: Array.from(currencyBreakdown.entries()).map(([curr, amount]) => ({
+        currency: curr,
+        totalCommission: amount
+      }))
     };
     
     return c.json({
@@ -985,7 +1030,8 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
             { bookingAgentId: employeeId },
             { customerServiceId: employeeId }
           ],
-          bookingDate: { gte: startDate, lte: endDate }
+          bookingDate: { gte: startDate, lte: endDate },
+          status: { in: ['CONFIRMED', 'COMPLETE'] }
         },
         select: {
           id: true,
@@ -995,9 +1041,16 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
           serviceType: true,
           serviceDetails: true,
           saleAmount: true,
+          costAmount: true,
           saleCurrency: true,
+          costCurrency: true,
           agentCommissionAmount: true,
           salesCommissionAmount: true,
+          agentCommissionInSaleCurrency: true,
+          csCommissionInSaleCurrency: true,
+          agentCommissionRate: true,
+          csCommissionRate: true,
+          grossProfit: true,
           customers: {
             select: {
               firstName: true,
@@ -1018,9 +1071,16 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
     let totalCommission = 0;
     
     for (const booking of bookings) {
-      const commission = (Number(booking.agentCommissionAmount) || 0) + (Number(booking.salesCommissionAmount) || 0);
-      const convertedCommission = await convertCurrency(commission, booking.saleCurrency || 'AED', currency);
+      const saleOrig = Number(booking.saleAmount || 0);
+      const costOrig = Number(booking.costAmount || 0);
+      const profitInAED = Number(booking.grossProfit || 0);
       
+      const agentCommOrig = Number(booking.agentCommissionInSaleCurrency) || (profitInAED * Number(booking.agentCommissionRate || 0) / 100);
+      const csCommOrig = Number(booking.csCommissionInSaleCurrency) || (profitInAED * Number(booking.csCommissionRate || 0) / 100);
+      const commissionOrig = agentCommOrig + csCommOrig;
+      
+      const convertedCommission = await convertCurrency(commissionOrig, booking.saleCurrency || 'AED', currency);
+      const commissionInAED = await convertCurrency(commissionOrig, booking.saleCurrency || 'AED', 'AED');
       totalCommission += convertedCommission;
       
       // Parse serviceDetails
@@ -1044,7 +1104,14 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
         date: (booking.bookingDate || booking.createdAt).toISOString().split('T')[0],
         bookingNumber: booking.bookingNumber,
         customer: customerName,
-        commission: convertedCommission
+        commission: convertedCommission,
+        commissionInAED: commissionInAED,
+        saleCurrency: booking.saleCurrency,
+        costCurrency: booking.costCurrency,
+        saleOriginal: saleOrig,
+        costOriginal: costOrig,
+        profitInAED: profitInAED,
+        commissionOriginal: commissionOrig
       });
     }
     
@@ -1059,11 +1126,29 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
       breakdown: transactions
     }];
     
+    // Calculate commission breakdown by currency  
+    const currencyBreakdown = new Map<string, number>();
+    for (const booking of bookings) {
+      const curr = booking.saleCurrency;
+      const saleOrig = Number(booking.saleAmount || 0);
+      const costOrig = Number(booking.costAmount || 0);
+      const profitOrig = saleOrig - costOrig;
+      const profitInAED = Number(booking.grossProfit || 0);
+      const agentCommOrig = Number(booking.agentCommissionInSaleCurrency) || (profitInAED * Number(booking.agentCommissionRate || 0) / 100);
+      const csCommOrig = Number(booking.csCommissionInSaleCurrency) || (profitInAED * Number(booking.csCommissionRate || 0) / 100);
+      const totalComm = agentCommOrig + csCommOrig;
+      currencyBreakdown.set(curr, (currencyBreakdown.get(curr) || 0) + totalComm);
+    }
+    
     const summary = {
       totalEmployees: 1,
       totalBookings: transactions.length,
       totalCommissions: totalCommission,
-      averagePerEmployee: totalCommission
+      averagePerEmployee: totalCommission,
+      commissionsByCurrency: Array.from(currencyBreakdown.entries()).map(([curr, amount]) => ({
+        currency: curr,
+        totalCommission: amount
+      }))
     };
     
     return c.json({

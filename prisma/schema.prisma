@@ -107,6 +107,8 @@ model bookings {
   salesCommissionValue                            Float?
   salesCommissionAmount                           Float?
   totalCommission                                 Float?
+  agentCommissionInSaleCurrency                   Decimal?           @db.Decimal(10, 2)
+  csCommissionInSaleCurrency                      Decimal?           @db.Decimal(10, 2)
   status                                          String             @default("DRAFT")
   bookingStatus                                   String             @default("CONFIRMED")
   serviceDetails                                  String             @default("{}")
