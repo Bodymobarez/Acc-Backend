@@ -990,6 +990,7 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
         select: {
           id: true,
           bookingNumber: true,
+          bookingDate: true,
           createdAt: true,
           serviceType: true,
           serviceDetails: true,
@@ -1005,7 +1006,7 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
             }
           }
         },
-        orderBy: { createdAt: 'asc' }
+        orderBy: { bookingDate: 'asc' }
       })
     ]);
     

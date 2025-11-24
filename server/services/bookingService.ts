@@ -152,8 +152,12 @@ export class BookingService {
     const saleRate = await this.getExchangeRate(input.saleCurrency);
     
     // Convert to AED
-    const costInAED = convertToAED(input.costAmount, costRate);
-    const saleInAED = convertToAED(input.saleAmount, saleRate);
+    let costInAED = convertToAED(input.costAmount, costRate);
+    let saleInAED = convertToAED(input.saleAmount, saleRate);
+    
+    // For REFUNDED bookings, reverse the calculation logic
+    // If cost > sale in REFUNDED, it means profit (supplier refunded more than customer)
+    const isRefundBooking = input.bookingStatus === 'REFUNDED';
     
     // Calculate initial values
     const vatCalc = input.vatApplicable
@@ -192,6 +196,7 @@ export class BookingService {
     // For UAE Bookings: Commission calculated from profit AFTER VAT deduction
     // For Non-UAE: Commission calculated from gross profit BEFORE VAT
     // SPECIAL CASE FOR FLIGHT: VAT is only 5% on net profit, not extracted from total
+    // REFUND LOGIC: For refunds, if cost > sale, it's profit (supplier refunded more)
     let commissionBase: number;
     let finalVatAmount: number;
     let finalNetProfit: number;
@@ -200,7 +205,8 @@ export class BookingService {
       // Check if this is a FLIGHT booking
       if (input.serviceType === 'FLIGHT') {
         // FLIGHT: VAT is only 5% on net profit (after commissions)
-        commissionBase = vatCalc.grossProfit; // Use full profit for commission
+        // For REFUND: Use absolute value for commission calculation
+        commissionBase = isRefundBooking ? Math.abs(vatCalc.grossProfit) : vatCalc.grossProfit;
         const commissionCalc = calculateCommissions(
           commissionBase,
           agentCommissionRate,
@@ -311,7 +317,8 @@ export class BookingService {
         return booking;
       } else {
         // Non-FLIGHT UAE Booking: VAT already extracted, commission from profit after VAT
-        commissionBase = vatCalc.grossProfit; // Profit after VAT deduction
+        // For REFUND: Use absolute value for commission calculation
+        commissionBase = isRefundBooking ? Math.abs(vatCalc.grossProfit) : vatCalc.grossProfit;
         const commissionCalc = calculateCommissions(
           commissionBase,
           agentCommissionRate,
@@ -419,7 +426,8 @@ export class BookingService {
       }
     } else {
       // Non-UAE or No VAT: Commission from gross profit, then VAT on remaining profit
-      commissionBase = vatCalc.grossProfit; // Gross profit before any deductions
+      // For REFUND: Use absolute value for commission calculation
+      commissionBase = isRefundBooking ? Math.abs(vatCalc.grossProfit) : vatCalc.grossProfit;
       const commissionCalc = calculateCommissions(
         commissionBase,
         agentCommissionRate,
