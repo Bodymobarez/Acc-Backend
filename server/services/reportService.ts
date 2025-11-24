@@ -78,7 +78,7 @@ export class ReportService {
     // Get CONFIRMED bookings for revenue
     const confirmedBookings = await prisma.bookings.findMany({
       where: {
-        createdAt: { gte: new Date(startDate), lte: new Date(endDate) },
+        bookingDate: { gte: new Date(startDate), lte: new Date(endDate) },
         status: 'CONFIRMED'
       },
       select: { saleInAED: true, saleAmount: true, saleCurrency: true, costInAED: true, costAmount: true, costCurrency: true, totalCommission: true }
@@ -87,7 +87,7 @@ export class ReportService {
     // Get REFUNDED bookings
     const refundedBookings = await prisma.bookings.findMany({
       where: {
-        createdAt: { gte: new Date(startDate), lte: new Date(endDate) },
+        bookingDate: { gte: new Date(startDate), lte: new Date(endDate) },
         status: 'REFUNDED'
       },
       select: { saleInAED: true, saleAmount: true, saleCurrency: true, costInAED: true, costAmount: true, costCurrency: true }
@@ -131,7 +131,7 @@ export class ReportService {
     // Calculate payables (unpaid supplier costs)
     const unpaidBookings = await prisma.bookings.findMany({
       where: {
-        createdAt: { gte: new Date(startDate), lte: new Date(endDate) },
+        bookingDate: { gte: new Date(startDate), lte: new Date(endDate) },
         paymentStatus: { not: 'PAID' }
       },
       select: { supplierCost: true }
@@ -400,7 +400,7 @@ export class ReportService {
       include: {
         bookings: {
           where: {
-            createdAt: { gte: new Date(startDate), lte: new Date(endDate) }
+            bookingDate: { gte: new Date(startDate), lte: new Date(endDate) }
           },
           select: { 
             supplierCost: true, 
@@ -553,7 +553,7 @@ export class ReportService {
 
     const bookings = await prisma.bookings.findMany({
       where: {
-        createdAt: { gte: new Date(startDate), lte: new Date(endDate) }
+        bookingDate: { gte: new Date(startDate), lte: new Date(endDate) }
       },
       include: {
         file: { select: { customer: { select: { name: true } } } },
@@ -614,7 +614,7 @@ export class ReportService {
     // VAT paid on purchases (from bookings)
     const bookings = await prisma.bookings.findMany({
       where: {
-        createdAt: { gte: new Date(startDate), lte: new Date(endDate) }
+        bookingDate: { gte: new Date(startDate), lte: new Date(endDate) }
       },
       select: { supplierCost: true }
     });
@@ -654,7 +654,7 @@ export class ReportService {
     
     const bookings = await prisma.bookings.findMany({
       where: {
-        createdAt: { gte: new Date(startDate), lte: new Date(endDate) }
+        bookingDate: { gte: new Date(startDate), lte: new Date(endDate) }
       },
       select: { serviceType: true, sellingPrice: true }
     });

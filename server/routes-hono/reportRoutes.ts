@@ -810,7 +810,7 @@ reports.get('/employee-commissions-monthly', async (c) => {
     
     const bookings = await prisma.bookings.findMany({
       where: {
-        createdAt: { gte: startDate, lte: endDate },
+        bookingDate: { gte: startDate, lte: endDate },
         status: { in: ['CONFIRMED', 'COMPLETE'] }
       },
       include: {
@@ -862,7 +862,7 @@ reports.get('/employee-commissions-monthly', async (c) => {
         emp.totalBookings++;
         emp.totalCommission += commission;
         emp.breakdown.push({
-          date: booking.createdAt.toISOString().split('T')[0],
+          date: (booking.bookingDate || booking.createdAt).toISOString().split('T')[0],
           bookingNumber: booking.bookingNumber,
           customer: booking.customers?.companyName || 
                    `${booking.customers?.firstName || ''} ${booking.customers?.lastName || ''}`.trim(),
@@ -897,7 +897,7 @@ reports.get('/employee-commissions-monthly', async (c) => {
         emp.totalBookings++;
         emp.totalCommission += commission;
         emp.breakdown.push({
-          date: booking.createdAt.toISOString().split('T')[0],
+          date: (booking.bookingDate || booking.createdAt).toISOString().split('T')[0],
           bookingNumber: booking.bookingNumber,
           customer: booking.customers?.companyName || 
                    `${booking.customers?.firstName || ''} ${booking.customers?.lastName || ''}`.trim(),
@@ -985,7 +985,7 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
             { bookingAgentId: employeeId },
             { customerServiceId: employeeId }
           ],
-          createdAt: { gte: startDate, lte: endDate }
+          bookingDate: { gte: startDate, lte: endDate }
         },
         select: {
           id: true,
@@ -1040,7 +1040,7 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
       const customerName = booking.customers.companyName || `${booking.customers.firstName} ${booking.customers.lastName}`;
       
       transactions.push({
-        date: booking.createdAt.toISOString().split('T')[0],
+        date: (booking.bookingDate || booking.createdAt).toISOString().split('T')[0],
         bookingNumber: booking.bookingNumber,
         customer: customerName,
         commission: convertedCommission
