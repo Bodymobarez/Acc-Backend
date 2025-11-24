@@ -775,7 +775,162 @@ reports.get('/supplier-statement/:supplierId', async (c) => {
   }
 });
 
-// Employee Commissions Monthly Report
+// Employee Commissions Monthly Report - All Employees
+reports.get('/employee-commissions-monthly', async (c) => {
+  try {
+    const { year, month, currency = 'AED' } = c.req.query();
+    
+    if (!year || !month) {
+      return c.json({ success: false, error: 'Year and month are required' }, 400);
+    }
+    
+    // Helper function to convert amount to target currency  
+    const convertCurrency = async (amount: number, fromCurrency: string, toCurrency: string): Promise<number> => {
+      if (fromCurrency === toCurrency) return amount;
+      
+      const [fromCurrencyData, toCurrencyData] = await Promise.all([
+        prisma.currencies.findUnique({
+          where: { code: fromCurrency },
+          select: { exchangeRateToAED: true }
+        }),
+        prisma.currencies.findUnique({
+          where: { code: toCurrency },
+          select: { exchangeRateToAED: true }
+        })
+      ]);
+      
+      if (!fromCurrencyData || !toCurrencyData) return amount;
+      
+      const amountInAED = amount * Number(fromCurrencyData.exchangeRateToAED);
+      return amountInAED / Number(toCurrencyData.exchangeRateToAED);
+    };
+    
+    const startDate = new Date(Number(year), Number(month) - 1, 1);
+    const endDate = new Date(Number(year), Number(month), 0, 23, 59, 59);
+    
+    const bookings = await prisma.bookings.findMany({
+      where: {
+        bookingDate: { gte: startDate, lte: endDate },
+        status: { in: ['CONFIRMED', 'COMPLETE'] }
+      },
+      include: {
+        employees_bookings_bookingAgentIdToemployees: {
+          select: {
+            id: true,
+            users: { select: { firstName: true, lastName: true } }
+          }
+        },
+        employees_bookings_customerServiceIdToemployees: {
+          select: {
+            id: true,
+            users: { select: { firstName: true, lastName: true } }
+          }
+        },
+        customers: {
+          select: { firstName: true, lastName: true, companyName: true }
+        }
+      }
+    });
+    
+    const employeeMap = new Map<string, any>();
+    
+    for (const booking of bookings) {
+      // Process agent commission
+      if (booking.employees_bookings_bookingAgentIdToemployees && booking.agentCommissionAmount) {
+        const agent = booking.employees_bookings_bookingAgentIdToemployees;
+        const id = agent.id;
+        const name = `${agent.users.firstName} ${agent.users.lastName}`;
+        
+        const commission = await convertCurrency(
+          Number(booking.agentCommissionAmount),
+          booking.saleCurrency,
+          currency as string
+        );
+        
+        if (!employeeMap.has(id)) {
+          employeeMap.set(id, {
+            employeeName: name,
+            totalBookings: 0,
+            totalCommission: 0,
+            averageCommission: 0,
+            currency: currency,
+            breakdown: []
+          });
+        }
+        
+        const emp = employeeMap.get(id)!;
+        emp.totalBookings++;
+        emp.totalCommission += commission;
+        emp.breakdown.push({
+          date: booking.bookingDate.toISOString().split('T')[0],
+          bookingNumber: booking.bookingNumber,
+          customer: booking.customers?.companyName || 
+                   `${booking.customers?.firstName || ''} ${booking.customers?.lastName || ''}`.trim(),
+          commission: commission
+        });
+      }
+      
+      // Process CS commission
+      if (booking.employees_bookings_customerServiceIdToemployees && booking.csCommissionAmount) {
+        const cs = booking.employees_bookings_customerServiceIdToemployees;
+        const id = cs.id;
+        const name = `${cs.users.firstName} ${cs.users.lastName}`;
+        
+        const commission = await convertCurrency(
+          Number(booking.csCommissionAmount),
+          booking.saleCurrency,
+          currency as string
+        );
+        
+        if (!employeeMap.has(id)) {
+          employeeMap.set(id, {
+            employeeName: name,
+            totalBookings: 0,
+            totalCommission: 0,
+            averageCommission: 0,
+            currency: currency,
+            breakdown: []
+          });
+        }
+        
+        const emp = employeeMap.get(id)!;
+        emp.totalBookings++;
+        emp.totalCommission += commission;
+        emp.breakdown.push({
+          date: booking.bookingDate.toISOString().split('T')[0],
+          bookingNumber: booking.bookingNumber,
+          customer: booking.customers?.companyName || 
+                   `${booking.customers?.firstName || ''} ${booking.customers?.lastName || ''}`.trim(),
+          commission: commission
+        });
+      }
+    }
+    
+    const employees = Array.from(employeeMap.values()).map(emp => ({
+      ...emp,
+      averageCommission: emp.totalBookings > 0 ? emp.totalCommission / emp.totalBookings : 0
+    }));
+    
+    const summary = {
+      totalEmployees: employees.length,
+      totalBookings: employees.reduce((sum, e) => sum + e.totalBookings, 0),
+      totalCommissions: employees.reduce((sum, e) => sum + e.totalCommission, 0),
+      averagePerEmployee: employees.length > 0 
+        ? employees.reduce((sum, e) => sum + e.totalCommission, 0) / employees.length 
+        : 0
+    };
+    
+    return c.json({
+      success: true,
+      data: { employees, summary }
+    });
+  } catch (error: any) {
+    console.error('Error generating employee commissions report:', error);
+    return c.json({ success: false, error: error.message }, 500);
+  }
+});
+
+// Employee Commissions Monthly Report - Single Employee
 reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
   try {
     const employeeId = c.req.param('employeeId');
