@@ -169,8 +169,13 @@ export class BookingService {
           netBeforeVAT: saleInAED,
           vatAmount: 0,
           totalWithVAT: saleInAED,
-          grossProfit: saleInAED - costInAED,
-          netProfit: saleInAED - costInAED
+          // For REFUNDED: if cost > sale, it's profit (supplier refunded more)
+          grossProfit: isRefundBooking && costInAED > saleInAED 
+            ? costInAED - saleInAED 
+            : saleInAED - costInAED,
+          netProfit: isRefundBooking && costInAED > saleInAED 
+            ? costInAED - saleInAED 
+            : saleInAED - costInAED
         };
     
     // Get commission rates - use provided rates or fall back to employee defaults
@@ -214,8 +219,11 @@ export class BookingService {
         );
         
         // VAT is 5% of net profit (after commissions)
-        finalVatAmount = calculateVATOnProfit(commissionCalc.profitAfterCommission);
-        finalNetProfit = commissionCalc.profitAfterCommission - finalVatAmount;
+        finalVatAmount = calculateVATOnProfit(Math.abs(commissionCalc.profitAfterCommission));
+        // For REFUNDED: keep netProfit positive when cost > sale
+        finalNetProfit = isRefundBooking && costInAED > saleInAED
+          ? Math.abs(commissionCalc.profitAfterCommission) - finalVatAmount
+          : commissionCalc.profitAfterCommission - finalVatAmount;
         
         console.log('✈️  FLIGHT Booking - VAT 5% on net profit ONLY (not extracted from total)');
         console.log('  Sale Amount:', saleInAED);
@@ -229,13 +237,15 @@ export class BookingService {
         console.log('  VAT Amount (5% of net profit):', finalVatAmount);
         console.log('  Net Profit:', finalNetProfit);
         
-        // Generate booking number
+        // Generate booking number - use RFN prefix for REFUNDED bookings
+        const prefix = input.bookingStatus === 'REFUNDED' ? 'RFN' : 'BKG';
         const lastBooking = await prisma.bookings.findFirst({
+          where: { bookingNumber: { startsWith: prefix } },
           orderBy: { createdAt: 'desc' }
         });
         const nextSequence = lastBooking ? 
           parseInt(lastBooking.bookingNumber.split('-').pop() || '0') + 1 : 1;
-        const bookingNumber = generateBookingNumber('BKG', nextSequence);
+        const bookingNumber = generateBookingNumber(prefix, nextSequence);
         
         // Create booking for FLIGHT
         const booking = await prisma.bookings.create({
@@ -325,7 +335,10 @@ export class BookingService {
           csCommissionRate
         );
         finalVatAmount = vatCalc.vatAmount;
-        finalNetProfit = commissionCalc.profitAfterCommission;
+        // For REFUNDED: keep netProfit positive when cost > sale
+        finalNetProfit = isRefundBooking && costInAED > saleInAED
+          ? Math.abs(commissionCalc.profitAfterCommission)
+          : commissionCalc.profitAfterCommission;
       
         console.log('✅ Non-FLIGHT UAE Booking - Commission from profit AFTER VAT deduction');
         console.log('  Net Before VAT:', vatCalc.netBeforeVAT);
@@ -337,13 +350,15 @@ export class BookingService {
         console.log('  Total Commission:', commissionCalc.totalCommission);
         console.log('  Net Profit:', finalNetProfit);
         
-        // Generate booking number
+        // Generate booking number - use RFN prefix for REFUNDED bookings
+        const prefix = input.bookingStatus === 'REFUNDED' ? 'RFN' : 'BKG';
         const lastBooking = await prisma.bookings.findFirst({
+          where: { bookingNumber: { startsWith: prefix } },
           orderBy: { createdAt: 'desc' }
         });
         const nextSequence = lastBooking ? 
           parseInt(lastBooking.bookingNumber.split('-').pop() || '0') + 1 : 1;
-        const bookingNumber = generateBookingNumber('BKG', nextSequence);
+        const bookingNumber = generateBookingNumber(prefix, nextSequence);
       
         // Create booking for non-FLIGHT UAE
         const booking = await prisma.bookings.create({
@@ -436,10 +451,13 @@ export class BookingService {
       
       // VAT calculated on profit AFTER commission deduction (only if VAT applicable)
       finalVatAmount = input.vatApplicable 
-        ? calculateVATOnProfit(commissionCalc.profitAfterCommission)
+        ? calculateVATOnProfit(Math.abs(commissionCalc.profitAfterCommission))
         : 0;
       
-      finalNetProfit = commissionCalc.profitAfterCommission - finalVatAmount;
+      // For REFUNDED: keep netProfit positive when cost > sale
+      finalNetProfit = isRefundBooking && costInAED > saleInAED
+        ? Math.abs(commissionCalc.profitAfterCommission) - finalVatAmount
+        : commissionCalc.profitAfterCommission - finalVatAmount;
       
       console.log('✅ Non-UAE Booking - Commission from gross profit BEFORE VAT');
       console.log('  Gross Profit:', vatCalc.grossProfit);
@@ -451,13 +469,15 @@ export class BookingService {
       console.log('  VAT Amount:', finalVatAmount);
       console.log('  Net Profit:', finalNetProfit);
       
-      // Generate booking number
+      // Generate booking number - use RFN prefix for REFUNDED bookings
+      const prefix = input.bookingStatus === 'REFUNDED' ? 'RFN' : 'BKG';
       const lastBooking = await prisma.bookings.findFirst({
+        where: { bookingNumber: { startsWith: prefix } },
         orderBy: { createdAt: 'desc' }
       });
       const nextSequence = lastBooking ? 
         parseInt(lastBooking.bookingNumber.split('-').pop() || '0') + 1 : 1;
-      const bookingNumber = generateBookingNumber('BKG', nextSequence);
+      const bookingNumber = generateBookingNumber(prefix, nextSequence);
       
       // Create booking
       const booking = await prisma.bookings.create({
@@ -908,6 +928,9 @@ export class BookingService {
       const isUAEBooking = data.isUAEBooking !== undefined ? data.isUAEBooking : existing.isUAEBooking;
       const vatApplicable = data.vatApplicable !== undefined ? data.vatApplicable : existing.vatApplicable;
       
+      // Check if this is a REFUNDED booking
+      const isRefundBooking = existing.status === 'REFUNDED' || data.bookingStatus === 'REFUNDED';
+      
       const vatCalc = vatApplicable
         ? calculateVAT(saleInAED, costInAED, isUAEBooking)
         : {
@@ -917,8 +940,13 @@ export class BookingService {
             netBeforeVAT: saleInAED,
             vatAmount: 0,
             totalWithVAT: saleInAED,
-            grossProfit: saleInAED - costInAED,
-            netProfit: saleInAED - costInAED
+            // For REFUNDED: if cost > sale, it's profit (supplier refunded more)
+            grossProfit: isRefundBooking && costInAED > saleInAED 
+              ? costInAED - saleInAED 
+              : saleInAED - costInAED,
+            netProfit: isRefundBooking && costInAED > saleInAED 
+              ? costInAED - saleInAED 
+              : saleInAED - costInAED
           };
       
       // Get commission rates - use new rates if provided, otherwise keep existing
@@ -950,16 +978,25 @@ export class BookingService {
         // Use the VAT amount calculated by calculateVAT
         finalVatAmount = vatCalc.vatAmount;  // ✅ Correct: 356.19 for 7480.02
         // Net Profit = Gross Profit - Total Commission (VAT already deducted)
-        finalNetProfit = commissionCalc.profitAfterCommission;
+        // For REFUNDED: keep netProfit positive when cost > sale
+        finalNetProfit = isRefundBooking && costInAED > saleInAED
+          ? Math.abs(commissionCalc.profitAfterCommission)
+          : commissionCalc.profitAfterCommission;
       } else if (!isUAEBooking && vatApplicable) {
         // Non-UAE with VAT: VAT is 5% on profit after commissions
-        finalVatAmount = calculateVATOnProfit(commissionCalc.profitAfterCommission);
+        finalVatAmount = calculateVATOnProfit(Math.abs(commissionCalc.profitAfterCommission));
         // Net Profit = Profit After Commission - VAT
-        finalNetProfit = commissionCalc.profitAfterCommission - finalVatAmount;
+        // For REFUNDED: keep netProfit positive when cost > sale
+        finalNetProfit = isRefundBooking && costInAED > saleInAED
+          ? Math.abs(commissionCalc.profitAfterCommission) - finalVatAmount
+          : commissionCalc.profitAfterCommission - finalVatAmount;
       } else {
         // No VAT
         finalVatAmount = 0;
-        finalNetProfit = commissionCalc.profitAfterCommission;
+        // For REFUNDED: keep netProfit positive when cost > sale
+        finalNetProfit = isRefundBooking && costInAED > saleInAED
+          ? Math.abs(commissionCalc.profitAfterCommission)
+          : commissionCalc.profitAfterCommission;
       }
       
       const updatedBooking = await prisma.bookings.update({
