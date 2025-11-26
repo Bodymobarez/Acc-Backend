@@ -833,6 +833,17 @@ reports.get('/employee-commissions-monthly', async (c) => {
     });
     
     console.log('📊 Found bookings:', bookings.length);
+    if (bookings.length > 0) {
+      console.log('📊 Sample booking data:', {
+        bookingNumber: bookings[0].bookingNumber,
+        saleAmount: bookings[0].saleAmount,
+        costAmount: bookings[0].costAmount,
+        saleCurrency: bookings[0].saleCurrency,
+        costCurrency: bookings[0].costCurrency,
+        grossProfit: bookings[0].grossProfit,
+        agentCommissionAmount: bookings[0].agentCommissionAmount
+      });
+    }
     
     const employeeMap = new Map<string, any>();
     
