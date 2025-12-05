@@ -775,6 +775,130 @@ reports.get('/supplier-statement/:supplierId', async (c) => {
   }
 });
 
+// Employee Commissions Summary Report (for MonthlyCommissionsSummaryReport)
+reports.get('/employee-commissions', async (c) => {
+  try {
+    const { year, month, currency = 'AED' } = c.req.query();
+    
+    if (!year || !month) {
+      return c.json({ success: false, error: 'Year and month are required' }, 400);
+    }
+    
+    // Load all currencies once for efficient conversion
+    const allCurrencies = await prisma.currencies.findMany({
+      select: { code: true, exchangeRateToAED: true }
+    });
+    const currencyRates = new Map(allCurrencies.map(c => [c.code, Number(c.exchangeRateToAED)]));
+    
+    const startDate = new Date(Number(year), Number(month) - 1, 1);
+    const endDate = new Date(Number(year), Number(month), 0, 23, 59, 59);
+    
+    const bookings = await prisma.bookings.findMany({
+      where: {
+        bookingDate: { gte: startDate, lte: endDate },
+        status: { in: ['CONFIRMED', 'COMPLETE', 'REFUNDED'] }
+      },
+      include: {
+        employees_bookings_bookingAgentIdToemployees: {
+          include: { 
+            users: { select: { firstName: true, lastName: true } },
+          }
+        },
+        employees_bookings_customerServiceIdToemployees: {
+          include: { 
+            users: { select: { firstName: true, lastName: true } },
+          }
+        }
+      }
+    });
+    
+    // Build employee summary map
+    const employeeMap = new Map<string, {
+      employeeId: string;
+      employeeName: string;
+      department: string;
+      totalBookings: number;
+      agentCommission: number;
+      csCommission: number;
+      totalCommission: number;
+    }>();
+    
+    for (const booking of bookings) {
+      // Process agent
+      const agent = booking.employees_bookings_bookingAgentIdToemployees;
+      if (agent && booking.agentCommissionAmount) {
+        const agentId = agent.id;
+        const agentName = `${agent.users.firstName} ${agent.users.lastName}`;
+        
+        if (!employeeMap.has(agentId)) {
+          employeeMap.set(agentId, {
+            employeeId: agentId,
+            employeeName: agentName,
+            department: 'Booking Agent',
+            totalBookings: 0,
+            agentCommission: 0,
+            csCommission: 0,
+            totalCommission: 0
+          });
+        }
+        
+        const emp = employeeMap.get(agentId)!;
+        emp.totalBookings++;
+        emp.agentCommission += Number(booking.agentCommissionAmount || 0);
+        emp.totalCommission += Number(booking.agentCommissionAmount || 0);
+      }
+      
+      // Process CS
+      const cs = booking.employees_bookings_customerServiceIdToemployees;
+      if (cs && booking.salesCommissionAmount) {
+        const csId = cs.id;
+        const csName = `${cs.users.firstName} ${cs.users.lastName}`;
+        
+        if (!employeeMap.has(csId)) {
+          employeeMap.set(csId, {
+            employeeId: csId,
+            employeeName: csName,
+            department: 'Sales Agent',
+            totalBookings: 0,
+            agentCommission: 0,
+            csCommission: 0,
+            totalCommission: 0
+          });
+        }
+        
+        const emp = employeeMap.get(csId)!;
+        emp.totalBookings++;
+        emp.csCommission += Number(booking.salesCommissionAmount || 0);
+        emp.totalCommission += Number(booking.salesCommissionAmount || 0);
+      }
+    }
+    
+    const employees = Array.from(employeeMap.values());
+    
+    const totalAgentCommissions = employees.reduce((sum, e) => sum + e.agentCommission, 0);
+    const totalCSCommissions = employees.reduce((sum, e) => sum + e.csCommission, 0);
+    const totalCommissions = totalAgentCommissions + totalCSCommissions;
+    const totalBookings = employees.reduce((sum, e) => sum + e.totalBookings, 0);
+    
+    const summary = {
+      totalEmployees: employees.length,
+      totalBookings,
+      totalCommissions,
+      totalAgentCommissions,
+      totalCSCommissions,
+      avgCommissionPerEmployee: employees.length > 0 ? totalCommissions / employees.length : 0
+    };
+    
+    return c.json({
+      success: true,
+      data: { employees, summary }
+    });
+  } catch (error: any) {
+    console.error('Error generating employee commissions summary:', error);
+    return c.json({ success: false, error: error.message }, 500);
+  }
+});
+
 // Employee Commissions Monthly Report - All Employees
 reports.get('/employee-commissions-monthly', async (c) => {
   try {
