@@ -33,6 +33,41 @@ export const receiptService = {
   async createReceipt(input: CreateReceiptInput) {
     console.log('🧾 Creating receipt:', JSON.stringify(input, null, 2));
 
+    // If linking to an invoice, validate that the total won't exceed invoice amount
+    if (input.invoiceId) {
+      const invoice = await prisma.invoices.findUnique({
+        where: { id: input.invoiceId },
+        select: { totalAmount: true, invoiceNumber: true }
+      });
+      
+      if (!invoice) {
+        throw new Error('Invoice not found');
+      }
+      
+      // Get existing receipts for this invoice
+      const existingReceipts = await prisma.receipts.findMany({
+        where: {
+          invoiceId: input.invoiceId,
+          status: { not: 'CANCELLED' }
+        },
+        select: { amount: true, receiptNumber: true }
+      });
+      
+      const totalAlreadyPaid = existingReceipts.reduce((sum, r) => sum + r.amount, 0);
+      const remainingAmount = invoice.totalAmount - totalAlreadyPaid;
+      const epsilon = 0.01;
+      
+      // Check if invoice is already fully paid
+      if (remainingAmount <= epsilon) {
+        throw new Error(`Invoice ${invoice.invoiceNumber} is already fully paid. Total: ${invoice.totalAmount}, Already Paid: ${totalAlreadyPaid}`);
+      }
+      
+      // Check if new receipt would exceed invoice amount
+      if (input.amount > remainingAmount + epsilon) {
+        throw new Error(`Receipt amount (${input.amount}) exceeds remaining invoice balance (${remainingAmount.toFixed(2)}). Invoice ${invoice.invoiceNumber} total: ${invoice.totalAmount}, already paid: ${totalAlreadyPaid.toFixed(2)}`);
+      }
+    }
+
     const receipt = await prisma.receipts.create({
       data: {
         id: randomUUID(),
@@ -219,6 +254,47 @@ export const receiptService = {
 
   // Update receipt
   async updateReceipt(id: string, input: UpdateReceiptInput) {
+
+    // If linking to an invoice, validate that the total won't exceed invoice amount
+    if ((input as any).invoiceId) {
+      const invoiceId = (input as any).invoiceId;
+      
+      const invoice = await prisma.invoices.findUnique({
+        where: { id: invoiceId },
+        select: { totalAmount: true, invoiceNumber: true }
+      });
+      
+      if (!invoice) {
+        throw new Error('Invoice not found');
+      }
+      
+      // Get existing receipts for this invoice (excluding current receipt)
+      const existingReceipts = await prisma.receipts.findMany({
+        where: {
+          invoiceId: invoiceId,
+          id: { not: id }, // Exclude current receipt
+          status: { not: 'CANCELLED' }
+        },
+        select: { amount: true }
+      });
+      
+      const totalAlreadyPaid = existingReceipts.reduce((sum, r) => sum + r.amount, 0);
+      const remainingAmount = invoice.totalAmount - totalAlreadyPaid;
+      const epsilon = 0.01;
+      
+      // Get the current receipt to check its amount
+      const currentReceipt = await prisma.receipts.findUnique({
+        where: { id },
+        select: { amount: true }
+      });
+      
+      const receiptAmount = input.amount !== undefined ? input.amount : (currentReceipt?.amount || 0);
+      
+      // Check if receipt amount would exceed remaining invoice balance
+      if (receiptAmount > remainingAmount + epsilon) {
+        throw new Error(`Receipt amount (${receiptAmount}) exceeds remaining invoice balance (${remainingAmount.toFixed(2)}). Invoice ${invoice.invoiceNumber} total: ${invoice.totalAmount}, already paid: ${totalAlreadyPaid.toFixed(2)}`);
+      }
+    }
 
     const receipt = await prisma.receipts.update({
       where: { id },
