@@ -769,32 +769,22 @@ export class BookingService {
       }
     });
     
-    // Debug: Log the first booking to verify structure
+    // Debug: Log bookings with customer data issues
     if (bookings.length > 0) {
       console.log('\n═══════════════════════════════════════');
-      console.log('📦 SAMPLE BOOKING DATA (First Record):');
+      console.log('📦 BOOKINGS WITH CUSTOMER DATA:');
       console.log('═══════════════════════════════════════');
-      const sample = bookings[0];
-      console.log('ID:', sample.id);
-      console.log('Booking Number:', sample.bookingNumber);
-      console.log('Status:', sample.status);
-      console.log('\n📄 INVOICE DATA:');
-      console.log('  Invoices:', sample.invoices);
-      console.log('\n💰 FINANCIAL DATA:');
-      console.log('  Sale in AED:', sample.saleInAED);
-      console.log('  Cost in AED:', sample.costInAED);
-      console.log('  Gross Profit:', sample.grossProfit);
-      console.log('  Net Profit:', sample.netProfit);
-      console.log('\n👔 AGENT DATA:');
-      console.log('  Booking Agent ID:', sample.bookingAgentId);
-      console.log('  Booking Agent:', sample.employees_bookings_bookingAgentIdToemployees);
-      console.log('  Agent Commission Rate:', sample.agentCommissionRate);
-      console.log('  Agent Commission Amount:', sample.agentCommissionAmount);
-      console.log('\n💼 SALES AGENT DATA:');
-      console.log('  Customer Service ID:', sample.customerServiceId);
-      console.log('  Customer Service:', sample.employees_bookings_customerServiceIdToemployees);
-      console.log('  CS Commission Rate:', sample.csCommissionRate);
-      console.log('  CS Commission Amount:', sample.csCommissionAmount);
+      bookings.slice(0, 5).forEach((b, i) => {
+        console.log(`\n[${i + 1}] ${b.bookingNumber}:`);
+        console.log('   Customer ID:', b.customerId);
+        console.log('   Customers Data:', b.customers ? {
+          id: b.customers.id,
+          type: b.customers.type,
+          firstName: b.customers.firstName,
+          lastName: b.customers.lastName,
+          companyName: b.customers.companyName
+        } : 'NULL');
+      });
       console.log('═══════════════════════════════════════\n');
     }
     
