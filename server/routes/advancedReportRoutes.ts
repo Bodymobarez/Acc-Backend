@@ -769,7 +769,7 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
     const bookings = await prisma.bookings.findMany({
       where: {
         bookingDate: { gte: startDate, lte: endDate },
-        status: { in: ['CONFIRMED', 'REFUNDED'] }
+        status: { in: ['CONFIRMED', 'REFUNDED', 'COMPLETE'] }
       },
       select: {
         id: true,
@@ -779,8 +779,13 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         serviceDetails: true,
         status: true,
         saleCurrency: true,
+        costCurrency: true,
+        saleAmount: true,
+        costAmount: true,
+        grossProfit: true,
         agentCommissionAmount: true,
         csCommissionAmount: true,
+        salesCommissionAmount: true,
         employees_bookings_bookingAgentIdToemployees: {
           select: {
             id: true,
@@ -863,6 +868,17 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           serviceDetailsText = 'Not specified';
         }
         
+        // Calculate values for display - AGENT
+        const saleOrigAgent = Number(booking.saleAmount || 0);
+        const costOrigAgent = Number(booking.costAmount || 0);
+        const profitInAEDAgent = Number(booking.grossProfit || 0);
+        const commissionInAEDAgent = Number(booking.agentCommissionAmount || 0);
+        const saleCurrAgent = booking.saleCurrency || 'AED';
+        
+        // Convert profit and commission to sale currency
+        const profitInSaleCurrencyAgent = convertCurrency(profitInAEDAgent, 'AED', saleCurrAgent);
+        const commissionInSaleCurrencyAgent = convertCurrency(commissionInAEDAgent, 'AED', saleCurrAgent);
+        
         emp.breakdown.push({
           date: new Date(booking.bookingDate).toLocaleDateString(),
           bookingNumber: booking.bookingNumber,
@@ -870,7 +886,16 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           service: booking.serviceType,
           serviceDetails: serviceDetailsText,
           status: booking.status,
-          commission: commissionInTargetCurrency
+          commission: commissionInTargetCurrency,
+          saleCurrency: saleCurrAgent,
+          costCurrency: booking.costCurrency || 'AED',
+          saleOriginal: saleOrigAgent,
+          costOriginal: costOrigAgent,
+          profitInAED: profitInAEDAgent,
+          profitInSaleCurrency: profitInSaleCurrencyAgent,
+          commissionInAED: commissionInAEDAgent,
+          commissionInSaleCurrency: commissionInSaleCurrencyAgent,
+          commissionOriginal: commissionInAEDAgent
         });
       }
 
@@ -935,6 +960,17 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           serviceDetailsText = 'Not specified';
         }
         
+        // Calculate values for display - CS
+        const saleOrigCS = Number(booking.saleAmount || 0);
+        const costOrigCS = Number(booking.costAmount || 0);
+        const profitInAEDCS = Number(booking.grossProfit || 0);
+        const commissionInAEDCS = Number(booking.csCommissionAmount || 0);
+        const saleCurrCS = booking.saleCurrency || 'AED';
+        
+        // Convert profit and commission to sale currency
+        const profitInSaleCurrencyCS = convertCurrency(profitInAEDCS, 'AED', saleCurrCS);
+        const commissionInSaleCurrencyCS = convertCurrency(commissionInAEDCS, 'AED', saleCurrCS);
+        
         emp.breakdown.push({
           date: new Date(booking.bookingDate).toLocaleDateString(),
           bookingNumber: booking.bookingNumber,
@@ -942,16 +978,32 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           service: booking.serviceType,
           serviceDetails: serviceDetailsText,
           status: booking.status,
-          commission: commissionInTargetCurrency
+          commission: commissionInTargetCurrency,
+          saleCurrency: saleCurrCS,
+          costCurrency: booking.costCurrency || 'AED',
+          saleOriginal: saleOrigCS,
+          costOriginal: costOrigCS,
+          profitInAED: profitInAEDCS,
+          profitInSaleCurrency: profitInSaleCurrencyCS,
+          commissionInAED: commissionInAEDCS,
+          commissionInSaleCurrency: commissionInSaleCurrencyCS,
+          commissionOriginal: commissionInAEDCS
         });
       }
     });
 
-    const employees = Array.from(employeeMap.values()).map(emp => ({
-      ...emp,
-      averageCommission: emp.totalCommission / emp.totalBookings,
-      currency: currency || 'AED'
-    }));
+    // Calculate confirmed and refunded counts
+    const employees = Array.from(employeeMap.values()).map(emp => {
+      const confirmedCount = emp.breakdown.filter((b: any) => b.status === 'CONFIRMED' || b.status === 'COMPLETE').length;
+      const refundedCount = emp.breakdown.filter((b: any) => b.status === 'REFUNDED').length;
+      return {
+        ...emp,
+        averageCommission: emp.totalCommission / emp.totalBookings,
+        currency: currency || 'AED',
+        confirmedCount,
+        refundedCount
+      };
+    });
 
     res.json({
       success: true,
@@ -989,48 +1041,102 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
           { customerServiceId: employeeId }
         ],
         bookingDate: { gte: startDate, lte: endDate },
-        status: { in: ['CONFIRMED', 'REFUNDED'] }
+        status: { in: ['CONFIRMED', 'REFUNDED', 'COMPLETE'] }
       },
       include: {
-        customers: { select: { firstName: true, lastName: true, companyName: true } }
+        customers: { select: { firstName: true, lastName: true, companyName: true } },
+        employees_bookings_bookingAgentIdToemployees: {
+          include: { users: { select: { firstName: true, lastName: true } } }
+        }
       }
     });
 
     const targetCurrency = (currency as string) || 'AED';
+    
+    let confirmedCount = 0;
+    let refundedCount = 0;
 
     const transactions = bookings.map(b => {
-      const agentCommission = b.agentCommissionAmount || 0;
-      const csCommission = b.csCommissionAmount || 0;
-      const totalCommissionInBookingCurrency = agentCommission + csCommission;
+      // Count by status
+      if (b.status === 'CONFIRMED' || b.status === 'COMPLETE') confirmedCount++;
+      else if (b.status === 'REFUNDED') refundedCount++;
+      
+      // Get commission based on role
+      let commissionInAED = 0;
+      if (b.bookingAgentId === employeeId && b.agentCommissionAmount) {
+        commissionInAED += Number(b.agentCommissionAmount || 0);
+      }
+      if (b.customerServiceId === employeeId && (b.csCommissionAmount || b.salesCommissionAmount)) {
+        commissionInAED += Number(b.csCommissionAmount || b.salesCommissionAmount || 0);
+      }
+      
+      const saleOrig = Number(b.saleAmount || 0);
+      const costOrig = Number(b.costAmount || 0);
+      const profitInAED = Number(b.grossProfit || 0);
+      const saleCurr = b.saleCurrency || 'AED';
+      
+      // Convert to sale currency
+      const profitInSaleCurrency = convertCurrency(profitInAED, 'AED', saleCurr);
+      const commissionInSaleCurrency = convertCurrency(commissionInAED, 'AED', saleCurr);
       
       // Convert to target currency
-      const commissionInTargetCurrency = convertCurrency(
-        totalCommissionInBookingCurrency,
-        b.saleCurrency,
-        targetCurrency
-      );
+      const commissionInTargetCurrency = convertCurrency(commissionInAED, 'AED', targetCurrency);
 
       return {
-        date: b.bookingDate.toISOString(),
+        date: b.bookingDate.toISOString().split('T')[0],
         bookingNumber: b.bookingNumber,
         bookingId: b.id,
         customer: b.customers?.companyName || `${b.customers?.firstName || ''} ${b.customers?.lastName || ''}`.trim() || 'N/A',
         serviceType: b.serviceType || 'N/A',
         serviceDetails: b.serviceDetails || '',
+        status: b.status,
         commission: commissionInTargetCurrency,
+        saleCurrency: saleCurr,
+        costCurrency: b.costCurrency || 'AED',
+        saleOriginal: saleOrig,
+        costOriginal: costOrig,
+        profitInAED: profitInAED,
+        profitInSaleCurrency: profitInSaleCurrency,
+        commissionInAED: commissionInAED,
+        commissionInSaleCurrency: commissionInSaleCurrency,
+        commissionOriginal: commissionInAED,
         currency: targetCurrency
       };
     });
 
     const totalCommission = transactions.reduce((sum, t) => sum + t.commission, 0);
+    
+    // Get employee name
+    const employee = await prisma.employees.findUnique({
+      where: { id: employeeId },
+      include: { users: { select: { firstName: true, lastName: true } } }
+    });
+    
+    const employeeName = employee ? `${employee.users.firstName} ${employee.users.lastName}` : 'Unknown';
+
+    // Format as employees array for consistency with all-employees endpoint
+    const employees = [{
+      employeeName: employeeName,
+      totalBookings: transactions.length,
+      totalCommission: totalCommission,
+      averageCommission: transactions.length > 0 ? totalCommission / transactions.length : 0,
+      currency: targetCurrency,
+      confirmedCount: confirmedCount,
+      refundedCount: refundedCount,
+      breakdown: transactions
+    }];
 
     res.json({
       success: true,
       data: {
-        transactions,
+        employees,
         summary: {
-          totalCommission,
-          bookingsCount: bookings.length
+          totalEmployees: 1,
+          totalBookings: transactions.length,
+          totalCommissions: totalCommission,
+          averagePerEmployee: totalCommission,
+          confirmedBookings: confirmedCount,
+          refundedBookings: refundedCount
         }
       }
     });
