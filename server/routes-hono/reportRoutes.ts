@@ -1020,7 +1020,8 @@ reports.get('/employee-commissions-monthly', async (c) => {
           profitInAED: profitInAED,
           profitInSaleCurrency: profitInSaleCurrency,
           commissionInSaleCurrency: commissionInSaleCurrency,
-          commissionOriginal: commissionInAED
+          commissionOriginal: commissionInAED,
+          status: booking.status
         });
       }
       
@@ -1072,7 +1073,8 @@ reports.get('/employee-commissions-monthly', async (c) => {
           profitInAED: profitInAED,
           profitInSaleCurrency: profitInSaleCurrency,
           commissionInSaleCurrency: commissionInSaleCurrency,
-          commissionOriginal: commissionInAED
+          commissionOriginal: commissionInAED,
+          status: booking.status
         });
       }
     }
@@ -1094,7 +1096,9 @@ reports.get('/employee-commissions-monthly', async (c) => {
     
     const employees = Array.from(employeeMap.values()).map(emp => ({
       ...emp,
-      averageCommission: emp.totalBookings > 0 ? emp.totalCommission / emp.totalBookings : 0
+      averageCommission: emp.totalBookings > 0 ? emp.totalCommission / emp.totalBookings : 0,
+      confirmedCount: emp.breakdown.filter((b: any) => b.status === 'CONFIRMED' || b.status === 'COMPLETE').length,
+      refundedCount: emp.breakdown.filter((b: any) => b.status === 'REFUNDED').length
     }));
     
     // Calculate status breakdown
@@ -1288,7 +1292,8 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
         profitInAED: profitInAED,
         profitInSaleCurrency: profitInSaleCurrency,
         commissionInSaleCurrency: commissionInSaleCurrency,
-        commissionOriginal: commissionInAED
+        commissionOriginal: commissionInAED,
+        status: booking.status
       });
     }
     
@@ -1300,6 +1305,8 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
       totalCommission: totalCommission,
       averageCommission: transactions.length > 0 ? totalCommission / transactions.length : 0,
       currency: currency,
+      confirmedCount: confirmedCount + completeCount,
+      refundedCount: refundedCount,
       breakdown: transactions
     }];
     
