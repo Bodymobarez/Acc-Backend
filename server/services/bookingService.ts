@@ -792,10 +792,11 @@ export class BookingService {
   }
   
   /**
-   * Get booking by ID
+   * Get booking by ID or bookingNumber
    */
   async getBookingById(id: string) {
-    return await prisma.bookings.findUnique({
+    // First try to find by ID (UUID)
+    let booking = await prisma.bookings.findUnique({
       where: { id },
       include: {
         customers: true,
@@ -834,6 +835,51 @@ export class BookingService {
         files: true
       }
     });
+    
+    // If not found by ID, try to find by bookingNumber
+    if (!booking) {
+      booking = await prisma.bookings.findFirst({
+        where: { bookingNumber: id },
+        include: {
+          customers: true,
+          suppliers: true,
+          booking_suppliers: {
+            include: {
+              suppliers: true
+            }
+          },
+          employees_bookings_bookingAgentIdToemployees: {
+            include: {
+              users: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  email: true
+                }
+              }
+            }
+          },
+          employees_bookings_customerServiceIdToemployees: {
+            include: {
+              users: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  email: true
+                }
+              }
+            }
+          },
+          users: true,
+          invoices: true,
+          files: true
+        }
+      });
+    }
+    
+    return booking;
   }
   
   /**

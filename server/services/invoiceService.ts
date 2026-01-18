@@ -150,6 +150,7 @@ export class InvoiceService {
   
   /**
    * Get all invoices with filters
+   * OPTIMIZED: Two queries instead of N+1 queries
    */
   async getInvoices(filters: {
     status?: string;
@@ -157,6 +158,7 @@ export class InvoiceService {
     startDate?: Date;
     endDate?: Date;
   }) {
+    // Query 1: Get all invoices
     const invoices = await prisma.invoices.findMany({
       where: {
         ...(filters.status && { status: filters.status }),
@@ -183,33 +185,45 @@ export class InvoiceService {
       }
     });
     
-    // Calculate paidAmount for each invoice from linked receipts
-    const invoicesWithPaidAmount = await Promise.all(
-      invoices.map(async (invoice) => {
-        // Get all receipts linked to this invoice
-        const receipts = await prisma.receipts.findMany({
-          where: {
-            invoiceId: invoice.id,
-            status: { not: 'CANCELLED' }
-          },
-          select: {
-            id: true,
-            receiptNumber: true,
-            amount: true,
-            receiptDate: true,
-            status: true
-          }
-        });
-        
-        const paidAmount = receipts.reduce((sum, receipt) => sum + receipt.amount, 0);
-        
-        return {
-          ...invoice,
-          paidAmount,
-          receipts // Include receipts array
-        };
-      })
-    );
+    // Query 2: Get all receipts for all invoices in ONE query
+    const invoiceIds = invoices.map(inv => inv.id);
+    const allReceipts = await prisma.receipts.findMany({
+      where: {
+        invoiceId: { in: invoiceIds },
+        status: { not: 'CANCELLED' }
+      },
+      select: {
+        id: true,
+        receiptNumber: true,
+        amount: true,
+        receiptDate: true,
+        status: true,
+        invoiceId: true
+      }
+    });
+    
+    // Group receipts by invoiceId for fast lookup
+    const receiptsByInvoice: Record<string, typeof allReceipts> = {};
+    for (const receipt of allReceipts) {
+      if (receipt.invoiceId) {
+        if (!receiptsByInvoice[receipt.invoiceId]) {
+          receiptsByInvoice[receipt.invoiceId] = [];
+        }
+        receiptsByInvoice[receipt.invoiceId].push(receipt);
+      }
+    }
+    
+    // Map invoices with their receipts and paidAmount
+    const invoicesWithPaidAmount = invoices.map((invoice) => {
+      const receipts = receiptsByInvoice[invoice.id] || [];
+      const paidAmount = receipts.reduce((sum, receipt) => sum + receipt.amount, 0);
+      
+      return {
+        ...invoice,
+        paidAmount,
+        receipts
+      };
+    });
     
     return invoicesWithPaidAmount;
   }

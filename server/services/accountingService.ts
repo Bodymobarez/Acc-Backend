@@ -4,9 +4,44 @@ import { prisma } from '../lib/prisma';
 /**
  * Accounting Service
  * Automatically creates journal entries for all financial transactions
+ * WITH FISCAL YEAR SEPARATION - Each entry is linked to its fiscal year
  */
 
 export class AccountingService {
+  /**
+   * Get the fiscal year for a given date
+   * Returns the fiscal year that contains this date, or null if none found
+   */
+  private async getFiscalYearForDate(date: Date): Promise<{ id: string; status: string } | null> {
+    const fiscalYear = await prisma.fiscal_years.findFirst({
+      where: {
+        startDate: { lte: date },
+        endDate: { gte: date }
+      },
+      select: { id: true, status: true, name: true }
+    });
+    return fiscalYear;
+  }
+
+  /**
+   * Validate that a date falls within an OPEN fiscal year
+   * Throws error if fiscal year is closed or not found
+   */
+  private async validateFiscalYear(date: Date, throwOnClosed: boolean = true): Promise<string | null> {
+    const fiscalYear = await this.getFiscalYearForDate(date);
+    
+    if (!fiscalYear) {
+      console.warn(`⚠️  No fiscal year found for date: ${date.toISOString()}`);
+      return null; // Allow entry without fiscal year for backward compatibility
+    }
+    
+    if (fiscalYear.status === 'CLOSED' && throwOnClosed) {
+      throw new Error(`لا يمكن إضافة قيود لسنة مالية مغلقة. التاريخ ${date.toISOString()} يقع في سنة مالية مغلقة.`);
+    }
+    
+    return fiscalYear.id;
+  }
+
   /**
    * Get revenue account code based on service type
    */
@@ -52,9 +87,15 @@ export class AccountingService {
    * Records cost with supplier
    * Handles both single and multi-supplier bookings
    * PREVENTS DUPLICATE ENTRIES
+   * LINKS TO FISCAL YEAR
    */
   async createBookingJournalEntry(booking: any): Promise<void> {
     try {
+      const entryDate = booking.bookingDate || new Date();
+      
+      // Validate and get fiscal year for the entry date
+      const fiscalYearId = await this.validateFiscalYear(new Date(entryDate), false);
+      
       // Check if cost entry already exists
       const existingCostEntry = await prisma.journal_entries.findFirst({
         where: {
@@ -110,13 +151,14 @@ export class AccountingService {
             data: {
               id: randomUUID(),
               entryNumber: supplierEntryNumber,
-              date: booking.bookingDate || new Date(),
+              date: entryDate,
               description: `تكلفة حجز - ${booking.bookingNumber}`,
               reference: booking.bookingNumber,
               debitAccountId: costOfSalesAccount.id,
               creditAccountId: supplierPayableAccount.id,
               amount: costInAED,
               bookingId: booking.id,
+              fiscalYearId: fiscalYearId,
               transactionType: 'BOOKING_COST',
               status: 'DRAFT',
               createdBy: booking.createdById,
@@ -126,7 +168,7 @@ export class AccountingService {
           // Auto-post created entry to update account balances
           await this.postJournalEntry(created.id);
           
-          console.log(`✅ Created booking cost journal entry for supplier: ${supplierEntryNumber}`);
+          console.log(`✅ Created booking cost journal entry for supplier: ${supplierEntryNumber} (FY: ${fiscalYearId || 'N/A'})`);
         }
       } else {
         // Single supplier: Create one entry
@@ -136,13 +178,14 @@ export class AccountingService {
           data: {
             id: randomUUID(),
             entryNumber,
-            date: booking.bookingDate || new Date(),
+            date: entryDate,
             description: `تكلفة حجز - ${booking.bookingNumber}`,
             reference: booking.bookingNumber,
             debitAccountId: costOfSalesAccount.id,
             creditAccountId: supplierPayableAccount.id,
             amount: costInAED,
             bookingId: booking.id,
+            fiscalYearId: fiscalYearId,
             transactionType: 'BOOKING_COST',
             status: 'DRAFT',
             createdBy: booking.createdById,
@@ -164,9 +207,15 @@ export class AccountingService {
    * Records accounts receivable and revenue
    * This is called at booking creation, not at invoice generation
    * PREVENTS DUPLICATE ENTRIES
+   * LINKS TO FISCAL YEAR
    */
   async createBookingRevenueJournalEntry(booking: any): Promise<void> {
     try {
+      const entryDate = booking.bookingDate || new Date();
+      
+      // Validate and get fiscal year for the entry date
+      const fiscalYearId = await this.validateFiscalYear(new Date(entryDate), false);
+      
       // Check if revenue entry already exists
       const existingRevenueEntry = await prisma.journal_entries.findFirst({
         where: {
@@ -219,13 +268,14 @@ export class AccountingService {
         data: {
           id: randomUUID(),
           entryNumber,
-          date: booking.bookingDate || new Date(),
+          date: entryDate,
           description: `إيراد حجز - ${booking.bookingNumber}`,
           reference: booking.bookingNumber,
           debitAccountId: accountsReceivableAccount.id,
           creditAccountId: revenueAccount.id,
           amount: subtotal,
           bookingId: booking.id,
+          fiscalYearId: fiscalYearId,
           transactionType: 'BOOKING_REVENUE',
           status: 'DRAFT',
           createdBy: booking.createdById,
@@ -235,7 +285,7 @@ export class AccountingService {
       // Auto-post revenue entry
       await this.postJournalEntry(revenueEntry.id);
 
-      console.log(`✅ Created booking revenue journal entry: ${entryNumber}`);
+      console.log(`✅ Created booking revenue journal entry: ${entryNumber} (FY: ${fiscalYearId || 'N/A'})`);
     } catch (error: any) {
       console.error('❌ Error creating booking revenue journal entry:', error.message);
     }
@@ -246,6 +296,7 @@ export class AccountingService {
    * Records VAT payable
    * This is called at booking creation, not at invoice generation
    * PREVENTS DUPLICATE ENTRIES
+   * LINKS TO FISCAL YEAR
    */
   async createBookingVATJournalEntry(booking: any): Promise<void> {
     try {
@@ -255,6 +306,11 @@ export class AccountingService {
       if (vatAmount <= 0) {
         return;
       }
+
+      const entryDate = booking.bookingDate || new Date();
+      
+      // Validate and get fiscal year for the entry date
+      const fiscalYearId = await this.validateFiscalYear(new Date(entryDate), false);
 
       // Check if VAT entry already exists
       const existingVATEntry = await prisma.journal_entries.findFirst({
@@ -302,13 +358,14 @@ export class AccountingService {
         data: {
           id: randomUUID(),
           entryNumber,
-          date: booking.bookingDate || new Date(),
+          date: entryDate,
           description,
           reference: booking.bookingNumber,
           debitAccountId: accountsReceivableAccount.id,
           creditAccountId: vatPayableAccount.id,
           amount: vatAmount,
           bookingId: booking.id,
+          fiscalYearId: fiscalYearId,
           transactionType: isUAEBooking ? 'BOOKING_VAT_UAE' : 'BOOKING_VAT_NON_UAE',
           status: 'DRAFT',
           createdBy: booking.createdById,
@@ -461,9 +518,15 @@ export class AccountingService {
    * Create journal entry for payment received
    * Records cash/bank and reduces accounts receivable
    * PREVENTS DUPLICATE ENTRIES
+   * LINKS TO FISCAL YEAR
    */
   async createReceiptJournalEntry(receipt: any): Promise<void> {
     try {
+      const entryDate = receipt.receiptDate || new Date();
+      
+      // Validate and get fiscal year for the entry date
+      const fiscalYearId = await this.validateFiscalYear(new Date(entryDate), false);
+      
       // Check if receipt entry already exists
       const existingReceiptEntry = await prisma.journal_entries.findFirst({
         where: {
@@ -541,12 +604,13 @@ export class AccountingService {
         data: {
           id: randomUUID(),
           entryNumber,
-          date: receipt.receiptDate || new Date(),
+          date: entryDate,
           description: `سداد - ${receipt.receiptNumber}`,
           reference: receipt.receiptNumber,
           debitAccountId: cashAccount.id,
           creditAccountId: accountsReceivableAccount.id,
           amount,
+          fiscalYearId: fiscalYearId,
           transactionType: 'RECEIPT_PAYMENT',
           status: 'DRAFT',
           createdBy: receipt.createdById,
@@ -566,6 +630,7 @@ export class AccountingService {
    * Create journal entry for commission payment
    * Records commission expense and payable to employee
    * PREVENTS DUPLICATE ENTRIES
+   * LINKS TO FISCAL YEAR
    */
   async createCommissionJournalEntry(booking: any, employeeType: 'AGENT' | 'CS'): Promise<void> {
     try {
@@ -574,6 +639,11 @@ export class AccountingService {
       if (!amount || amount === 0) {
         return; // No commission to record
       }
+
+      const entryDate = booking.bookingDate || new Date();
+      
+      // Validate and get fiscal year for the entry date
+      const fiscalYearId = await this.validateFiscalYear(new Date(entryDate), false);
 
       // Check if commission entry already exists
       const transactionType = `COMMISSION_${employeeType}`;
@@ -625,13 +695,14 @@ export class AccountingService {
         data: {
           id: randomUUID(),
           entryNumber,
-          date: booking.bookingDate || new Date(),
+          date: entryDate,
           description: `${employeeLabel} - ${booking.bookingNumber}`,
           reference: booking.bookingNumber,
           debitAccountId: commissionExpenseAccount.id,
           creditAccountId: accountsPayableAccount.id,
           amount: commissionAmount,
           bookingId: booking.id,
+          fiscalYearId: fiscalYearId,
           transactionType: `COMMISSION_${employeeType}`,
           status: 'DRAFT',
           createdBy: booking.createdById,

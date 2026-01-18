@@ -367,6 +367,7 @@ import cashRegisterRoutes from './routes-hono/cashRegisterRoutes';
 import reportRoutes from './routes-hono/reportRoutes';
 import notificationRoutes from './routes-hono/notificationRoutes';
 import employeeCommissionRoutes from './routes-hono/employeeCommissionRoutes';
+import fiscalYearRoutes from './routes-hono/fiscalYearRoutes';
 
 
 
@@ -401,6 +402,7 @@ app.route('/api/cash-registers', cashRegisterRoutes);
 app.route('/api/notifications', notificationRoutes);
 app.route('/api/reports', reportRoutes);
 app.route('/api/reports/employee-commissions', employeeCommissionRoutes);
+app.route('/api/fiscal-years', fiscalYearRoutes);
 
 // Temporary test route
 app.get('/api/test', (c: Context) => {

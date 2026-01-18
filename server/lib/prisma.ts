@@ -40,4 +40,26 @@ export const prisma =
     }),
   });
 
+// Extend Prisma with retry logic for Neon cold starts
+const originalConnect = prisma.$connect.bind(prisma);
+prisma.$connect = async () => {
+  const maxRetries = 3;
+  let lastError: Error | null = null;
+  
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      await originalConnect();
+      return;
+    } catch (error: any) {
+      lastError = error;
+      console.warn(`⚠️ Database connection attempt ${i + 1}/${maxRetries} failed:`, error.message);
+      if (i < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+      }
+    }
+  }
+  
+  if (lastError) throw lastError;
+};
+
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;

@@ -292,6 +292,7 @@ model journal_entries {
   amount                                             Float
   bookingId                                          String?
   invoiceId                                          String?
+  fiscalYearId                                       String?   // ربط بالسنة المالية
   transactionType                                    String?
   status                                             String    @default("DRAFT")
   postedDate                                         DateTime?
@@ -304,6 +305,9 @@ model journal_entries {
   accounts_journal_entries_debitAccountIdToaccounts  accounts  @relation("journal_entries_debitAccountIdToaccounts", fields: [debitAccountId], references: [id])
   bookings                                           bookings? @relation("bookings_journal_entries", fields: [bookingId], references: [id])
   invoices                                           invoices? @relation("invoices_journal_entries", fields: [invoiceId], references: [id])
+  fiscalYear                                         fiscal_years? @relation(fields: [fiscalYearId], references: [id])
+  
+  @@index([fiscalYearId])
 }
 
 model receipts {
@@ -532,4 +536,103 @@ model cash_registers {
   // Metadata
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+}
+
+// ==================== نظام السنوات المالية ====================
+
+model fiscal_years {
+  id              String    @id
+  name            String    // اسم السنة المالية مثل "2024" أو "2024-2025"
+  code            String    @unique // كود فريد للسنة المالية
+  startDate       DateTime  // تاريخ بداية السنة المالية
+  endDate         DateTime  // تاريخ نهاية السنة المالية
+  
+  // حالة السنة المالية
+  status          String    @default("OPEN") // OPEN, CLOSING, CLOSED
+  isCurrent       Boolean   @default(false) // هل هي السنة الحالية؟
+  
+  // معلومات الإقفال
+  closedAt        DateTime? // تاريخ الإقفال
+  closedById      String?   // من قام بالإقفال
+  closingNotes    String?   @db.Text // ملاحظات الإقفال
+  
+  // معلومات الترحيل
+  balancesCarriedForward Boolean @default(false) // هل تم ترحيل الأرصدة؟
+  carriedForwardAt DateTime? // تاريخ الترحيل
+  carriedForwardById String? // من قام بالترحيل
+  previousYearId  String?   // السنة السابقة
+  nextYearId      String?   // السنة التالية
+  
+  // أرصدة الإقفال
+  closingRetainedEarnings Float? // الأرباح المحتجزة عند الإقفال
+  closingNetIncome Float?        // صافي الدخل عند الإقفال
+  
+  // إعدادات
+  allowBackdatedEntries Boolean @default(false) // السماح بقيود بتاريخ سابق
+  lockDate        DateTime? // تاريخ قفل القيود (لا يمكن إدخال قيود قبله)
+  
+  // Metadata
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdById     String?
+  
+  // Relations
+  opening_balances fiscal_year_opening_balances[]
+  closing_entries fiscal_year_closing_entries[]
+  journal_entries journal_entries[]
+  
+  @@index([status])
+  @@index([isCurrent])
+  @@index([startDate, endDate])
+}
+
+model fiscal_year_opening_balances {
+  id              String    @id
+  fiscalYearId    String
+  accountId       String
+  
+  // الأرصدة
+  debitBalance    Float     @default(0)
+  creditBalance   Float     @default(0)
+  balance         Float     @default(0)
+  
+  // مصدر الرصيد
+  source          String    @default("MANUAL") // MANUAL, CARRIED_FORWARD
+  previousYearClosingId String? // رقم قيد الإقفال من السنة السابقة
+  
+  // Metadata
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdById     String?
+  
+  // Relations
+  fiscalYear      fiscal_years @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  
+  @@unique([fiscalYearId, accountId])
+  @@index([fiscalYearId])
+  @@index([accountId])
+}
+
+model fiscal_year_closing_entries {
+  id              String    @id
+  fiscalYearId    String
+  
+  // نوع قيد الإقفال
+  entryType       String    // REVENUE_CLOSE, EXPENSE_CLOSE, INCOME_SUMMARY, RETAINED_EARNINGS
+  description     String
+  
+  // تفاصيل القيد
+  debitAccountId  String
+  creditAccountId String
+  amount          Float
+  
+  // Metadata
+  createdAt       DateTime  @default(now())
+  journalEntryId  String?   // ربط بقيد اليومية الفعلي
+  
+  // Relations
+  fiscalYear      fiscal_years @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  
+  @@index([fiscalYearId])
+  @@index([entryType])
 }
