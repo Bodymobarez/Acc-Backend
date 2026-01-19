@@ -998,11 +998,14 @@ reports.get('/employee-commissions-monthly', async (c) => {
         const profitInAED = Number(booking.grossProfit || 0);
         const commissionInAED = Number(booking.agentCommissionAmount || 0);
         
-        // Convert profit and commission to sale currency (like booking page does)
-        const profitInSaleCurrency = convertCurrency(profitInAED, 'AED', booking.saleCurrency || 'AED');
+        // Calculate profit in original sale currency (Sale - Cost)
+        // This is what should be displayed since Sale and Cost are in the same currency
+        const profitInSaleCurrency = saleOrig - costOrig;
+        
+        // Convert commission to sale currency
         const commissionInSaleCurrency = convertCurrency(commissionInAED, 'AED', booking.saleCurrency || 'AED');
         
-        // Convert commission to requested currency
+        // Convert commission to requested currency for totals
         const commission = convertCurrency(commissionInAED, 'AED', currency as string);
         emp.totalCommission += commission;
         
@@ -1076,11 +1079,13 @@ reports.get('/employee-commissions-monthly', async (c) => {
         const profitInAED = Number(booking.grossProfit || 0);
         const commissionInAED = Number(booking.salesCommissionAmount || 0);
         
-        // Convert profit and commission to sale currency (like booking page does)
-        const profitInSaleCurrency = convertCurrency(profitInAED, 'AED', booking.saleCurrency || 'AED');
+        // Calculate profit in original sale currency (Sale - Cost)
+        const profitInSaleCurrency = saleOrig - costOrig;
+        
+        // Convert commission to sale currency
         const commissionInSaleCurrency = convertCurrency(commissionInAED, 'AED', booking.saleCurrency || 'AED');
         
-        // Convert commission to requested currency
+        // Convert commission to requested currency for totals
         const commission = convertCurrency(commissionInAED, 'AED', currency as string);
         emp.totalCommission += commission;
         
@@ -1293,7 +1298,10 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
       const profitInAED = Number(booking.grossProfit || 0);
       const saleCurrency = booking.saleCurrency || 'AED';
       
-      // Get sale currency exchange rate for display conversion (like BookingsPage)
+      // Calculate profit in original sale currency (Sale - Cost)
+      const profitInSaleCurrency = saleOrig - costOrig;
+      
+      // Get sale currency exchange rate for commission conversion
       const saleRate = currencyRates.get(saleCurrency) || 1;
       
       // Get commission directly from database - no calculations!
@@ -1309,8 +1317,7 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
         commissionInAED += Number(booking.salesCommissionAmount || 0);
       }
       
-      // Convert to sale currency for display (same as BookingsPage)
-      const profitInSaleCurrency = saleRate > 0 ? profitInAED / saleRate : profitInAED;
+      // Convert commission to sale currency for display
       const commissionInSaleCurrency = saleRate > 0 ? commissionInAED / saleRate : commissionInAED;
       
       // Convert commission to requested currency

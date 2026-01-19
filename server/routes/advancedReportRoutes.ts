@@ -872,13 +872,20 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         const costOrigAgent = Number(booking.costAmount || 0);
         const saleCurrAgent = booking.saleCurrency || 'AED';
         
-        // Use the stored gross profit (already in AED)
+        // Calculate profit in original sale currency (Sale - Cost)
+        // This is what should be displayed since Sale and Cost are in the same currency
+        const profitInSaleCurrencyAgent = saleOrigAgent - costOrigAgent;
+        
+        // Use the stored gross profit (already in AED) for commission rate calculation
         const profitInAEDAgent = Number(booking.grossProfit || 0);
         
         // Use the stored commission amount (already in AED)
         const commissionInAEDAgent = Number(booking.agentCommissionAmount || 0);
         
-        // Convert to target currency for display
+        // Convert commission to sale currency for display
+        const commissionInSaleCurrencyAgent = convertCurrency(commissionInAEDAgent, 'AED', saleCurrAgent);
+        
+        // Convert to target currency for totals
         const commissionInTargetCurrencyAgent = convertCurrency(commissionInAEDAgent, 'AED', targetCurrency);
         const profitInTargetCurrencyAgent = convertCurrency(profitInAEDAgent, 'AED', targetCurrency);
         
@@ -892,15 +899,15 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           service: serviceDisplayAgent,
           serviceDetails: serviceDetailsTextAgent,
           status: booking.status,
-          commission: commissionInTargetCurrencyAgent,
+          commission: commissionInSaleCurrencyAgent,
           saleCurrency: saleCurrAgent,
           costCurrency: booking.costCurrency || 'AED',
           saleOriginal: saleOrigAgent,
           costOriginal: costOrigAgent,
           profitInAED: profitInAEDAgent,
-          profitInSaleCurrency: profitInTargetCurrencyAgent,
+          profitInSaleCurrency: profitInSaleCurrencyAgent,
           commissionInAED: commissionInAEDAgent,
-          commissionInSaleCurrency: commissionInTargetCurrencyAgent,
+          commissionInSaleCurrency: commissionInSaleCurrencyAgent,
           commissionOriginal: commissionInAEDAgent,
           commissionRate: booking.agentCommissionRate || (profitInAEDAgent > 0 ? Math.round((commissionInAEDAgent / profitInAEDAgent) * 100) : 0)
         });
@@ -967,13 +974,19 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         const costOrigCS = Number(booking.costAmount || 0);
         const saleCurrCS = booking.saleCurrency || 'AED';
         
-        // Use the stored gross profit (already in AED)
+        // Calculate profit in original sale currency (Sale - Cost)
+        const profitInSaleCurrencyCS = saleOrigCS - costOrigCS;
+        
+        // Use the stored gross profit (already in AED) for commission rate calculation
         const profitInAEDCS = Number(booking.grossProfit || 0);
         
         // Use the stored commission amount (already in AED)
         const commissionInAEDCS = Number(booking.csCommissionAmount || 0);
         
-        // Convert to target currency for display
+        // Convert commission to sale currency for display
+        const commissionInSaleCurrencyCS = convertCurrency(commissionInAEDCS, 'AED', saleCurrCS);
+        
+        // Convert to target currency for totals
         const commissionInTargetCurrencyCS = convertCurrency(commissionInAEDCS, 'AED', targetCurrency);
         const profitInTargetCurrencyCS = convertCurrency(profitInAEDCS, 'AED', targetCurrency);
         
@@ -987,15 +1000,15 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           service: serviceDisplayCS,
           serviceDetails: serviceDetailsTextCS,
           status: booking.status,
-          commission: commissionInTargetCurrencyCS,
+          commission: commissionInSaleCurrencyCS,
           saleCurrency: saleCurrCS,
           costCurrency: booking.costCurrency || 'AED',
           saleOriginal: saleOrigCS,
           costOriginal: costOrigCS,
           profitInAED: profitInAEDCS,
-          profitInSaleCurrency: profitInTargetCurrencyCS,
+          profitInSaleCurrency: profitInSaleCurrencyCS,
           commissionInAED: commissionInAEDCS,
-          commissionInSaleCurrency: commissionInTargetCurrencyCS,
+          commissionInSaleCurrency: commissionInSaleCurrencyCS,
           commissionOriginal: commissionInAEDCS,
           commissionRate: booking.csCommissionRate || (profitInAEDCS > 0 ? Math.round((commissionInAEDCS / profitInAEDCS) * 100) : 0)
         });
@@ -1082,11 +1095,14 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
       const costOrig = Number(b.costAmount || 0);
       const saleCurr = b.saleCurrency || 'AED';
       
+      // Calculate profit in original sale currency (Sale - Cost)
+      const profitInSaleCurrency = saleOrig - costOrig;
+      
       // USE STORED VALUES FROM DATABASE - same as booking page
       // grossProfit and commission amounts are already calculated and stored in AED
       // Each booking has its own commission rate (agentCommissionRate), not the employee default
       
-      // Use stored gross profit (already in AED)
+      // Use stored gross profit (already in AED) for commission rate calculation
       const profitInAED = Number(b.grossProfit || 0);
       
       // Determine if this is an agent booking or CS booking for this employee
@@ -1097,7 +1113,10 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
         ? Number(b.agentCommissionAmount || 0)
         : Number(b.csCommissionAmount || 0);
       
-      // Convert to target currency for display
+      // Convert commission to sale currency for display
+      const commissionInSaleCurrencyVal = convertCurrency(commissionInAED, 'AED', saleCurr);
+      
+      // Convert to target currency for totals
       const profitInTargetCurrency = convertCurrency(profitInAED, 'AED', targetCurrency);
       const commissionInTargetCurrency = convertCurrency(commissionInAED, 'AED', targetCurrency);
 
@@ -1157,18 +1176,18 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
         serviceType: b.serviceType || 'N/A',
         serviceDetails: serviceDetailsText,
         status: b.status,
-        commission: commissionInTargetCurrency,
+        commission: commissionInSaleCurrencyVal,
         saleCurrency: saleCurr,
         costCurrency: b.costCurrency || 'AED',
         saleOriginal: saleOrig,
         costOriginal: costOrig,
         profitInAED: profitInAED,
-        profitInSaleCurrency: profitInTargetCurrency,
+        profitInSaleCurrency: profitInSaleCurrency,
         commissionInAED: commissionInAED,
-        commissionInSaleCurrency: commissionInTargetCurrency,
+        commissionInSaleCurrency: commissionInSaleCurrencyVal,
         commissionOriginal: commissionInAED,
         commissionRate: commissionRate,
-        currency: targetCurrency
+        currency: saleCurr
       };
     });
 
