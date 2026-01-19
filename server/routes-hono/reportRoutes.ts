@@ -1006,6 +1006,28 @@ reports.get('/employee-commissions-monthly', async (c) => {
         const commission = convertCurrency(commissionInAED, 'AED', currency as string);
         emp.totalCommission += commission;
         
+        // Parse service details for service info and passenger name
+        let serviceDisplay = booking.serviceType || '-';
+        let passengerName = '-';
+        
+        if (booking.serviceDetails) {
+          try {
+            const details = typeof booking.serviceDetails === 'string' 
+              ? JSON.parse(booking.serviceDetails) 
+              : booking.serviceDetails;
+            
+            // Get passenger name
+            passengerName = details.passengerName || '-';
+            
+            // For hotels, show hotel name as service
+            if (booking.serviceType === 'HOTEL' && details.hotelName) {
+              serviceDisplay = details.hotelName;
+            }
+          } catch (e) {
+            // Keep default values if parsing fails
+          }
+        }
+        
         emp.breakdown.push({
           date: (booking.bookingDate || booking.createdAt).toISOString().split('T')[0],
           bookingNumber: booking.bookingNumber,
@@ -1021,7 +1043,9 @@ reports.get('/employee-commissions-monthly', async (c) => {
           profitInSaleCurrency: profitInSaleCurrency,
           commissionInSaleCurrency: commissionInSaleCurrency,
           commissionOriginal: commissionInAED,
-          status: booking.status
+          status: booking.status,
+          service: serviceDisplay,
+          serviceDetails: passengerName
         });
       }
       
@@ -1059,6 +1083,28 @@ reports.get('/employee-commissions-monthly', async (c) => {
         const commission = convertCurrency(commissionInAED, 'AED', currency as string);
         emp.totalCommission += commission;
         
+        // Parse service details for service info and passenger name
+        let serviceDisplayCS = booking.serviceType || '-';
+        let passengerNameCS = '-';
+        
+        if (booking.serviceDetails) {
+          try {
+            const detailsCS = typeof booking.serviceDetails === 'string' 
+              ? JSON.parse(booking.serviceDetails) 
+              : booking.serviceDetails;
+            
+            // Get passenger name
+            passengerNameCS = detailsCS.passengerName || '-';
+            
+            // For hotels, show hotel name as service
+            if (booking.serviceType === 'HOTEL' && detailsCS.hotelName) {
+              serviceDisplayCS = detailsCS.hotelName;
+            }
+          } catch (e) {
+            // Keep default values if parsing fails
+          }
+        }
+        
         emp.breakdown.push({
           date: (booking.bookingDate || booking.createdAt).toISOString().split('T')[0],
           bookingNumber: booking.bookingNumber,
@@ -1074,7 +1120,9 @@ reports.get('/employee-commissions-monthly', async (c) => {
           profitInSaleCurrency: profitInSaleCurrency,
           commissionInSaleCurrency: commissionInSaleCurrency,
           commissionOriginal: commissionInAED,
-          status: booking.status
+          status: booking.status,
+          service: serviceDisplayCS,
+          serviceDetails: passengerNameCS
         });
       }
     }
@@ -1262,16 +1310,16 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
       else if (booking.status === 'COMPLETE') completeCount++;
       else if (booking.status === 'REFUNDED') refundedCount++;
       
-      // Parse serviceDetails
-      let serviceDetailsStr = '';
+      // Parse serviceDetails for service and passenger name
+      let serviceDisplay = booking.serviceType || '-';
+      let passengerName = '-';
       try {
         const details = JSON.parse(booking.serviceDetails || '{}');
+        // Get passenger name
+        passengerName = details.passengerName || '-';
+        // For hotels, show hotel name as service
         if (booking.serviceType === 'HOTEL' && details.hotelName) {
-          serviceDetailsStr = details.hotelName;
-        } else if (booking.serviceType === 'FLIGHT' && details.airline) {
-          serviceDetailsStr = details.airline;
-        } else if (details.name) {
-          serviceDetailsStr = details.name;
+          serviceDisplay = details.hotelName;
         }
       } catch (e) {
         // ignore
@@ -1293,7 +1341,9 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
         profitInSaleCurrency: profitInSaleCurrency,
         commissionInSaleCurrency: commissionInSaleCurrency,
         commissionOriginal: commissionInAED,
-        status: booking.status
+        status: booking.status,
+        service: serviceDisplay,
+        serviceDetails: passengerName
       });
     }
     

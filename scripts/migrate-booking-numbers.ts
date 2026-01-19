@@ -1,3 +1,4 @@
+/// <reference types="node" />
 /**
  * Migration Script: Update old booking numbers to new service-type based prefixes
  * 
