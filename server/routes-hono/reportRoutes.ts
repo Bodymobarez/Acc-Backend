@@ -1314,7 +1314,10 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
       let serviceDisplay = booking.serviceType || '-';
       let passengerName = '-';
       try {
-        const details = JSON.parse(booking.serviceDetails || '{}');
+        // Handle both string and object serviceDetails
+        const details = typeof booking.serviceDetails === 'string' 
+          ? JSON.parse(booking.serviceDetails || '{}')
+          : (booking.serviceDetails || {});
         // Get passenger name
         passengerName = details.passengerName || '-';
         // For hotels, show hotel name as service
@@ -1322,7 +1325,8 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
           serviceDisplay = details.hotelName;
         }
       } catch (e) {
-        // ignore
+        // ignore parsing errors
+        console.log('Error parsing serviceDetails:', e);
       }
       
       const customerName = booking.customers.companyName || `${booking.customers.firstName} ${booking.customers.lastName}`;
