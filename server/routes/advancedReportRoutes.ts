@@ -832,34 +832,42 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         emp.totalCommission += commissionInTargetCurrency;
         
         // Parse service details with proper formatting
-        let serviceDetailsText = '';
+        // SERVICE column: hotel name for HOTEL, service type for others
+        // DETAILS column: passenger/guest name
+        let serviceDisplayAgent = booking.serviceType || 'N/A';
+        let serviceDetailsTextAgent = '';
         try {
           const details = JSON.parse(booking.serviceDetails || '{}');
           const hasDetails = Object.keys(details).length > 0;
           
           if (hasDetails) {
+            // For HOTEL, show hotel name in SERVICE column
+            if (booking.serviceType === 'HOTEL' && details.hotelName) {
+              serviceDisplayAgent = details.hotelName;
+            }
+            
+            // For DETAILS column, always show passenger/guest name
             if (booking.serviceType === 'HOTEL') {
-              serviceDetailsText = details.hotelName || details.name || '';
+              serviceDetailsTextAgent = details.passengerName || details.guestName || '';
             } else if (booking.serviceType === 'FLIGHT') {
-              // For flights, show passenger name
-              serviceDetailsText = details.passengerName || details.passenger || '';
+              serviceDetailsTextAgent = details.passengerName || details.passenger || '';
             } else if (booking.serviceType === 'VISA') {
-              serviceDetailsText = details.passengerName || details.travelerName || details.country || '';
+              serviceDetailsTextAgent = details.passengerName || details.travelerName || '';
             } else if (booking.serviceType === 'TRANSFER') {
-              serviceDetailsText = details.passengerName || (details.from && details.to ? `${details.from} → ${details.to}` : (details.route || ''));
+              serviceDetailsTextAgent = details.passengerName || '';
             } else if (booking.serviceType === 'CRUISE') {
-              serviceDetailsText = details.passengerName || details.cruiseName || details.shipName || '';
+              serviceDetailsTextAgent = details.passengerName || '';
             } else {
-              serviceDetailsText = details.passengerName || details.description || details.name || '';
+              serviceDetailsTextAgent = details.passengerName || details.description || '';
             }
           }
         } catch (e) {
-          serviceDetailsText = '';
+          serviceDetailsTextAgent = '';
         }
         
         // Fallback if empty
-        if (!serviceDetailsText || serviceDetailsText.trim() === '') {
-          serviceDetailsText = 'Not specified';
+        if (!serviceDetailsTextAgent || serviceDetailsTextAgent.trim() === '') {
+          serviceDetailsTextAgent = '-';
         }
         
         // Calculate values for display - AGENT
@@ -877,8 +885,8 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           date: new Date(booking.bookingDate).toLocaleDateString(),
           bookingNumber: booking.bookingNumber,
           customer: booking.customers?.companyName || `${booking.customers?.firstName || ''} ${booking.customers?.lastName || ''}`.trim() || 'N/A',
-          service: booking.serviceType,
-          serviceDetails: serviceDetailsText,
+          service: serviceDisplayAgent,
+          serviceDetails: serviceDetailsTextAgent,
           status: booking.status,
           commission: commissionInTargetCurrency,
           saleCurrency: saleCurrAgent,
@@ -918,34 +926,42 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         emp.totalCommission += commissionInTargetCurrency;
         
         // Parse service details with proper formatting
-        let serviceDetailsText = '';
+        // SERVICE column: hotel name for HOTEL, service type for others
+        // DETAILS column: passenger/guest name
+        let serviceDisplayCS = booking.serviceType || 'N/A';
+        let serviceDetailsTextCS = '';
         try {
           const details = JSON.parse(booking.serviceDetails || '{}');
           const hasDetails = Object.keys(details).length > 0;
           
           if (hasDetails) {
+            // For HOTEL, show hotel name in SERVICE column
+            if (booking.serviceType === 'HOTEL' && details.hotelName) {
+              serviceDisplayCS = details.hotelName;
+            }
+            
+            // For DETAILS column, always show passenger/guest name
             if (booking.serviceType === 'HOTEL') {
-              serviceDetailsText = details.hotelName || details.name || '';
+              serviceDetailsTextCS = details.passengerName || details.guestName || '';
             } else if (booking.serviceType === 'FLIGHT') {
-              // For flights, show passenger name
-              serviceDetailsText = details.passengerName || details.passenger || '';
+              serviceDetailsTextCS = details.passengerName || details.passenger || '';
             } else if (booking.serviceType === 'VISA') {
-              serviceDetailsText = details.passengerName || details.travelerName || details.country || '';
+              serviceDetailsTextCS = details.passengerName || details.travelerName || '';
             } else if (booking.serviceType === 'TRANSFER') {
-              serviceDetailsText = details.passengerName || (details.from && details.to ? `${details.from} → ${details.to}` : (details.route || ''));
+              serviceDetailsTextCS = details.passengerName || '';
             } else if (booking.serviceType === 'CRUISE') {
-              serviceDetailsText = details.passengerName || details.cruiseName || details.shipName || '';
+              serviceDetailsTextCS = details.passengerName || '';
             } else {
-              serviceDetailsText = details.passengerName || details.description || details.name || '';
+              serviceDetailsTextCS = details.passengerName || details.description || '';
             }
           }
         } catch (e) {
-          serviceDetailsText = '';
+          serviceDetailsTextCS = '';
         }
         
         // Fallback if empty
-        if (!serviceDetailsText || serviceDetailsText.trim() === '') {
-          serviceDetailsText = 'Not specified';
+        if (!serviceDetailsTextCS || serviceDetailsTextCS.trim() === '') {
+          serviceDetailsTextCS = '-';
         }
         
         // Calculate values for display - CS
@@ -963,8 +979,8 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           date: new Date(booking.bookingDate).toLocaleDateString(),
           bookingNumber: booking.bookingNumber,
           customer: booking.customers?.companyName || `${booking.customers?.firstName || ''} ${booking.customers?.lastName || ''}`.trim() || 'N/A',
-          service: booking.serviceType,
-          serviceDetails: serviceDetailsText,
+          service: serviceDisplayCS,
+          serviceDetails: serviceDetailsTextCS,
           status: booking.status,
           commission: commissionInTargetCurrency,
           saleCurrency: saleCurrCS,
@@ -1070,13 +1086,53 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
       // Convert to target currency
       const commissionInTargetCurrency = convertCurrency(commissionInAED, 'AED', targetCurrency);
 
+      // Parse service details with proper formatting (same logic as all-employees endpoint)
+      let serviceDisplay = b.serviceType || 'N/A';
+      let serviceDetailsText = '';
+      try {
+        const details = typeof b.serviceDetails === 'string' 
+          ? JSON.parse(b.serviceDetails || '{}') 
+          : (b.serviceDetails || {});
+        const hasDetails = Object.keys(details).length > 0;
+        
+        if (hasDetails) {
+          // For HOTEL, show hotel name as service
+          if (b.serviceType === 'HOTEL' && details.hotelName) {
+            serviceDisplay = details.hotelName;
+          }
+          
+          // Get passenger/traveler name for serviceDetails column
+          if (b.serviceType === 'HOTEL') {
+            serviceDetailsText = details.passengerName || details.guestName || '';
+          } else if (b.serviceType === 'FLIGHT') {
+            serviceDetailsText = details.passengerName || details.passenger || '';
+          } else if (b.serviceType === 'VISA') {
+            serviceDetailsText = details.passengerName || details.travelerName || '';
+          } else if (b.serviceType === 'TRANSFER') {
+            serviceDetailsText = details.passengerName || '';
+          } else if (b.serviceType === 'CRUISE') {
+            serviceDetailsText = details.passengerName || '';
+          } else {
+            serviceDetailsText = details.passengerName || details.description || '';
+          }
+        }
+      } catch (e) {
+        serviceDetailsText = '';
+      }
+      
+      // Fallback if empty
+      if (!serviceDetailsText || serviceDetailsText.trim() === '') {
+        serviceDetailsText = '-';
+      }
+
       return {
         date: b.bookingDate.toISOString().split('T')[0],
         bookingNumber: b.bookingNumber,
         bookingId: b.id,
         customer: b.customers?.companyName || `${b.customers?.firstName || ''} ${b.customers?.lastName || ''}`.trim() || 'N/A',
+        service: serviceDisplay,
         serviceType: b.serviceType || 'N/A',
-        serviceDetails: b.serviceDetails || '',
+        serviceDetails: serviceDetailsText,
         status: b.status,
         commission: commissionInTargetCurrency,
         saleCurrency: saleCurr,
