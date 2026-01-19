@@ -872,6 +872,12 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         const isRefundedAgent = booking.status === 'REFUNDED';
         const agentCommissionRate = Number(bookingAgent.defaultCommissionRate || 10);
         
+        // For UAE (AED) bookings, deduct 5% VAT from sale amount
+        // Net Sale = Sale / 1.05 (removes the 5% VAT)
+        const isUAEBookingAgent = saleCurrAgent === 'AED';
+        const netSaleAgent = isUAEBookingAgent ? saleOrigAgent / 1.05 : saleOrigAgent;
+        const netCostAgent = isUAEBookingAgent && costCurrAgent === 'AED' ? costOrigAgent / 1.05 : costOrigAgent;
+        
         // Calculate profit based on booking status
         // For REFUNDED: cost > sale = profit (we recovered money), cost < sale = loss
         // For CONFIRMED: sale > cost = profit, sale < cost = loss
@@ -879,16 +885,17 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         if (saleCurrAgent === costCurrAgent) {
           if (isRefundedAgent) {
             // For refunds: profit = cost - sale (what we recovered minus what we refunded)
-            profitInSaleCurrencyAgent = costOrigAgent - saleOrigAgent;
+            profitInSaleCurrencyAgent = netCostAgent - netSaleAgent;
           } else {
-            profitInSaleCurrencyAgent = saleOrigAgent - costOrigAgent;
+            profitInSaleCurrencyAgent = netSaleAgent - netCostAgent;
           }
         } else {
           const costInSaleCurrency = convertCurrency(costOrigAgent, costCurrAgent, saleCurrAgent);
+          const netCostInSaleCurrency = isUAEBookingAgent ? costInSaleCurrency / 1.05 : costInSaleCurrency;
           if (isRefundedAgent) {
-            profitInSaleCurrencyAgent = costInSaleCurrency - saleOrigAgent;
+            profitInSaleCurrencyAgent = netCostInSaleCurrency - netSaleAgent;
           } else {
-            profitInSaleCurrencyAgent = saleOrigAgent - costInSaleCurrency;
+            profitInSaleCurrencyAgent = netSaleAgent - netCostInSaleCurrency;
           }
         }
         
@@ -996,6 +1003,12 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         const isRefundedCS = booking.status === 'REFUNDED';
         const csCommissionRate = Number(customerService.defaultCommissionRate || 10);
         
+        // For UAE (AED) bookings, deduct 5% VAT from sale amount
+        // Net Sale = Sale / 1.05 (removes the 5% VAT)
+        const isUAEBookingCS = saleCurrCS === 'AED';
+        const netSaleCS = isUAEBookingCS ? saleOrigCS / 1.05 : saleOrigCS;
+        const netCostCS = isUAEBookingCS && costCurrCS === 'AED' ? costOrigCS / 1.05 : costOrigCS;
+        
         // Calculate profit based on booking status
         // For REFUNDED: cost > sale = profit (we recovered money), cost < sale = loss
         // For CONFIRMED: sale > cost = profit, sale < cost = loss
@@ -1003,16 +1016,17 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         if (saleCurrCS === costCurrCS) {
           if (isRefundedCS) {
             // For refunds: profit = cost - sale (what we recovered minus what we refunded)
-            profitInSaleCurrencyCS = costOrigCS - saleOrigCS;
+            profitInSaleCurrencyCS = netCostCS - netSaleCS;
           } else {
-            profitInSaleCurrencyCS = saleOrigCS - costOrigCS;
+            profitInSaleCurrencyCS = netSaleCS - netCostCS;
           }
         } else {
           const costInSaleCurrency = convertCurrency(costOrigCS, costCurrCS, saleCurrCS);
+          const netCostInSaleCurrency = isUAEBookingCS ? costInSaleCurrency / 1.05 : costInSaleCurrency;
           if (isRefundedCS) {
-            profitInSaleCurrencyCS = costInSaleCurrency - saleOrigCS;
+            profitInSaleCurrencyCS = netCostInSaleCurrency - netSaleCS;
           } else {
-            profitInSaleCurrencyCS = saleOrigCS - costInSaleCurrency;
+            profitInSaleCurrencyCS = netSaleCS - netCostInSaleCurrency;
           }
         }
         
@@ -1147,6 +1161,12 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
       const costCurr = b.costCurrency || 'AED';
       const isRefunded = b.status === 'REFUNDED';
       
+      // For UAE (AED) bookings, deduct 5% VAT from sale amount
+      // Net Sale = Sale / 1.05 (removes the 5% VAT)
+      const isUAEBooking = saleCurr === 'AED';
+      const netSale = isUAEBooking ? saleOrig / 1.05 : saleOrig;
+      const netCost = isUAEBooking && costCurr === 'AED' ? costOrig / 1.05 : costOrig;
+      
       // Calculate profit based on booking status
       // For REFUNDED: cost > sale = profit (we recovered money), cost < sale = loss
       // For CONFIRMED: sale > cost = profit, sale < cost = loss
@@ -1154,16 +1174,17 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
       if (saleCurr === costCurr) {
         if (isRefunded) {
           // For refunds: profit = cost - sale (what we recovered minus what we refunded)
-          profitInSaleCurrency = costOrig - saleOrig;
+          profitInSaleCurrency = netCost - netSale;
         } else {
-          profitInSaleCurrency = saleOrig - costOrig;
+          profitInSaleCurrency = netSale - netCost;
         }
       } else {
         const costInSaleCurrency = convertCurrency(costOrig, costCurr, saleCurr);
+        const netCostInSaleCurrency = isUAEBooking ? costInSaleCurrency / 1.05 : costInSaleCurrency;
         if (isRefunded) {
-          profitInSaleCurrency = costInSaleCurrency - saleOrig;
+          profitInSaleCurrency = netCostInSaleCurrency - netSale;
         } else {
-          profitInSaleCurrency = saleOrig - costInSaleCurrency;
+          profitInSaleCurrency = netSale - netCostInSaleCurrency;
         }
       }
       
