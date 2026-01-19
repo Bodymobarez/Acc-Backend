@@ -789,12 +789,14 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         employees_bookings_bookingAgentIdToemployees: {
           select: {
             id: true,
+            defaultCommissionRate: true,
             users: { select: { firstName: true, lastName: true } }
           }
         },
         employees_bookings_customerServiceIdToemployees: {
           select: {
             id: true,
+            defaultCommissionRate: true,
             users: { select: { firstName: true, lastName: true } }
           }
         },
@@ -812,13 +814,6 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         const id = bookingAgent.id;
         const name = `${bookingAgent.users.firstName} ${bookingAgent.users.lastName}`;
         
-        // Convert commission from booking's sale currency to target currency
-        const commissionInTargetCurrency = convertCurrency(
-          booking.agentCommissionAmount,
-          booking.saleCurrency,
-          targetCurrency
-        );
-        
         if (!employeeMap.has(id)) {
           employeeMap.set(id, { 
             employeeName: name, 
@@ -829,7 +824,6 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         }
         const emp = employeeMap.get(id);
         emp.totalBookings += 1;
-        emp.totalCommission += commissionInTargetCurrency;
         
         // Parse service details with proper formatting
         // SERVICE column: hotel name for HOTEL, service type for others
@@ -873,10 +867,10 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         // Calculate values for display - AGENT
         const saleOrigAgent = Number(booking.saleAmount || 0);
         const costOrigAgent = Number(booking.costAmount || 0);
-        let commissionInAEDAgent = Number(booking.agentCommissionAmount || 0);
         const saleCurrAgent = booking.saleCurrency || 'AED';
         const costCurrAgent = booking.costCurrency || 'AED';
         const isRefundedAgent = booking.status === 'REFUNDED';
+        const agentCommissionRate = Number(bookingAgent.defaultCommissionRate || 10);
         
         // Calculate profit based on booking status
         // For REFUNDED: cost > sale = profit (we recovered money), cost < sale = loss
@@ -898,16 +892,26 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           }
         }
         
-        // For refunds, commission should be negative if there's a loss
-        if (isRefundedAgent && profitInSaleCurrencyAgent < 0) {
-          commissionInAEDAgent = -Math.abs(commissionInAEDAgent);
+        // Calculate commission from profit in sale currency
+        // Commission = profit * (rate / 100)
+        let commissionInSaleCurrencyAgent = Math.abs(profitInSaleCurrencyAgent) * (agentCommissionRate / 100);
+        
+        // For losses (negative profit), commission should be negative
+        if (profitInSaleCurrencyAgent < 0) {
+          commissionInSaleCurrencyAgent = -commissionInSaleCurrencyAgent;
         }
+        
+        // Convert to AED for storage
+        const commissionInAEDAgent = convertCurrency(commissionInSaleCurrencyAgent, saleCurrAgent, 'AED');
         
         // Convert profit to AED for consistency
         const profitInAEDAgent = convertCurrency(profitInSaleCurrencyAgent, saleCurrAgent, 'AED');
         
-        // Convert commission to sale currency
-        const commissionInSaleCurrencyAgent = convertCurrency(commissionInAEDAgent, 'AED', saleCurrAgent);
+        // Convert commission to target currency for display
+        const commissionInTargetCurrencyAgent = convertCurrency(commissionInSaleCurrencyAgent, saleCurrAgent, targetCurrency);
+        
+        // Add to total
+        emp.totalCommission += commissionInTargetCurrencyAgent;
         
         emp.breakdown.push({
           date: new Date(booking.bookingDate).toLocaleDateString(),
@@ -916,7 +920,7 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           service: serviceDisplayAgent,
           serviceDetails: serviceDetailsTextAgent,
           status: booking.status,
-          commission: commissionInTargetCurrency,
+          commission: commissionInTargetCurrencyAgent,
           saleCurrency: saleCurrAgent,
           costCurrency: booking.costCurrency || 'AED',
           saleOriginal: saleOrigAgent,
@@ -934,13 +938,6 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         const id = customerService.id;
         const name = `${customerService.users.firstName} ${customerService.users.lastName}`;
         
-        // Convert commission from booking's sale currency to target currency
-        const commissionInTargetCurrency = convertCurrency(
-          booking.csCommissionAmount,
-          booking.saleCurrency,
-          targetCurrency
-        );
-        
         if (!employeeMap.has(id)) {
           employeeMap.set(id, { 
             employeeName: name, 
@@ -951,7 +948,6 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         }
         const emp = employeeMap.get(id);
         emp.totalBookings += 1;
-        emp.totalCommission += commissionInTargetCurrency;
         
         // Parse service details with proper formatting
         // SERVICE column: hotel name for HOTEL, service type for others
@@ -995,10 +991,10 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         // Calculate values for display - CS
         const saleOrigCS = Number(booking.saleAmount || 0);
         const costOrigCS = Number(booking.costAmount || 0);
-        let commissionInAEDCS = Number(booking.csCommissionAmount || 0);
         const saleCurrCS = booking.saleCurrency || 'AED';
         const costCurrCS = booking.costCurrency || 'AED';
         const isRefundedCS = booking.status === 'REFUNDED';
+        const csCommissionRate = Number(customerService.defaultCommissionRate || 10);
         
         // Calculate profit based on booking status
         // For REFUNDED: cost > sale = profit (we recovered money), cost < sale = loss
@@ -1020,16 +1016,26 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           }
         }
         
-        // For refunds, commission should be negative if there's a loss
-        if (isRefundedCS && profitInSaleCurrencyCS < 0) {
-          commissionInAEDCS = -Math.abs(commissionInAEDCS);
+        // Calculate commission from profit in sale currency
+        // Commission = profit * (rate / 100)
+        let commissionInSaleCurrencyCS = Math.abs(profitInSaleCurrencyCS) * (csCommissionRate / 100);
+        
+        // For losses (negative profit), commission should be negative
+        if (profitInSaleCurrencyCS < 0) {
+          commissionInSaleCurrencyCS = -commissionInSaleCurrencyCS;
         }
+        
+        // Convert to AED for storage
+        const commissionInAEDCS = convertCurrency(commissionInSaleCurrencyCS, saleCurrCS, 'AED');
         
         // Convert profit to AED for consistency
         const profitInAEDCS = convertCurrency(profitInSaleCurrencyCS, saleCurrCS, 'AED');
         
-        // Convert commission to sale currency
-        const commissionInSaleCurrencyCS = convertCurrency(commissionInAEDCS, 'AED', saleCurrCS);
+        // Convert commission to target currency for display
+        const commissionInTargetCurrencyCS = convertCurrency(commissionInSaleCurrencyCS, saleCurrCS, targetCurrency);
+        
+        // Add to total
+        emp.totalCommission += commissionInTargetCurrencyCS;
         
         emp.breakdown.push({
           date: new Date(booking.bookingDate).toLocaleDateString(),
@@ -1038,7 +1044,7 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           service: serviceDisplayCS,
           serviceDetails: serviceDetailsTextCS,
           status: booking.status,
-          commission: commissionInTargetCurrency,
+          commission: commissionInTargetCurrencyCS,
           saleCurrency: saleCurrCS,
           costCurrency: booking.costCurrency || 'AED',
           saleOriginal: saleOrigCS,
@@ -1106,10 +1112,24 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
       include: {
         customers: { select: { firstName: true, lastName: true, companyName: true } },
         employees_bookings_bookingAgentIdToemployees: {
-          include: { users: { select: { firstName: true, lastName: true } } }
+          include: { 
+            users: { select: { firstName: true, lastName: true } }
+          }
+        },
+        employees_bookings_customerServiceIdToemployees: {
+          include: { 
+            users: { select: { firstName: true, lastName: true } }
+          }
         }
       }
     });
+    
+    // Get employee's commission rate
+    const employee = await prisma.employees.findUnique({
+      where: { id: employeeId },
+      select: { defaultCommissionRate: true }
+    });
+    const employeeCommissionRate = Number(employee?.defaultCommissionRate || 10);
 
     const targetCurrency = (currency as string) || 'AED';
     
@@ -1120,15 +1140,6 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
       // Count by status
       if (b.status === 'CONFIRMED' || b.status === 'COMPLETE') confirmedCount++;
       else if (b.status === 'REFUNDED') refundedCount++;
-      
-      // Get commission based on role
-      let commissionInAED = 0;
-      if (b.bookingAgentId === employeeId && b.agentCommissionAmount) {
-        commissionInAED += Number(b.agentCommissionAmount || 0);
-      }
-      if (b.customerServiceId === employeeId && (b.csCommissionAmount || b.salesCommissionAmount)) {
-        commissionInAED += Number(b.csCommissionAmount || b.salesCommissionAmount || 0);
-      }
       
       const saleOrig = Number(b.saleAmount || 0);
       const costOrig = Number(b.costAmount || 0);
@@ -1156,19 +1167,23 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
         }
       }
       
-      // For refunds, commission should be negative if there's a loss
-      if (isRefunded && profitInSaleCurrency < 0) {
-        commissionInAED = -Math.abs(commissionInAED);
+      // Calculate commission from profit in sale currency
+      // Commission = profit * (rate / 100)
+      let commissionInSaleCurrency = Math.abs(profitInSaleCurrency) * (employeeCommissionRate / 100);
+      
+      // For losses (negative profit), commission should be negative
+      if (profitInSaleCurrency < 0) {
+        commissionInSaleCurrency = -commissionInSaleCurrency;
       }
+      
+      // Convert to AED for storage
+      const commissionInAED = convertCurrency(commissionInSaleCurrency, saleCurr, 'AED');
       
       // Convert profit to AED for consistency
       const profitInAED = convertCurrency(profitInSaleCurrency, saleCurr, 'AED');
       
-      // Convert commission to sale currency
-      const commissionInSaleCurrency = convertCurrency(commissionInAED, 'AED', saleCurr);
-      
       // Convert to target currency
-      const commissionInTargetCurrency = convertCurrency(commissionInAED, 'AED', targetCurrency);
+      const commissionInTargetCurrency = convertCurrency(commissionInSaleCurrency, saleCurr, targetCurrency);
 
       // Parse service details with proper formatting (same logic as all-employees endpoint)
       let serviceDisplay = b.serviceType || 'N/A';
