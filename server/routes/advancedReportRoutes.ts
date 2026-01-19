@@ -1125,11 +1125,11 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
     });
     
     // Get employee's commission rate
-    const employee = await prisma.employees.findUnique({
+    const employeeForRate = await prisma.employees.findUnique({
       where: { id: employeeId },
       select: { defaultCommissionRate: true }
     });
-    const employeeCommissionRate = Number(employee?.defaultCommissionRate || 10);
+    const employeeCommissionRate = Number(employeeForRate?.defaultCommissionRate || 10);
 
     const targetCurrency = (currency as string) || 'AED';
     
