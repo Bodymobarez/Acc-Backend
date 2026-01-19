@@ -161,6 +161,31 @@ export function convertToAED(
 }
 
 /**
+ * Get booking prefix based on service type
+ * HTL = Hotel, AIR = Flight, TR = Transfer, RNT = Rent Car, VISA = Visa, ACT = Activity, CRU = Cruise, TRN = Train
+ */
+export function getBookingPrefix(serviceType: string, isRefunded: boolean = false): string {
+  if (isRefunded) return 'RFN';
+  
+  const prefixMap: { [key: string]: string } = {
+    'HOTEL': 'HTL',
+    'FLIGHT': 'AIR',
+    'TRANSFER': 'TR',
+    'RENT_CAR': 'RNT',
+    'RENTCAR': 'RNT',
+    'RENTAL_CAR': 'RNT',
+    'CAR_RENTAL': 'RNT',
+    'VISA': 'VISA',
+    'ACTIVITY': 'ACT',
+    'CRUISE': 'CRU',
+    'TRAIN': 'TRN',
+    'OTHER': 'OTH'
+  };
+  
+  return prefixMap[serviceType?.toUpperCase()] || 'BKG';
+}
+
+/**
  * Generate booking number with prefix and sequence
  */
 export function generateBookingNumber(prefix: string = 'BKG', sequence: number): string {

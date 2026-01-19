@@ -841,22 +841,16 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
             if (booking.serviceType === 'HOTEL') {
               serviceDetailsText = details.hotelName || details.name || '';
             } else if (booking.serviceType === 'FLIGHT') {
-              // For flights, show route (from → to)
-              const from = details.departureCity || details.from || '';
-              const to = details.arrivalCity || details.to || '';
-              if (from && to) {
-                serviceDetailsText = `${from} → ${to}`;
-              } else {
-                serviceDetailsText = details.airline || details.flightNumber || '';
-              }
+              // For flights, show passenger name
+              serviceDetailsText = details.passengerName || details.passenger || '';
             } else if (booking.serviceType === 'VISA') {
-              serviceDetailsText = details.country || details.destination || '';
+              serviceDetailsText = details.passengerName || details.travelerName || details.country || '';
             } else if (booking.serviceType === 'TRANSFER') {
-              serviceDetailsText = details.from && details.to ? `${details.from} → ${details.to}` : (details.route || '');
+              serviceDetailsText = details.passengerName || (details.from && details.to ? `${details.from} → ${details.to}` : (details.route || ''));
             } else if (booking.serviceType === 'CRUISE') {
-              serviceDetailsText = details.cruiseName || details.shipName || '';
+              serviceDetailsText = details.passengerName || details.cruiseName || details.shipName || '';
             } else {
-              serviceDetailsText = details.description || details.name || '';
+              serviceDetailsText = details.passengerName || details.description || details.name || '';
             }
           }
         } catch (e) {
@@ -933,22 +927,16 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
             if (booking.serviceType === 'HOTEL') {
               serviceDetailsText = details.hotelName || details.name || '';
             } else if (booking.serviceType === 'FLIGHT') {
-              // For flights, show route (from → to)
-              const from = details.departureCity || details.from || '';
-              const to = details.arrivalCity || details.to || '';
-              if (from && to) {
-                serviceDetailsText = `${from} → ${to}`;
-              } else {
-                serviceDetailsText = details.airline || details.flightNumber || '';
-              }
+              // For flights, show passenger name
+              serviceDetailsText = details.passengerName || details.passenger || '';
             } else if (booking.serviceType === 'VISA') {
-              serviceDetailsText = details.country || details.destination || '';
+              serviceDetailsText = details.passengerName || details.travelerName || details.country || '';
             } else if (booking.serviceType === 'TRANSFER') {
-              serviceDetailsText = details.from && details.to ? `${details.from} → ${details.to}` : (details.route || '');
+              serviceDetailsText = details.passengerName || (details.from && details.to ? `${details.from} → ${details.to}` : (details.route || ''));
             } else if (booking.serviceType === 'CRUISE') {
-              serviceDetailsText = details.cruiseName || details.shipName || '';
+              serviceDetailsText = details.passengerName || details.cruiseName || details.shipName || '';
             } else {
-              serviceDetailsText = details.description || details.name || '';
+              serviceDetailsText = details.passengerName || details.description || details.name || '';
             }
           }
         } catch (e) {

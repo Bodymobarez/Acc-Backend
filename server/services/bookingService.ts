@@ -1,6 +1,6 @@
 import { bookings } from '@prisma/client';
 import { randomUUID } from 'crypto';
-import { calculateVAT, calculateCommissions, calculateVATOnProfit, convertToAED, generateBookingNumber } from '../utils/calculations';
+import { calculateVAT, calculateCommissions, calculateVATOnProfit, convertToAED, generateBookingNumber, getBookingPrefix } from '../utils/calculations';
 import { prisma } from '../lib/prisma';
 import { InvoiceService } from './invoiceService';
 
@@ -350,15 +350,16 @@ export class BookingService {
         console.log('  Total Commission:', commissionCalc.totalCommission);
         console.log('  Net Profit:', finalNetProfit);
         
-        // Generate booking number - use RFN prefix for REFUNDED bookings
-        const prefix = input.bookingStatus === 'REFUNDED' ? 'RFN' : 'BKG';
-        const lastBooking = await prisma.bookings.findFirst({
-          where: { bookingNumber: { startsWith: prefix } },
+        // Generate booking number based on service type
+        const isRefunded2 = input.bookingStatus === 'REFUNDED';
+        const prefix2 = getBookingPrefix(input.serviceType, isRefunded2);
+        const lastBooking2 = await prisma.bookings.findFirst({
+          where: { bookingNumber: { startsWith: prefix2 } },
           orderBy: { createdAt: 'desc' }
         });
-        const nextSequence = lastBooking ? 
-          parseInt(lastBooking.bookingNumber.split('-').pop() || '0') + 1 : 1;
-        const bookingNumber = generateBookingNumber(prefix, nextSequence);
+        const nextSequence2 = lastBooking2 ? 
+          parseInt(lastBooking2.bookingNumber.split('-').pop() || '0') + 1 : 1;
+        const bookingNumber = generateBookingNumber(prefix2, nextSequence2);
       
         // Create booking for non-FLIGHT UAE
         const booking = await prisma.bookings.create({
@@ -469,8 +470,9 @@ export class BookingService {
       console.log('  VAT Amount:', finalVatAmount);
       console.log('  Net Profit:', finalNetProfit);
       
-      // Generate booking number - use RFN prefix for REFUNDED bookings
-      const prefix = input.bookingStatus === 'REFUNDED' ? 'RFN' : 'BKG';
+      // Generate booking number based on service type
+      const isRefunded = input.bookingStatus === 'REFUNDED';
+      const prefix = getBookingPrefix(input.serviceType, isRefunded);
       const lastBooking = await prisma.bookings.findFirst({
         where: { bookingNumber: { startsWith: prefix } },
         orderBy: { createdAt: 'desc' }
