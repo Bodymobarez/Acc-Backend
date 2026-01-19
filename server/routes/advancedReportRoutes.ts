@@ -873,17 +873,34 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         // Calculate values for display - AGENT
         const saleOrigAgent = Number(booking.saleAmount || 0);
         const costOrigAgent = Number(booking.costAmount || 0);
-        const commissionInAEDAgent = Number(booking.agentCommissionAmount || 0);
+        let commissionInAEDAgent = Number(booking.agentCommissionAmount || 0);
         const saleCurrAgent = booking.saleCurrency || 'AED';
         const costCurrAgent = booking.costCurrency || 'AED';
+        const isRefundedAgent = booking.status === 'REFUNDED';
         
-        // Calculate profit directly from sale - cost (in original currency)
+        // Calculate profit based on booking status
+        // For REFUNDED: cost > sale = profit (we recovered money), cost < sale = loss
+        // For CONFIRMED: sale > cost = profit, sale < cost = loss
         let profitInSaleCurrencyAgent: number;
         if (saleCurrAgent === costCurrAgent) {
-          profitInSaleCurrencyAgent = saleOrigAgent - costOrigAgent;
+          if (isRefundedAgent) {
+            // For refunds: profit = cost - sale (what we recovered minus what we refunded)
+            profitInSaleCurrencyAgent = costOrigAgent - saleOrigAgent;
+          } else {
+            profitInSaleCurrencyAgent = saleOrigAgent - costOrigAgent;
+          }
         } else {
           const costInSaleCurrency = convertCurrency(costOrigAgent, costCurrAgent, saleCurrAgent);
-          profitInSaleCurrencyAgent = saleOrigAgent - costInSaleCurrency;
+          if (isRefundedAgent) {
+            profitInSaleCurrencyAgent = costInSaleCurrency - saleOrigAgent;
+          } else {
+            profitInSaleCurrencyAgent = saleOrigAgent - costInSaleCurrency;
+          }
+        }
+        
+        // For refunds, commission should be negative if there's a loss
+        if (isRefundedAgent && profitInSaleCurrencyAgent < 0) {
+          commissionInAEDAgent = -Math.abs(commissionInAEDAgent);
         }
         
         // Convert profit to AED for consistency
@@ -978,17 +995,34 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         // Calculate values for display - CS
         const saleOrigCS = Number(booking.saleAmount || 0);
         const costOrigCS = Number(booking.costAmount || 0);
-        const commissionInAEDCS = Number(booking.csCommissionAmount || 0);
+        let commissionInAEDCS = Number(booking.csCommissionAmount || 0);
         const saleCurrCS = booking.saleCurrency || 'AED';
         const costCurrCS = booking.costCurrency || 'AED';
+        const isRefundedCS = booking.status === 'REFUNDED';
         
-        // Calculate profit directly from sale - cost (in original currency)
+        // Calculate profit based on booking status
+        // For REFUNDED: cost > sale = profit (we recovered money), cost < sale = loss
+        // For CONFIRMED: sale > cost = profit, sale < cost = loss
         let profitInSaleCurrencyCS: number;
         if (saleCurrCS === costCurrCS) {
-          profitInSaleCurrencyCS = saleOrigCS - costOrigCS;
+          if (isRefundedCS) {
+            // For refunds: profit = cost - sale (what we recovered minus what we refunded)
+            profitInSaleCurrencyCS = costOrigCS - saleOrigCS;
+          } else {
+            profitInSaleCurrencyCS = saleOrigCS - costOrigCS;
+          }
         } else {
           const costInSaleCurrency = convertCurrency(costOrigCS, costCurrCS, saleCurrCS);
-          profitInSaleCurrencyCS = saleOrigCS - costInSaleCurrency;
+          if (isRefundedCS) {
+            profitInSaleCurrencyCS = costInSaleCurrency - saleOrigCS;
+          } else {
+            profitInSaleCurrencyCS = saleOrigCS - costInSaleCurrency;
+          }
+        }
+        
+        // For refunds, commission should be negative if there's a loss
+        if (isRefundedCS && profitInSaleCurrencyCS < 0) {
+          commissionInAEDCS = -Math.abs(commissionInAEDCS);
         }
         
         // Convert profit to AED for consistency
@@ -1100,16 +1134,31 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
       const costOrig = Number(b.costAmount || 0);
       const saleCurr = b.saleCurrency || 'AED';
       const costCurr = b.costCurrency || 'AED';
+      const isRefunded = b.status === 'REFUNDED';
       
-      // Calculate profit directly from sale - cost (in original currency)
-      // If sale and cost are in same currency, profit is simple subtraction
-      // If different currencies, convert cost to sale currency first
+      // Calculate profit based on booking status
+      // For REFUNDED: cost > sale = profit (we recovered money), cost < sale = loss
+      // For CONFIRMED: sale > cost = profit, sale < cost = loss
       let profitInSaleCurrency: number;
       if (saleCurr === costCurr) {
-        profitInSaleCurrency = saleOrig - costOrig;
+        if (isRefunded) {
+          // For refunds: profit = cost - sale (what we recovered minus what we refunded)
+          profitInSaleCurrency = costOrig - saleOrig;
+        } else {
+          profitInSaleCurrency = saleOrig - costOrig;
+        }
       } else {
         const costInSaleCurrency = convertCurrency(costOrig, costCurr, saleCurr);
-        profitInSaleCurrency = saleOrig - costInSaleCurrency;
+        if (isRefunded) {
+          profitInSaleCurrency = costInSaleCurrency - saleOrig;
+        } else {
+          profitInSaleCurrency = saleOrig - costInSaleCurrency;
+        }
+      }
+      
+      // For refunds, commission should be negative if there's a loss
+      if (isRefunded && profitInSaleCurrency < 0) {
+        commissionInAED = -Math.abs(commissionInAED);
       }
       
       // Convert profit to AED for consistency
