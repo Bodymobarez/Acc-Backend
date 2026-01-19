@@ -1,22 +1,21 @@
+functionsDirectory = "/Users/Mobarez_1/Acc-File-Invoice-main/backend/functions"
+functionsDirectoryOrigin = "config"
 headersOrigin = "config"
 redirectsOrigin = "config"
 plugins = []
-functionsDirectory = "/Users/Mobarez/Acc-File-Invoice-main/backend/functions"
-functionsDirectoryOrigin = "config"
 
 [functions]
 
 [functions."*"]
-external_node_modules = ["@prisma/client", "prisma"]
-node_bundler = "esbuild"
+node_bundler = "nft"
 timeout = 26.0
 
 [build]
-publish = "/Users/Mobarez/Acc-File-Invoice-main/backend/dist"
+publish = "/Users/Mobarez_1/Acc-File-Invoice-main/backend/dist"
 publishOrigin = "config"
 commandOrigin = "config"
-command = "npm install --include=dev && npx prisma generate"
-functions = "/Users/Mobarez/Acc-File-Invoice-main/backend/functions"
+command = "npm install --include=dev && npx prisma generate && mkdir -p dist"
+functions = "/Users/Mobarez_1/Acc-File-Invoice-main/backend/functions"
 
 [build.environment]
 NODE_VERSION = "20.19.0"
@@ -40,26 +39,24 @@ for = "/*"
 [headers.values]
 Access-Control-Allow-Origin = "*"
 Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With"
+Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With, Accept"
 Access-Control-Allow-Credentials = "true"
+Access-Control-Max-Age = "600"
 
-[[redirects]]
-from = "/api/*"
-to = "/.netlify/functions/api/:splat"
-status = 200.0
-force = false
+[[headers]]
+for = "/.netlify/functions/*"
 
-[redirects.query]
-
-[redirects.conditions]
-
-[redirects.headers]
+[headers.values]
+Access-Control-Allow-Origin = "*"
+Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With, Accept"
+Access-Control-Allow-Credentials = "true"
 
 [[redirects]]
 from = "/*"
 to = "/.netlify/functions/api/:splat"
 status = 200.0
-force = false
+force = true
 
 [redirects.query]
 
