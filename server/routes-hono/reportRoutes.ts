@@ -1275,6 +1275,16 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
     let completeCount = 0;
     let refundedCount = 0;
     
+    // Debug log first booking
+    if (bookings.length > 0) {
+      console.log('📊 Single Employee Report - First booking serviceDetails:', {
+        bookingNumber: bookings[0].bookingNumber,
+        serviceType: bookings[0].serviceType,
+        serviceDetails: bookings[0].serviceDetails,
+        typeOf: typeof bookings[0].serviceDetails
+      });
+    }
+    
     for (const booking of bookings) {
       const saleOrig = Number(booking.saleAmount || 0);
       const costOrig = Number(booking.costAmount || 0);
@@ -1314,14 +1324,21 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
       let serviceDisplay = booking.serviceType || '-';
       let passengerName = '-';
       try {
-        // Handle both string and object serviceDetails
-        const details = typeof booking.serviceDetails === 'string' 
-          ? JSON.parse(booking.serviceDetails || '{}')
-          : (booking.serviceDetails || {});
+        // Handle both string and object serviceDetails (Prisma JsonValue)
+        let details: any = {};
+        if (booking.serviceDetails) {
+          if (typeof booking.serviceDetails === 'string') {
+            details = JSON.parse(booking.serviceDetails);
+          } else if (typeof booking.serviceDetails === 'object') {
+            details = booking.serviceDetails as any;
+          }
+        }
         // Get passenger name
-        passengerName = details.passengerName || '-';
+        if (details && details.passengerName) {
+          passengerName = details.passengerName;
+        }
         // For hotels, show hotel name as service
-        if (booking.serviceType === 'HOTEL' && details.hotelName) {
+        if (booking.serviceType === 'HOTEL' && details && details.hotelName) {
           serviceDisplay = details.hotelName;
         }
       } catch (e) {
