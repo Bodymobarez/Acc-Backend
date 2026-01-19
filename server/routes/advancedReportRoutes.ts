@@ -873,12 +873,23 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         // Calculate values for display - AGENT
         const saleOrigAgent = Number(booking.saleAmount || 0);
         const costOrigAgent = Number(booking.costAmount || 0);
-        const profitInAEDAgent = Number(booking.grossProfit || 0);
         const commissionInAEDAgent = Number(booking.agentCommissionAmount || 0);
         const saleCurrAgent = booking.saleCurrency || 'AED';
+        const costCurrAgent = booking.costCurrency || 'AED';
         
-        // Convert profit and commission to sale currency
-        const profitInSaleCurrencyAgent = convertCurrency(profitInAEDAgent, 'AED', saleCurrAgent);
+        // Calculate profit directly from sale - cost (in original currency)
+        let profitInSaleCurrencyAgent: number;
+        if (saleCurrAgent === costCurrAgent) {
+          profitInSaleCurrencyAgent = saleOrigAgent - costOrigAgent;
+        } else {
+          const costInSaleCurrency = convertCurrency(costOrigAgent, costCurrAgent, saleCurrAgent);
+          profitInSaleCurrencyAgent = saleOrigAgent - costInSaleCurrency;
+        }
+        
+        // Convert profit to AED for consistency
+        const profitInAEDAgent = convertCurrency(profitInSaleCurrencyAgent, saleCurrAgent, 'AED');
+        
+        // Convert commission to sale currency
         const commissionInSaleCurrencyAgent = convertCurrency(commissionInAEDAgent, 'AED', saleCurrAgent);
         
         emp.breakdown.push({
@@ -967,12 +978,23 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         // Calculate values for display - CS
         const saleOrigCS = Number(booking.saleAmount || 0);
         const costOrigCS = Number(booking.costAmount || 0);
-        const profitInAEDCS = Number(booking.grossProfit || 0);
         const commissionInAEDCS = Number(booking.csCommissionAmount || 0);
         const saleCurrCS = booking.saleCurrency || 'AED';
+        const costCurrCS = booking.costCurrency || 'AED';
         
-        // Convert profit and commission to sale currency
-        const profitInSaleCurrencyCS = convertCurrency(profitInAEDCS, 'AED', saleCurrCS);
+        // Calculate profit directly from sale - cost (in original currency)
+        let profitInSaleCurrencyCS: number;
+        if (saleCurrCS === costCurrCS) {
+          profitInSaleCurrencyCS = saleOrigCS - costOrigCS;
+        } else {
+          const costInSaleCurrency = convertCurrency(costOrigCS, costCurrCS, saleCurrCS);
+          profitInSaleCurrencyCS = saleOrigCS - costInSaleCurrency;
+        }
+        
+        // Convert profit to AED for consistency
+        const profitInAEDCS = convertCurrency(profitInSaleCurrencyCS, saleCurrCS, 'AED');
+        
+        // Convert commission to sale currency
         const commissionInSaleCurrencyCS = convertCurrency(commissionInAEDCS, 'AED', saleCurrCS);
         
         emp.breakdown.push({
@@ -1076,11 +1098,24 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
       
       const saleOrig = Number(b.saleAmount || 0);
       const costOrig = Number(b.costAmount || 0);
-      const profitInAED = Number(b.grossProfit || 0);
       const saleCurr = b.saleCurrency || 'AED';
+      const costCurr = b.costCurrency || 'AED';
       
-      // Convert to sale currency
-      const profitInSaleCurrency = convertCurrency(profitInAED, 'AED', saleCurr);
+      // Calculate profit directly from sale - cost (in original currency)
+      // If sale and cost are in same currency, profit is simple subtraction
+      // If different currencies, convert cost to sale currency first
+      let profitInSaleCurrency: number;
+      if (saleCurr === costCurr) {
+        profitInSaleCurrency = saleOrig - costOrig;
+      } else {
+        const costInSaleCurrency = convertCurrency(costOrig, costCurr, saleCurr);
+        profitInSaleCurrency = saleOrig - costInSaleCurrency;
+      }
+      
+      // Convert profit to AED for consistency
+      const profitInAED = convertCurrency(profitInSaleCurrency, saleCurr, 'AED');
+      
+      // Convert commission to sale currency
       const commissionInSaleCurrency = convertCurrency(commissionInAED, 'AED', saleCurr);
       
       // Convert to target currency

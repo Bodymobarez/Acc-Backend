@@ -6,11 +6,10 @@
     "bun": ">=1.1.0"
   },
   "scripts": {
-    "dev": "DATABASE_URL=\"postgresql://neondb_owner:npg_V8KJLriGjSn5@ep-lucky-cake-ae2hozjr-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" JWT_SECRET=\"Tjxquwvbnu6Knk988ZJbLdvoMfygmnNvPZ3n+MDzjSU=\" JWT_EXPIRES_IN=\"7d\" PORT=3001 NODE_ENV=development bun --watch server/index-hono.ts",
-    "start": "DATABASE_URL=\"postgresql://neondb_owner:npg_V8KJLriGjSn5@ep-lucky-cake-ae2hozjr-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" JWT_SECRET=\"Tjxquwvbnu6Knk988ZJbLdvoMfygmnNvPZ3n+MDzjSU=\" JWT_EXPIRES_IN=\"7d\" PORT=3001 NODE_ENV=development bun server/index-hono.ts",
-    "dev:old": "bun --watch server/index.ts",
-    "start:old": "bun server/index.ts",
-    "build": "bun build server/index-hono.ts --outdir ./dist --target bun",
+    "dev": "DATABASE_URL=\"postgresql://neondb_owner:npg_V8KJLriGjSn5@ep-lucky-cake-ae2hozjr-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" JWT_SECRET=\"Tjxquwvbnu6Knk988ZJbLdvoMfygmnNvPZ3n+MDzjSU=\" JWT_EXPIRES_IN=\"7d\" PORT=3001 NODE_ENV=development bun --watch server/index.ts",
+    "start": "DATABASE_URL=\"postgresql://neondb_owner:npg_V8KJLriGjSn5@ep-lucky-cake-ae2hozjr-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" JWT_SECRET=\"Tjxquwvbnu6Knk988ZJbLdvoMfygmnNvPZ3n+MDzjSU=\" JWT_EXPIRES_IN=\"7d\" PORT=3001 NODE_ENV=development bun server/index.ts",
+    "dev:hono": "DATABASE_URL=\"postgresql://neondb_owner:npg_V8KJLriGjSn5@ep-lucky-cake-ae2hozjr-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" JWT_SECRET=\"Tjxquwvbnu6Knk988ZJbLdvoMfygmnNvPZ3n+MDzjSU=\" JWT_EXPIRES_IN=\"7d\" PORT=3001 NODE_ENV=development bun --watch server/index-hono.ts",
+    "build": "bun build server/index.ts --outdir ./dist --target bun",
     "test": "bun test",
     "db:migrate": "bun x prisma migrate deploy",
     "db:generate": "bun x prisma generate",
