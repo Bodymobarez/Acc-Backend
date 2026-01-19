@@ -902,7 +902,7 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           commissionInAED: commissionInAEDAgent,
           commissionInSaleCurrency: commissionInTargetCurrencyAgent,
           commissionOriginal: commissionInAEDAgent,
-          commissionRate: Number(booking.agentCommissionRate || 0)
+          commissionRate: booking.agentCommissionRate || (profitInAEDAgent > 0 ? Math.round((commissionInAEDAgent / profitInAEDAgent) * 100) : 0)
         });
       }
 
@@ -997,7 +997,7 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           commissionInAED: commissionInAEDCS,
           commissionInSaleCurrency: commissionInTargetCurrencyCS,
           commissionOriginal: commissionInAEDCS,
-          commissionRate: Number(booking.csCommissionRate || 0)
+          commissionRate: booking.csCommissionRate || (profitInAEDCS > 0 ? Math.round((commissionInAEDCS / profitInAEDCS) * 100) : 0)
         });
       }
     });
@@ -1140,10 +1140,13 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
         serviceDetailsText = '-';
       }
 
-      // Get the commission rate from the booking for this employee's role
-      const commissionRate = isAgentBooking 
-        ? Number(b.agentCommissionRate || 0)
-        : Number(b.csCommissionRate || 0);
+      // Get the commission rate - use stored rate or calculate from amounts
+      let commissionRate = 0;
+      if (isAgentBooking) {
+        commissionRate = b.agentCommissionRate || (profitInAED > 0 ? Math.round((commissionInAED / profitInAED) * 100) : 0);
+      } else {
+        commissionRate = b.csCommissionRate || (profitInAED > 0 ? Math.round((commissionInAED / profitInAED) * 100) : 0);
+      }
 
       return {
         date: b.bookingDate.toISOString().split('T')[0],

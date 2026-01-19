@@ -1043,7 +1043,7 @@ reports.get('/employee-commissions-monthly', async (c) => {
           profitInSaleCurrency: profitInSaleCurrency,
           commissionInSaleCurrency: commissionInSaleCurrency,
           commissionOriginal: commissionInAED,
-          commissionRate: Number(booking.agentCommissionRate || 0),
+          commissionRate: booking.agentCommissionRate || (profitInAED > 0 ? Math.round((commissionInAED / profitInAED) * 100) : 0),
           status: booking.status,
           service: serviceDisplay,
           serviceDetails: passengerName
@@ -1121,7 +1121,7 @@ reports.get('/employee-commissions-monthly', async (c) => {
           profitInSaleCurrency: profitInSaleCurrency,
           commissionInSaleCurrency: commissionInSaleCurrency,
           commissionOriginal: commissionInAED,
-          commissionRate: Number(booking.csCommissionRate || 0),
+          commissionRate: booking.csCommissionRate || (profitInAED > 0 ? Math.round((commissionInAED / profitInAED) * 100) : 0),
           status: booking.status,
           service: serviceDisplayCS,
           serviceDetails: passengerNameCS
@@ -1351,11 +1351,12 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
       const customerName = booking.customers.companyName || `${booking.customers.firstName} ${booking.customers.lastName}`;
       
       // Determine commission rate based on employee's role in this booking
+      // Use stored rate or calculate from amounts
       let commissionRate = 0;
       if (booking.bookingAgentId === employeeId) {
-        commissionRate = Number(booking.agentCommissionRate || 0);
+        commissionRate = booking.agentCommissionRate || (profitInAED > 0 ? Math.round((commissionInAED / profitInAED) * 100) : 0);
       } else if (booking.customerServiceId === employeeId) {
-        commissionRate = Number(booking.csCommissionRate || 0);
+        commissionRate = booking.csCommissionRate || (profitInAED > 0 ? Math.round((commissionInAED / profitInAED) * 100) : 0);
       }
       
       transactions.push({
