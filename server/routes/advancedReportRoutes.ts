@@ -871,6 +871,7 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         const saleOrigAgent = Number(booking.saleAmount || 0);
         const costOrigAgent = Number(booking.costAmount || 0);
         const saleCurrAgent = booking.saleCurrency || 'AED';
+        const agentRateAgent = Number(booking.agentCommissionRate || 0);
         
         // Calculate profit in original sale currency (Sale - Cost)
         // This is what should be displayed since Sale and Cost are in the same currency
@@ -882,8 +883,9 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         // Use the stored commission amount (already in AED)
         const commissionInAEDAgent = Number(booking.agentCommissionAmount || 0);
         
-        // Convert commission to sale currency for display
-        const commissionInSaleCurrencyAgent = convertCurrency(commissionInAEDAgent, 'AED', saleCurrAgent);
+        // Calculate commission directly from profit in sale currency to ensure accuracy
+        // Commission = Profit × Rate% (calculated in sale currency, not converted from AED)
+        const commissionInSaleCurrencyAgent = parseFloat((profitInSaleCurrencyAgent * agentRateAgent / 100).toFixed(2));
         
         // Convert to target currency for totals
         const commissionInTargetCurrencyAgent = convertCurrency(commissionInAEDAgent, 'AED', targetCurrency);
@@ -909,7 +911,7 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           commissionInAED: commissionInAEDAgent,
           commissionInSaleCurrency: commissionInSaleCurrencyAgent,
           commissionOriginal: commissionInAEDAgent,
-          commissionRate: booking.agentCommissionRate || (profitInAEDAgent > 0 ? Math.round((commissionInAEDAgent / profitInAEDAgent) * 100) : 0)
+          commissionRate: agentRateAgent
         });
       }
 
@@ -973,6 +975,7 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         const saleOrigCS = Number(booking.saleAmount || 0);
         const costOrigCS = Number(booking.costAmount || 0);
         const saleCurrCS = booking.saleCurrency || 'AED';
+        const csRateCS = Number(booking.csCommissionRate || 0);
         
         // Calculate profit in original sale currency (Sale - Cost)
         const profitInSaleCurrencyCS = saleOrigCS - costOrigCS;
@@ -983,8 +986,9 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
         // Use the stored commission amount (already in AED)
         const commissionInAEDCS = Number(booking.csCommissionAmount || 0);
         
-        // Convert commission to sale currency for display
-        const commissionInSaleCurrencyCS = convertCurrency(commissionInAEDCS, 'AED', saleCurrCS);
+        // Calculate commission directly from profit in sale currency to ensure accuracy
+        // Commission = Profit × Rate% (calculated in sale currency, not converted from AED)
+        const commissionInSaleCurrencyCS = parseFloat((profitInSaleCurrencyCS * csRateCS / 100).toFixed(2));
         
         // Convert to target currency for totals
         const commissionInTargetCurrencyCS = convertCurrency(commissionInAEDCS, 'AED', targetCurrency);
@@ -1010,7 +1014,7 @@ router.get('/employee-commissions-monthly', authenticate, async (req: AuthReques
           commissionInAED: commissionInAEDCS,
           commissionInSaleCurrency: commissionInSaleCurrencyCS,
           commissionOriginal: commissionInAEDCS,
-          commissionRate: booking.csCommissionRate || (profitInAEDCS > 0 ? Math.round((commissionInAEDCS / profitInAEDCS) * 100) : 0)
+          commissionRate: csRateCS
         });
       }
     });
@@ -1113,8 +1117,14 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
         ? Number(b.agentCommissionAmount || 0)
         : Number(b.csCommissionAmount || 0);
       
-      // Convert commission to sale currency for display
-      const commissionInSaleCurrencyVal = convertCurrency(commissionInAED, 'AED', saleCurr);
+      // Get the commission rate directly from stored values
+      const commissionRate = isAgentBooking 
+        ? Number(b.agentCommissionRate || 0)
+        : Number(b.csCommissionRate || 0);
+      
+      // Calculate commission directly from profit in sale currency to ensure accuracy
+      // Commission = Profit × Rate% (calculated in sale currency, not converted from AED)
+      const commissionInSaleCurrencyVal = parseFloat((profitInSaleCurrency * commissionRate / 100).toFixed(2));
       
       // Convert to target currency for totals
       const profitInTargetCurrency = convertCurrency(profitInAED, 'AED', targetCurrency);
@@ -1159,13 +1169,7 @@ router.get('/employee-commissions-monthly/:employeeId', authenticate, async (req
         serviceDetailsText = '-';
       }
 
-      // Get the commission rate - use stored rate or calculate from amounts
-      let commissionRate = 0;
-      if (isAgentBooking) {
-        commissionRate = b.agentCommissionRate || (profitInAED > 0 ? Math.round((commissionInAED / profitInAED) * 100) : 0);
-      } else {
-        commissionRate = b.csCommissionRate || (profitInAED > 0 ? Math.round((commissionInAED / profitInAED) * 100) : 0);
-      }
+      // commissionRate already determined above
 
       return {
         date: b.bookingDate.toISOString().split('T')[0],

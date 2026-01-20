@@ -997,13 +997,15 @@ reports.get('/employee-commissions-monthly', async (c) => {
         const costOrig = Number(booking.costAmount || 0);
         const profitInAED = Number(booking.grossProfit || 0);
         const commissionInAED = Number(booking.agentCommissionAmount || 0);
+        const agentRate = Number(booking.agentCommissionRate || 0);
         
         // Calculate profit in original sale currency (Sale - Cost)
         // This is what should be displayed since Sale and Cost are in the same currency
         const profitInSaleCurrency = saleOrig - costOrig;
         
-        // Convert commission to sale currency
-        const commissionInSaleCurrency = convertCurrency(commissionInAED, 'AED', booking.saleCurrency || 'AED');
+        // Calculate commission directly from profit in sale currency to ensure accuracy
+        // Commission = Profit × Rate% (calculated in sale currency, not converted from AED)
+        const commissionInSaleCurrency = parseFloat((profitInSaleCurrency * agentRate / 100).toFixed(2));
         
         // Convert commission to requested currency for totals
         const commission = convertCurrency(commissionInAED, 'AED', currency as string);
@@ -1078,12 +1080,14 @@ reports.get('/employee-commissions-monthly', async (c) => {
         const costOrig = Number(booking.costAmount || 0);
         const profitInAED = Number(booking.grossProfit || 0);
         const commissionInAED = Number(booking.salesCommissionAmount || 0);
+        const csRate = Number(booking.csCommissionRate || 0);
         
         // Calculate profit in original sale currency (Sale - Cost)
         const profitInSaleCurrency = saleOrig - costOrig;
         
-        // Convert commission to sale currency
-        const commissionInSaleCurrency = convertCurrency(commissionInAED, 'AED', booking.saleCurrency || 'AED');
+        // Calculate commission directly from profit in sale currency to ensure accuracy
+        // Commission = Profit × Rate% (calculated in sale currency, not converted from AED)
+        const commissionInSaleCurrency = parseFloat((profitInSaleCurrency * csRate / 100).toFixed(2));
         
         // Convert commission to requested currency for totals
         const commission = convertCurrency(commissionInAED, 'AED', currency as string);
@@ -1301,24 +1305,25 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
       // Calculate profit in original sale currency (Sale - Cost)
       const profitInSaleCurrency = saleOrig - costOrig;
       
-      // Get sale currency exchange rate for commission conversion
-      const saleRate = currencyRates.get(saleCurrency) || 1;
-      
       // Get commission directly from database - no calculations!
       let commissionInAED = 0;
+      let commissionRate = 0;
       
       // If employee is the agent for this booking
       if (booking.bookingAgentId === employeeId && booking.agentCommissionAmount) {
         commissionInAED += Number(booking.agentCommissionAmount || 0);
+        commissionRate = Number(booking.agentCommissionRate || 0);
       }
       
       // If employee is the CS for this booking
       if (booking.customerServiceId === employeeId && booking.salesCommissionAmount) {
         commissionInAED += Number(booking.salesCommissionAmount || 0);
+        commissionRate = Number(booking.csCommissionRate || 0);
       }
       
-      // Convert commission to sale currency for display
-      const commissionInSaleCurrency = saleRate > 0 ? commissionInAED / saleRate : commissionInAED;
+      // Calculate commission directly from profit in sale currency to ensure accuracy
+      // Commission = Profit × Rate% (calculated in sale currency, not converted from AED)
+      const commissionInSaleCurrency = parseFloat((profitInSaleCurrency * commissionRate / 100).toFixed(2));
       
       // Convert commission to requested currency
       const convertedCommission = convertCurrency(commissionInAED, 'AED', currency);
@@ -1357,14 +1362,7 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
       
       const customerName = booking.customers.companyName || `${booking.customers.firstName} ${booking.customers.lastName}`;
       
-      // Determine commission rate based on employee's role in this booking
-      // Use stored rate or calculate from amounts
-      let commissionRate = 0;
-      if (booking.bookingAgentId === employeeId) {
-        commissionRate = booking.agentCommissionRate || (profitInAED > 0 ? Math.round((commissionInAED / profitInAED) * 100) : 0);
-      } else if (booking.customerServiceId === employeeId) {
-        commissionRate = booking.csCommissionRate || (profitInAED > 0 ? Math.round((commissionInAED / profitInAED) * 100) : 0);
-      }
+      // commissionRate already determined above when calculating commissionInSaleCurrency
       
       transactions.push({
         date: (booking.bookingDate || booking.createdAt).toISOString().split('T')[0],
