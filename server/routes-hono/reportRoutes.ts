@@ -1448,6 +1448,150 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
   }
 });
 
+// Commissions Summary by Currency Report - Simple table with employee names and commissions grouped by currency
+reports.get('/commissions-summary-by-currency', async (c) => {
+  try {
+    const { year, month } = c.req.query();
+    
+    if (!year || !month) {
+      return c.json({ success: false, error: 'Year and month are required' }, 400);
+    }
+    
+    const startDate = new Date(Number(year), Number(month) - 1, 1);
+    const endDate = new Date(Number(year), Number(month), 0, 23, 59, 59);
+    
+    console.log('📊 Commissions Summary by Currency - Dates:', { startDate, endDate, year, month });
+    
+    // Get all bookings with commissions
+    const bookings = await prisma.bookings.findMany({
+      where: {
+        bookingDate: { gte: startDate, lte: endDate },
+        status: { in: ['CONFIRMED', 'COMPLETE', 'REFUNDED'] }
+      },
+      include: {
+        employees_bookings_bookingAgentIdToemployees: {
+          select: {
+            id: true,
+            department: true,
+            users: { select: { firstName: true, lastName: true } }
+          }
+        },
+        employees_bookings_customerServiceIdToemployees: {
+          select: {
+            id: true,
+            department: true,
+            users: { select: { firstName: true, lastName: true } }
+          }
+        }
+      }
+    });
+    
+    // Build employee commissions by currency
+    const employeeMap = new Map<string, {
+      employeeId: string;
+      employeeName: string;
+      department: string;
+      role: string;
+      commissionsByCurrency: { [currency: string]: number };
+      totalBookings: number;
+    }>();
+    
+    const allCurrencies = new Set<string>();
+    const currencyTotals: { [currency: string]: number } = {};
+    let grandTotalBookings = 0;
+    
+    for (const booking of bookings) {
+      const saleCurrency = booking.saleCurrency || 'AED';
+      allCurrencies.add(saleCurrency);
+      
+      const saleOrig = Number(booking.saleAmount || 0);
+      const costOrig = Number(booking.costAmount || 0);
+      const isRefund = booking.status === 'REFUNDED';
+      
+      // Calculate profit in sale currency (applying refund logic)
+      const profitInSaleCurrency = isRefund ? (costOrig - saleOrig) : (saleOrig - costOrig);
+      
+      // Process agent commission
+      if (booking.employees_bookings_bookingAgentIdToemployees && booking.agentCommissionRate) {
+        const agent = booking.employees_bookings_bookingAgentIdToemployees;
+        const agentRate = Number(booking.agentCommissionRate || 0);
+        const agentCommission = parseFloat(Math.abs(profitInSaleCurrency * agentRate / 100).toFixed(2));
+        
+        if (!employeeMap.has(agent.id)) {
+          employeeMap.set(agent.id, {
+            employeeId: agent.id,
+            employeeName: `${agent.users.firstName} ${agent.users.lastName}`,
+            department: agent.department || 'Agent',
+            role: 'Agent',
+            commissionsByCurrency: {},
+            totalBookings: 0
+          });
+        }
+        
+        const emp = employeeMap.get(agent.id)!;
+        emp.commissionsByCurrency[saleCurrency] = (emp.commissionsByCurrency[saleCurrency] || 0) + agentCommission;
+        emp.totalBookings++;
+        grandTotalBookings++;
+        currencyTotals[saleCurrency] = (currencyTotals[saleCurrency] || 0) + agentCommission;
+      }
+      
+      // Process customer service commission
+      if (booking.employees_bookings_customerServiceIdToemployees && booking.salesCommissionRate) {
+        const cs = booking.employees_bookings_customerServiceIdToemployees;
+        const csRate = Number(booking.salesCommissionRate || 0);
+        const csCommission = parseFloat(Math.abs(profitInSaleCurrency * csRate / 100).toFixed(2));
+        
+        // Only add if different from agent or no agent
+        if (!booking.employees_bookings_bookingAgentIdToemployees || cs.id !== booking.employees_bookings_bookingAgentIdToemployees.id) {
+          if (!employeeMap.has(cs.id)) {
+            employeeMap.set(cs.id, {
+              employeeId: cs.id,
+              employeeName: `${cs.users.firstName} ${cs.users.lastName}`,
+              department: cs.department || 'Customer Service',
+              role: 'Customer Service',
+              commissionsByCurrency: {},
+              totalBookings: 0
+            });
+          }
+          
+          const emp = employeeMap.get(cs.id)!;
+          emp.commissionsByCurrency[saleCurrency] = (emp.commissionsByCurrency[saleCurrency] || 0) + csCommission;
+          emp.totalBookings++;
+          grandTotalBookings++;
+          currencyTotals[saleCurrency] = (currencyTotals[saleCurrency] || 0) + csCommission;
+        }
+      }
+    }
+    
+    // Sort currencies: AED first, then EGP, SAR, USD, then others alphabetically
+    const currencyOrder = ['AED', 'EGP', 'SAR', 'USD', 'EUR', 'GBP', 'KWD', 'QAR'];
+    const sortedCurrencies = Array.from(allCurrencies).sort((a, b) => {
+      const aIndex = currencyOrder.indexOf(a);
+      const bIndex = currencyOrder.indexOf(b);
+      if (aIndex === -1 && bIndex === -1) return a.localeCompare(b);
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+      return aIndex - bIndex;
+    });
+    
+    // Convert map to array and sort by total bookings descending
+    const employees = Array.from(employeeMap.values()).sort((a, b) => b.totalBookings - a.totalBookings);
+    
+    return c.json({
+      success: true,
+      data: {
+        employees,
+        currencies: sortedCurrencies,
+        totals: currencyTotals,
+        grandTotalBookings
+      }
+    });
+  } catch (error: any) {
+    console.error('Error generating commissions summary by currency:', error);
+    return c.json({ success: false, error: error.message }, 500);
+  }
+});
+
 // Old reports route (legacy)
 reports.get('/old/*', async (c) => {
   return c.json({ success: true, message: 'Use new report endpoints: /financial, /bookings, /invoices, /employee-commission, /profit-loss, /cash-flow, /customer-statement, /supplier-statement, /employee-commissions-monthly' });
