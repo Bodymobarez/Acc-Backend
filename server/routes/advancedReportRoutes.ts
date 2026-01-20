@@ -1789,6 +1789,7 @@ router.get('/commissions-summary-by-currency', authenticate, async (req: AuthReq
       select: {
         id: true,
         saleCurrency: true,
+        costCurrency: true,
         saleAmount: true,
         costAmount: true,
         status: true,
@@ -1829,14 +1830,23 @@ router.get('/commissions-summary-by-currency', authenticate, async (req: AuthReq
     
     for (const booking of bookings) {
       const saleCurrency = booking.saleCurrency || 'AED';
+      const costCurrency = booking.costCurrency || 'AED';
       allCurrencies.add(saleCurrency);
       
       const saleOrig = Number(booking.saleAmount || 0);
       const costOrig = Number(booking.costAmount || 0);
       const isRefund = booking.status === 'REFUNDED';
       
+      // Convert cost to sale currency if different
+      let costInSaleCurrency = costOrig;
+      if (costCurrency !== saleCurrency) {
+        // Convert cost to AED first, then to sale currency
+        const costInAED = convertToAED(costOrig, costCurrency);
+        costInSaleCurrency = convertFromAED(costInAED, saleCurrency);
+      }
+      
       // Calculate profit in sale currency (applying refund logic)
-      const profitInSaleCurrency = isRefund ? (costOrig - saleOrig) : (saleOrig - costOrig);
+      const profitInSaleCurrency = isRefund ? (costInSaleCurrency - saleOrig) : (saleOrig - costInSaleCurrency);
       
       // Process agent commission - use stored rate and calculate in sale currency
       if (booking.employees_bookings_bookingAgentIdToemployees && booking.agentCommissionAmount) {
