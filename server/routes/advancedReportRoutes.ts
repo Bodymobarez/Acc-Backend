@@ -1786,7 +1786,16 @@ router.get('/commissions-summary-by-currency', authenticate, async (req: AuthReq
         bookingDate: { gte: startDate, lte: endDate },
         status: { in: ['CONFIRMED', 'COMPLETE', 'REFUNDED'] }
       },
-      include: {
+      select: {
+        id: true,
+        saleCurrency: true,
+        saleAmount: true,
+        costAmount: true,
+        status: true,
+        agentCommissionAmount: true,
+        csCommissionAmount: true,
+        agentCommissionRate: true,
+        csCommissionRate: true,
         employees_bookings_bookingAgentIdToemployees: {
           select: {
             id: true,
@@ -1829,11 +1838,13 @@ router.get('/commissions-summary-by-currency', authenticate, async (req: AuthReq
       // Calculate profit in sale currency (applying refund logic)
       const profitInSaleCurrency = isRefund ? (costOrig - saleOrig) : (saleOrig - costOrig);
       
-      // Process agent commission
-      if (booking.employees_bookings_bookingAgentIdToemployees && booking.agentCommissionRate) {
+      // Process agent commission - use stored rate and calculate in sale currency
+      if (booking.employees_bookings_bookingAgentIdToemployees && booking.agentCommissionAmount) {
         const agent = booking.employees_bookings_bookingAgentIdToemployees;
         const agentRate = Number(booking.agentCommissionRate || 0);
-        const agentCommission = parseFloat(Math.abs(profitInSaleCurrency * agentRate / 100).toFixed(2));
+        
+        // Calculate commission in sale currency: profit × rate%
+        const agentCommission = parseFloat((profitInSaleCurrency * agentRate / 100).toFixed(2));
         
         if (!employeeMap.has(agent.id)) {
           employeeMap.set(agent.id, {
@@ -1853,11 +1864,13 @@ router.get('/commissions-summary-by-currency', authenticate, async (req: AuthReq
         currencyTotals[saleCurrency] = (currencyTotals[saleCurrency] || 0) + agentCommission;
       }
       
-      // Process customer service commission
-      if (booking.employees_bookings_customerServiceIdToemployees && booking.salesCommissionRate) {
+      // Process customer service commission - use csCommissionRate and csCommissionAmount
+      if (booking.employees_bookings_customerServiceIdToemployees && booking.csCommissionAmount) {
         const cs = booking.employees_bookings_customerServiceIdToemployees;
-        const csRate = Number(booking.salesCommissionRate || 0);
-        const csCommission = parseFloat(Math.abs(profitInSaleCurrency * csRate / 100).toFixed(2));
+        const csRate = Number(booking.csCommissionRate || 0);
+        
+        // Calculate commission in sale currency: profit × rate%
+        const csCommission = parseFloat((profitInSaleCurrency * csRate / 100).toFixed(2));
         
         // Only add if different from agent or no agent
         if (!booking.employees_bookings_bookingAgentIdToemployees || cs.id !== booking.employees_bookings_bookingAgentIdToemployees.id) {
