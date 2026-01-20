@@ -1832,13 +1832,19 @@ router.get('/commissions-summary-by-currency', authenticate, async (req: AuthReq
       const saleCurrency = booking.saleCurrency || 'AED';
       allCurrencies.add(saleCurrency);
       
-      // Process agent commission - use stored value and convert from AED to sale currency
+      // Calculate profit in sale currency - same as detailed report
+      const saleOrig = Number(booking.saleAmount || 0);
+      const costOrig = Number(booking.costAmount || 0);
+      const isRefund = booking.status === 'REFUNDED';
+      const profitInSaleCurrency = isRefund ? (costOrig - saleOrig) : (saleOrig - costOrig);
+      
+      // Process agent commission - profit × rate in sale currency (same as detailed report)
       if (booking.employees_bookings_bookingAgentIdToemployees && booking.agentCommissionAmount) {
         const agent = booking.employees_bookings_bookingAgentIdToemployees;
+        const agentRate = Number(booking.agentCommissionRate || 0);
         
-        // Use stored commission (in AED) and convert to sale currency
-        const agentCommissionInAED = Number(booking.agentCommissionAmount || 0);
-        const agentCommission = convertCurrency(agentCommissionInAED, 'AED', saleCurrency);
+        // Commission in sale currency = profit × rate% (same formula as detailed report)
+        const agentCommission = parseFloat((profitInSaleCurrency * agentRate / 100).toFixed(2));
         
         if (!employeeMap.has(agent.id)) {
           employeeMap.set(agent.id, {
@@ -1858,13 +1864,13 @@ router.get('/commissions-summary-by-currency', authenticate, async (req: AuthReq
         currencyTotals[saleCurrency] = (currencyTotals[saleCurrency] || 0) + agentCommission;
       }
       
-      // Process customer service commission - use stored value and convert from AED to sale currency
+      // Process customer service commission - profit × rate in sale currency (same as detailed report)
       if (booking.employees_bookings_customerServiceIdToemployees && booking.csCommissionAmount) {
         const cs = booking.employees_bookings_customerServiceIdToemployees;
+        const csRate = Number(booking.csCommissionRate || 0);
         
-        // Use stored commission (in AED) and convert to sale currency
-        const csCommissionInAED = Number(booking.csCommissionAmount || 0);
-        const csCommission = convertCurrency(csCommissionInAED, 'AED', saleCurrency);
+        // Commission in sale currency = profit × rate% (same formula as detailed report)
+        const csCommission = parseFloat((profitInSaleCurrency * csRate / 100).toFixed(2));
         
         if (!employeeMap.has(cs.id)) {
           employeeMap.set(cs.id, {
