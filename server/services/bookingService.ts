@@ -169,11 +169,11 @@ export class BookingService {
           netBeforeVAT: saleInAED,
           vatAmount: 0,
           totalWithVAT: saleInAED,
-          // For REFUNDED: if cost > sale, it's profit (supplier refunded more)
-          grossProfit: isRefundBooking && costInAED > saleInAED 
+          // For REFUNDED: always cost - sale (positive = profit, negative = loss)
+          grossProfit: isRefundBooking 
             ? costInAED - saleInAED 
             : saleInAED - costInAED,
-          netProfit: isRefundBooking && costInAED > saleInAED 
+          netProfit: isRefundBooking 
             ? costInAED - saleInAED 
             : saleInAED - costInAED
         };
@@ -978,11 +978,11 @@ export class BookingService {
             netBeforeVAT: saleInAED,
             vatAmount: 0,
             totalWithVAT: saleInAED,
-            // For REFUNDED: if cost > sale, it's profit (supplier refunded more)
-            grossProfit: isRefundBooking && costInAED > saleInAED 
+            // For REFUNDED: always cost - sale (positive = profit, negative = loss)
+            grossProfit: isRefundBooking 
               ? costInAED - saleInAED 
               : saleInAED - costInAED,
-            netProfit: isRefundBooking && costInAED > saleInAED 
+            netProfit: isRefundBooking 
               ? costInAED - saleInAED 
               : saleInAED - costInAED
           };
