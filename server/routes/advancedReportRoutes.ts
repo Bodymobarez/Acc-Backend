@@ -1832,19 +1832,13 @@ router.get('/commissions-summary-by-currency', authenticate, async (req: AuthReq
       const saleCurrency = booking.saleCurrency || 'AED';
       allCurrencies.add(saleCurrency);
       
-      // Calculate profit in sale currency - same as detailed report
-      const saleOrig = Number(booking.saleAmount || 0);
-      const costOrig = Number(booking.costAmount || 0);
-      const isRefund = booking.status === 'REFUNDED';
-      const profitInSaleCurrency = isRefund ? (costOrig - saleOrig) : (saleOrig - costOrig);
-      
-      // Process agent commission - calculate from profit × rate (same as detailed report)
+      // Process agent commission - use stored value and convert from AED to sale currency
       if (booking.employees_bookings_bookingAgentIdToemployees && booking.agentCommissionAmount) {
         const agent = booking.employees_bookings_bookingAgentIdToemployees;
-        const agentRate = Number(booking.agentCommissionRate || 0);
         
-        // Commission = Profit × Rate% (calculated in sale currency, same as detailed report)
-        const agentCommission = parseFloat((profitInSaleCurrency * agentRate / 100).toFixed(2));
+        // Use stored commission (in AED) and convert to sale currency
+        const agentCommissionInAED = Number(booking.agentCommissionAmount || 0);
+        const agentCommission = convertCurrency(agentCommissionInAED, 'AED', saleCurrency);
         
         if (!employeeMap.has(agent.id)) {
           employeeMap.set(agent.id, {
@@ -1864,33 +1858,30 @@ router.get('/commissions-summary-by-currency', authenticate, async (req: AuthReq
         currencyTotals[saleCurrency] = (currencyTotals[saleCurrency] || 0) + agentCommission;
       }
       
-      // Process customer service commission - calculate from profit × rate (same as detailed report)
+      // Process customer service commission - use stored value and convert from AED to sale currency
       if (booking.employees_bookings_customerServiceIdToemployees && booking.csCommissionAmount) {
         const cs = booking.employees_bookings_customerServiceIdToemployees;
-        const csRate = Number(booking.csCommissionRate || 0);
         
-        // Commission = Profit × Rate% (calculated in sale currency, same as detailed report)
-        const csCommission = parseFloat((profitInSaleCurrency * csRate / 100).toFixed(2));
+        // Use stored commission (in AED) and convert to sale currency
+        const csCommissionInAED = Number(booking.csCommissionAmount || 0);
+        const csCommission = convertCurrency(csCommissionInAED, 'AED', saleCurrency);
         
-        // Only add if different from agent or no agent
-        if (!booking.employees_bookings_bookingAgentIdToemployees || cs.id !== booking.employees_bookings_bookingAgentIdToemployees.id) {
-          if (!employeeMap.has(cs.id)) {
-            employeeMap.set(cs.id, {
-              employeeId: cs.id,
-              employeeName: `${cs.users.firstName} ${cs.users.lastName}`,
-              department: cs.department || 'Customer Service',
-              role: 'Customer Service',
-              commissionsByCurrency: {},
-              totalBookings: 0
-            });
-          }
-          
-          const emp = employeeMap.get(cs.id)!;
-          emp.commissionsByCurrency[saleCurrency] = (emp.commissionsByCurrency[saleCurrency] || 0) + csCommission;
-          emp.totalBookings++;
-          grandTotalBookings++;
-          currencyTotals[saleCurrency] = (currencyTotals[saleCurrency] || 0) + csCommission;
+        if (!employeeMap.has(cs.id)) {
+          employeeMap.set(cs.id, {
+            employeeId: cs.id,
+            employeeName: `${cs.users.firstName} ${cs.users.lastName}`,
+            department: cs.department || 'Customer Service',
+            role: 'Customer Service',
+            commissionsByCurrency: {},
+            totalBookings: 0
+          });
         }
+        
+        const emp = employeeMap.get(cs.id)!;
+        emp.commissionsByCurrency[saleCurrency] = (emp.commissionsByCurrency[saleCurrency] || 0) + csCommission;
+        emp.totalBookings++;
+        grandTotalBookings++;
+        currencyTotals[saleCurrency] = (currencyTotals[saleCurrency] || 0) + csCommission;
       }
     }
     
