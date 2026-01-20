@@ -998,10 +998,11 @@ reports.get('/employee-commissions-monthly', async (c) => {
         const profitInAED = Number(booking.grossProfit || 0);
         const commissionInAED = Number(booking.agentCommissionAmount || 0);
         const agentRate = Number(booking.agentCommissionRate || 0);
+        const isRefund = booking.status === 'REFUNDED';
         
-        // Calculate profit in original sale currency (Sale - Cost)
-        // This is what should be displayed since Sale and Cost are in the same currency
-        const profitInSaleCurrency = saleOrig - costOrig;
+        // Calculate profit in original sale currency
+        // For REFUNDED: cost > sale = profit (we recovered more than we refunded)
+        const profitInSaleCurrency = isRefund ? (costOrig - saleOrig) : (saleOrig - costOrig);
         
         // Calculate commission directly from profit in sale currency to ensure accuracy
         // Commission = Profit × Rate% (calculated in sale currency, not converted from AED)
@@ -1081,9 +1082,11 @@ reports.get('/employee-commissions-monthly', async (c) => {
         const profitInAED = Number(booking.grossProfit || 0);
         const commissionInAED = Number(booking.salesCommissionAmount || 0);
         const csRate = Number(booking.csCommissionRate || 0);
+        const isRefundCS = booking.status === 'REFUNDED';
         
-        // Calculate profit in original sale currency (Sale - Cost)
-        const profitInSaleCurrency = saleOrig - costOrig;
+        // Calculate profit in original sale currency
+        // For REFUNDED: cost > sale = profit (we recovered more than we refunded)
+        const profitInSaleCurrency = isRefundCS ? (costOrig - saleOrig) : (saleOrig - costOrig);
         
         // Calculate commission directly from profit in sale currency to ensure accuracy
         // Commission = Profit × Rate% (calculated in sale currency, not converted from AED)
@@ -1301,9 +1304,11 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
       const costOrig = Number(booking.costAmount || 0);
       const profitInAED = Number(booking.grossProfit || 0);
       const saleCurrency = booking.saleCurrency || 'AED';
+      const isRefundSingle = booking.status === 'REFUNDED';
       
-      // Calculate profit in original sale currency (Sale - Cost)
-      const profitInSaleCurrency = saleOrig - costOrig;
+      // Calculate profit in original sale currency
+      // For REFUNDED: cost > sale = profit (we recovered more than we refunded)
+      const profitInSaleCurrency = isRefundSingle ? (costOrig - saleOrig) : (saleOrig - costOrig);
       
       // Get commission directly from database - no calculations!
       let commissionInAED = 0;
