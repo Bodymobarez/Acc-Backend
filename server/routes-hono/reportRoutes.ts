@@ -918,10 +918,9 @@ reports.get('/employee-commissions-monthly', async (c) => {
     const convertCurrency = (amount: number, fromCurrency: string, toCurrency: string): number => {
       if (fromCurrency === toCurrency) return amount;
       
-      const fromRate = currencyRates.get(fromCurrency);
-      const toRate = currencyRates.get(toCurrency);
-      
-      if (!fromRate || !toRate) return amount;
+      // Use database rate or fallback to static exchangeRates
+      const fromRate = currencyRates.get(fromCurrency) || exchangeRates[fromCurrency] || 1;
+      const toRate = currencyRates.get(toCurrency) || exchangeRates[toCurrency] || 1;
       
       const amountInAED = amount * fromRate;
       return amountInAED / toRate;
@@ -999,10 +998,15 @@ reports.get('/employee-commissions-monthly', async (c) => {
         const commissionInAED = Number(booking.agentCommissionAmount || 0);
         const agentRate = Number(booking.agentCommissionRate || 0);
         const isRefund = booking.status === 'REFUNDED';
+        const saleCurrency = booking.saleCurrency || 'AED';
+        const costCurrency = booking.costCurrency || 'AED';
         
-        // Calculate profit in original sale currency
+        // Convert cost to sale currency for accurate profit calculation
+        const costInSaleCurrency = convertCurrency(costOrig, costCurrency, saleCurrency);
+        
+        // Calculate profit in original sale currency (with proper currency conversion)
         // For REFUNDED: cost > sale = profit (we recovered more than we refunded)
-        const profitInSaleCurrency = isRefund ? (costOrig - saleOrig) : (saleOrig - costOrig);
+        const profitInSaleCurrency = isRefund ? (costInSaleCurrency - saleOrig) : (saleOrig - costInSaleCurrency);
         
         // Calculate commission directly from profit in sale currency to ensure accuracy
         // Commission = Profit × Rate% (calculated in sale currency, not converted from AED)
@@ -1083,10 +1087,15 @@ reports.get('/employee-commissions-monthly', async (c) => {
         const commissionInAED = Number(booking.salesCommissionAmount || 0);
         const csRate = Number(booking.csCommissionRate || 0);
         const isRefundCS = booking.status === 'REFUNDED';
+        const saleCurrencyCS = booking.saleCurrency || 'AED';
+        const costCurrencyCS = booking.costCurrency || 'AED';
         
-        // Calculate profit in original sale currency
+        // Convert cost to sale currency for accurate profit calculation
+        const costInSaleCurrencyCS = convertCurrency(costOrig, costCurrencyCS, saleCurrencyCS);
+        
+        // Calculate profit in original sale currency (with proper currency conversion)
         // For REFUNDED: cost > sale = profit (we recovered more than we refunded)
-        const profitInSaleCurrency = isRefundCS ? (costOrig - saleOrig) : (saleOrig - costOrig);
+        const profitInSaleCurrency = isRefundCS ? (costInSaleCurrencyCS - saleOrig) : (saleOrig - costInSaleCurrencyCS);
         
         // Calculate commission directly from profit in sale currency to ensure accuracy
         // Commission = Profit × Rate% (calculated in sale currency, not converted from AED)
@@ -1210,10 +1219,9 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
     const convertCurrency = (amount: number, fromCurrency: string, toCurrency: string): number => {
       if (fromCurrency === toCurrency) return amount;
       
-      const fromRate = currencyRates.get(fromCurrency);
-      const toRate = currencyRates.get(toCurrency);
-      
-      if (!fromRate || !toRate) return amount;
+      // Use database rate or fallback to static exchangeRates
+      const fromRate = currencyRates.get(fromCurrency) || exchangeRates[fromCurrency] || 1;
+      const toRate = currencyRates.get(toCurrency) || exchangeRates[toCurrency] || 1;
       
       const amountInAED = amount * fromRate;
       return amountInAED / toRate;
@@ -1304,11 +1312,15 @@ reports.get('/employee-commissions-monthly/:employeeId', async (c) => {
       const costOrig = Number(booking.costAmount || 0);
       const profitInAED = Number(booking.grossProfit || 0);
       const saleCurrency = booking.saleCurrency || 'AED';
+      const costCurrency = booking.costCurrency || 'AED';
       const isRefundSingle = booking.status === 'REFUNDED';
       
-      // Calculate profit in original sale currency
+      // Convert cost to sale currency for accurate profit calculation
+      const costInSaleCurrency = convertCurrency(costOrig, costCurrency, saleCurrency);
+      
+      // Calculate profit in original sale currency (with proper currency conversion)
       // For REFUNDED: cost > sale = profit (we recovered more than we refunded)
-      const profitInSaleCurrency = isRefundSingle ? (costOrig - saleOrig) : (saleOrig - costOrig);
+      const profitInSaleCurrency = isRefundSingle ? (costInSaleCurrency - saleOrig) : (saleOrig - costInSaleCurrency);
       
       // Get commission directly from database - no calculations!
       let commissionInAED = 0;
@@ -1502,14 +1514,18 @@ reports.get('/commissions-summary-by-currency', async (c) => {
     
     for (const booking of bookings) {
       const saleCurrency = booking.saleCurrency || 'AED';
+      const costCurrency = booking.costCurrency || 'AED';
       allCurrencies.add(saleCurrency);
       
       const saleOrig = Number(booking.saleAmount || 0);
       const costOrig = Number(booking.costAmount || 0);
       const isRefund = booking.status === 'REFUNDED';
       
-      // Calculate profit in sale currency (applying refund logic)
-      const profitInSaleCurrency = isRefund ? (costOrig - saleOrig) : (saleOrig - costOrig);
+      // Convert cost to sale currency for accurate profit calculation
+      const costInSaleCurrency = convertCurrency(costOrig, costCurrency, saleCurrency);
+      
+      // Calculate profit in sale currency (with proper currency conversion)
+      const profitInSaleCurrency = isRefund ? (costInSaleCurrency - saleOrig) : (saleOrig - costInSaleCurrency);
       
       // Process agent commission
       if (booking.employees_bookings_bookingAgentIdToemployees && booking.agentCommissionRate) {
